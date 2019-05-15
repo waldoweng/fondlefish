@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <stdarg.h>
 #include <string.h>
+#include "ast.h"
 
 extern int yylex (void);
 
@@ -292,81 +293,80 @@ stmt_list: stmt ';'
     ;
 
     /**** expressions ****/
-expr: NAME          { emit("NAME %s", $1); free($1); }
-    | NAME '.' NAME { emit("FIELDNAME %s.%s", $1, $3); free($1); free($3); }
-    | USERVAR       { emit("USERVAR %s", $1); free($1); }
-    | STRING        { emit("STRING %s", $1); free($1); }
-    | INTNUM        { emit("NUMBER %d", $1); }
-    | APPROXNUM     { emit("FLOAT %g", $1); }
-    | BOOL          { emit("BOOL %d", $1); }
+expr: NAME          { $$ = new Ast_Expr($1, Ast_Expr::NAME); }
+    | NAME '.' NAME { $$ = new Ast_Expr($1, $3, Ast_Expr::NAME2); }
+    | USERVAR       { $$ = new Ast_Expr($1, Ast_Expr::USERVAR); }
+    | STRING        { $$ = new Ast_Expr($1, Ast_Expr::STRING); }
+    | INTNUM        { $$ = new Ast_Expr($1, Ast_Expr::INTNUM); }
+    | APPROXNUM     { $$ = new Ast_Expr($1, Ast_Expr::APPROXNUM); }
+    | BOOL          { $$ = new Ast_Expr($1, Ast_Expr::BOOL); }
     ;
 
-expr: expr '+' expr { emit("ADD"); }
-    | expr '-' expr { emit("MINUS"); }
-    | expr '*' expr { emit("MUL"); }
-    | expr "/" expr { emit("DIV"); }
-    | expr "%" expr { emit("MOD"); }
-    | expr MOD expr { emit("MOD"); }
-    | '-' expr %prec UMINUS     { emit("NEG"); }
-    | expr ANDOP expr   { emit("AND"); }
-    | expr OR expr  { emit("OR"); }
-    | expr XOR expr { emit("XOR"); }
-    | expr '|' expr { emit("BITOR"); }
-    | expr '&' expr { emit("BITAND"); }
-    | expr '^' expr { emit("BITXOR"); }
-    | expr SHIFT expr   { emit("SHIFT %s", $2==1 ? "left" : "right"); }
-    | NOT expr      { emit("NOT"); }
-    | '!' expr      { emit("NOT"); }
-    | expr COMPARISON expr { emit("CMP %d", $2); }
+expr: expr '+' expr { $$ = new Ast_Expr($1, $3, Ast_Expr::ADD); }
+    | expr '-' expr { $$ = new Ast_Expr($1, $3, Ast_Expr::MINUS); }
+    | expr '*' expr { $$ = new Ast_Expr($1, $3, Ast_Expr::MUL); }
+    | expr "/" expr { $$ = new Ast_Expr($1, $3, Ast_Expr::DIV); }
+    | expr "%" expr { $$ = new Ast_Expr($1, $3, Ast_Expr::MOD); }
+    | expr MOD expr { $$ = new Ast_Expr($1, $3, Ast_Expr::MOD); }
+    | '-' expr %prec UMINUS     { $$ = new Ast_Expr($2, Ast_Expr::NEG); }
+    | expr ANDOP expr   { $$ = new Ast_Expr($1, $3, Ast_Expr::AND); }
+    | expr OR expr  { $$ = new Ast_Expr($1, $3, Ast_Expr::OR); }
+    | expr XOR expr { $$ = new Ast_Expr($1, $3, Ast_Expr::XOR); }
+    | expr '|' expr { $$ = new Ast_Expr($1, $3, Ast_Expr::BITOR); }
+    | expr '&' expr { $$ = new Ast_Expr($1, $3, Ast_Expr::BITAND); }
+    | expr '^' expr { $$ = new Ast_Expr($1, $3, Ast_Expr::BITXOR); }
+    | expr SHIFT expr   { $$ = new Ast_Expr($1, $3, $2==1 ? Ast_Expr::LEFT_SHIFT : Ast_Expr::RIGHT_SHIFT); }
+    | NOT expr      { $$ = new Ast_Expr($2, Ast_Expr::NOT); }
+    | '!' expr      { $$ = new Ast_Expr($2, Ast_Expr::NOT); }
+    | expr COMPARISON expr { $$ = new Ast_Expr($1, $3, Ast_Expr::CMP_BASE + $2); }
 
         /* recursive selects and comparisons thereto */
-    | expr COMPARISON '(' select_stmt ')'  { emit("CMPSELECT %d", $2); }
-    | expr COMPARISON ANY '(' select_stmt ')' { emit("CMPANYSELECT %d", $2); }
-    | expr COMPARISON SOME '(' select_stmt ')' { emit("CMPANYSELECT %d", $2); }
-    | expr COMPARISON ALL '(' select_stmt ')' { emit("CMPALLSELECT %d", $2); }
+    | expr COMPARISON '(' select_stmt ')'  { $$ = new Ast_Expr($1, $4, Ast_Expr::CMP_BASE + $2 + 1); }
+    | expr COMPARISON ANY '(' select_stmt ')' { $$ = new Ast_Expr($1, $5, Ast_Expr::CMP_BASE + $2 + 2); }
+    | expr COMPARISON SOME '(' select_stmt ')' { $$ = new Ast_Expr($1, $5, Ast_Expr::CMP_BASE + $2 + 3); }
+    | expr COMPARISON ALL '(' select_stmt ')' { $$ = new Ast_Expr($1, $5, Ast_Expr::CMP_BASE + $2 + 4); }
     ;
 
-expr: expr IS NULLX     { emit("ISNULL"); }
-    | expr IS NOT NULLX { emit("ISNULL"); emit("NOT"); }
-    | expr IS BOOL      { emit("ISBOOL %d", $3); }
-    | expr IS NOT BOOL  { emit("ISBOOL %d", $4); emit("NOT"); }
+expr: expr IS NULLX     { $$ = new Ast_Expr($1, Ast_Expr::IS_NULL); }
+    | expr IS NOT NULLX { $$ = new Ast_Expr($1, Ast_Expr::IS_NOT_NULL); }
+    | expr IS BOOL      { $$ = new Ast_Expr($1, $3, Ast_Expr::IS_BOOL); }
+    | expr IS NOT BOOL  { $$ = new Ast_Expr($1, $4, Ast_Expr::IS_NOT_BOOL); }
 
-    | USERVAR ASSIGN expr   { emit("ASSIGN @%s", $1); free($1); }
+    | USERVAR ASSIGN expr   { $$ = new Ast_Expr($1, $3, Ast_Expr::ASSIGN); }
     ;
 
-expr: expr BETWEEN expr AND expr %prec BETWEEN { emit("BETWEEN"); }
+expr: expr BETWEEN expr AND expr %prec BETWEEN { $$ = new Ast_Expr($1. $3, $5, Ast_Expr::BETWEEN); }
     ;
 
-val_list: expr { $$ = 1; }
-    | expr ',' val_list { $$ = 1 + $3; }
+val_list: expr { $$ = new Ast_ValList($1); }
+    | expr ',' val_list { $$ = new Ast_ValList($1, $3); }
     ;
 
 opt_val_list: /* nil */ { $$ = 0; }
-    | val_list
+    | val_list { $$ = new Ast_OptValList($1); }
     ;
 
-expr: expr IN '(' val_list ')'          { emit("ISIN %d", $4); }
-    | expr NOT IN '(' val_list ')'      { emit("ISIN %d", $5); emit("NOT"); }
-    | expr IN '(' select_stmt ')'       { emit("CMPANYSELECT 4"); }
-    | expr NOT IN '(' select_stmt ')'   { emit("CMPALLSELECT 3"); }
-    | EXISTS '(' select_stmt ')'        { emit("EXISTSELECT"); if($1) emit("NOT"); }
+expr: expr IN '(' val_list ')'          { $$ = new Ast_Expr($1, $4, Ast_Expr::IS_IN); }
+    | expr NOT IN '(' val_list ')'      { $$ = new Ast_Expr($1, $5, Ast_Expr::IS_NOT_IN); }
+    | expr IN '(' select_stmt ')'       { $$ = new Ast_Expr($1, $4, Ast_Expr::IS_IN); }
+    | expr NOT IN '(' select_stmt ')'   { $$ = new Ast_Expr($1, $5, Ast_Expr::IS_NOT_IN); }
+    | EXISTS '(' select_stmt ')'        { $$ = new Ast_Expr($3, $1 ? Ast_Expr::EXISTS : Ast_Expr::NOT_EXISTS); }
     ;
 
     /* regular functions */
-expr: NAME '(' opt_val_list ')'     { emit("CALL %d %s", $3, $1); free($1); }
+expr: NAME '(' opt_val_list ')'     { $$ = new Ast_Expr($1, $3, Ast_Expr::CALL); }
     ;
 
     /* functions with special syntax */
-expr: FCOUNT '(' '*' ')'    { emit("COUNTALL"); }
-    | FCOUNT '(' expr ')'   { emit("CALL 1 COUNT"); }
+expr: FCOUNT '(' '*' ')'    { $$ = new Ast_Expr(Ast_Expr::COUNTALL); }
+    | FCOUNT '(' expr ')'   { $$ = new Ast_Expr($3, Ast_Expr::COUNT); }
     ;
 
-expr: FSUBSTRING '(' val_list ')'               { emit("CALL %d SUBSTR", $3); }
-    | FSUBSTRING '(' expr FROM expr ')'         { emit("CALL 2 SUBSTR"); }
-    | FSUBSTRING '(' expr FROM expr FOR expr    { emit("CALL 3 SUBSTR"); }
-    
-    | FTRIM '(' val_list ')'                    { emit("CALL %d TRIM", $3); }
-    | FTRIM '(' trim_ltb expr FROM val_list ')' { emit("CALL 3 TRIM"); }
+expr: FSUBSTRING '(' val_list ')'               { $$ = new Ast_Expr($3, Ast_Expr::SUBSTR); }
+    | FSUBSTRING '(' expr FROM expr ')'         { $$ = new Ast_Expr($3, $5, Ast_Expr::SUBSTR_FROM); }
+    | FSUBSTRING '(' expr FROM expr FOR expr ')'    { $$ = new Ast_Expr($3, $5, $7, Ast_Expr::SUBSTR_FROM_FOR); }
+    | FTRIM '(' val_list ')'                    { $$ = new Ast_Expr($3, Ast_Expr::TRIM); }
+    | FTRIM '(' trim_ltb expr FROM val_list ')' { $$ = new Ast_Expr($3, $4, $6, Ast_Expr::TRIM_FROM); }
     ;
 
 trim_ltb: LEADING   { emit("NUMBER 1"); }
