@@ -1,0 +1,20 @@
+#ifndef FONDLE_FISH_MYSQL_AST_OPT_WHERE_H_INCLUDED
+#define FONDLE_FISH_MYSQL_AST_OPT_WHERE_H_INCLUDED
+
+#include "ast_base.h"
+
+class Ast_Expr;
+
+class Ast_OptWhere : public Ast_Base {
+public:
+    Ast_OptWhere(Ast_Expr *expr);
+    ~Ast_OptWhere();
+
+public:
+    virtual void illustrate() const;
+
+private:
+    Ast_Expr *expr;
+};
+
+#endif

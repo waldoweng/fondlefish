@@ -2,7 +2,7 @@
 #include <stdlib.h>
 #include <stdarg.h>
 #include <string.h>
-#include "ast.h"
+#include "include/ast/ast.h"
 
 extern int yylex (void);
 
@@ -366,104 +366,105 @@ expr: FSUBSTRING '(' val_list ')'               { $$ = new Ast_Expr($3, Ast_Expr
     | FSUBSTRING '(' expr FROM expr ')'         { $$ = new Ast_Expr($3, $5, Ast_Expr::SUBSTR_FROM); }
     | FSUBSTRING '(' expr FROM expr FOR expr ')'    { $$ = new Ast_Expr($3, $5, $7, Ast_Expr::SUBSTR_FROM_FOR); }
     | FTRIM '(' val_list ')'                    { $$ = new Ast_Expr($3, Ast_Expr::TRIM); }
-    | FTRIM '(' trim_ltb expr FROM val_list ')' { $$ = new Ast_Expr($3, $4, $6, Ast_Expr::TRIM_FROM); }
+    | FTRIM '(' trim_ltb expr FROM val_list ')' { $$ = new Ast_Expr($4, $6, Ast_Expr::TRIM_FROM + $3); }
     ;
 
-trim_ltb: LEADING   { emit("NUMBER 1"); }
-    | TRAILING      { emit("NUMBER 2"); }
-    | BOTH          { emit("NUMBER 3"); }
+trim_ltb: LEADING   { $$ = 0; }
+    | TRAILING      { $$ = 1; }
+    | BOTH          { $$ = 2; }
     ;
 
-expr: FDATE_ADD '(' expr ',' interval_exp ')'   { emit("CALL 3 DATE_ADD"); }
-    | FDATE_SUB '(' expr ',' interval_exp ')'   { emit("CALL 3 DATE_SUB"); }
+expr: FDATE_ADD '(' expr ',' interval_exp ')'   { $$ = new Ast_Expr($3, $5, Ast_Expr::DATE_ADD); }
+    | FDATE_SUB '(' expr ',' interval_exp ')'   { $$ = new Ast_Expr($3, $5, Ast_Expr::DATE_SUB); }
     ;
 
-interval_exp: INTERVAL expr DAY_HOUR    { emit("NUMBER 1"); }
-    | INTERVAL expr DAY_MICROSECOND     { emit("NUMBER 2"); }
-    | INTERVAL expr DAY_MINUTE          { emit("NUMBER 3"); }
-    | INTERVAL expr DAY_SECOND          { emit("NUMBER 4"); }
-    | INTERVAL expr YEAR_MONTH          { emit("NUMBER 5"); }
-    | INTERVAL expr YEAR                { emit("NUMBER 6"); }
-    | INTERVAL expr HOUR_MICROSECOND    { emit("NUMBER 7"); }
-    | INTERVAL expr HOUR_MINUTE         { emit("NUMBER 8"); }
-    | INTERVAL expr HOUR_SECOND         { emit("NUMBER 9"); }
+interval_exp: INTERVAL expr DAY_HOUR    { $$ = new Ast_IntervalExp($2, 1); }
+    | INTERVAL expr DAY_MICROSECOND     { $$ = new Ast_IntervalExp($2, 2); }
+    | INTERVAL expr DAY_MINUTE          { $$ = new Ast_IntervalExp($2, 3); }
+    | INTERVAL expr DAY_SECOND          { $$ = new Ast_IntervalExp($2, 4); }
+    | INTERVAL expr YEAR_MONTH          { $$ = new Ast_IntervalExp($2, 5); }
+    | INTERVAL expr YEAR                { $$ = new Ast_IntervalExp($2, 6); }
+    | INTERVAL expr HOUR_MICROSECOND    { $$ = new Ast_IntervalExp($2, 7); }
+    | INTERVAL expr HOUR_MINUTE         { $$ = new Ast_IntervalExp($2, 8); }
+    | INTERVAL expr HOUR_SECOND         { $$ = new Ast_IntervalExp($2, 9); }
     ;
 
-expr: CASE expr case_list END           { emit("CASEVAL %d 0", $3); }
-    | CASE expr case_list ELSE expr END { emit("CASEVAL %d 1", $3); }
-    | CASE case_list END                { emit("CASE %d 0", $2); }
-    | CASE case_list ELSE expr END      { emit("CASE %d 1", $2); }
+expr: CASE expr case_list END           { $$ = new Ast_Expr($2, $3, Ast_Expr::CASE); }
+    | CASE expr case_list ELSE expr END { $$ = new Ast_Expr($2, $5, $3, Ast_Expr::CASE2); }
+    | CASE case_list END                { $$ = new Ast_Expr($2, Ast_Expr::CASE3); }
+    | CASE case_list ELSE expr END      { $$ = new Ast_Expr($4, $2, Ast_Expr::CASE4); }
     ;
 
-case_list: WHEN expr THEN expr { $$ = 1; }
-    | case_list WHEN expr THEN expr { $$ = $1+1; }
+case_list: WHEN expr THEN expr { $$ = new Ast_CaseList($2, $4); }
+    | case_list WHEN expr THEN expr { $1->addCase($3, $5); $$ = $1; }
     ;
 
-expr: expr LIKE expr { emit("LIKE"); }
-    | expr NOT LIKE expr { emit("LIKE"); emit("NOT"); }
+expr: expr LIKE expr { $$ = new Ast_Expr($1, $3, Ast_Expr::LIKE); }
+    | expr NOT LIKE expr { $$ = new Ast_Expr($1, $4, Ast_Expr::NOT_LIKE); }
     ;
 
-expr: expr REGEXP expr { emit("REGEXP"); }
-    | expr NOT REGEXP expr { emit("REGEXP"); emit("NOT"); }
+expr: expr REGEXP expr { $$ = new Ast_Expr($1, $3, Ast_Expr::REGEXP); }
+    | expr NOT REGEXP expr { $$ = new Ast_Expr($1, $4, Ast_Expr::NOT_REGEXP); }
     ;
 
-expr: CURRENT_TIMESTAMP { emit("NOW"); }
-    | CURRENT_DATE      { emit("NOW"); }
-    | CURRENT_TIME      { emit("NOW"); }
+expr: CURRENT_TIMESTAMP { $$ = new Ast_Expr(Ast_Expr::CURRENT_TIMESTAMP); }
+    | CURRENT_DATE      { $$ = new Ast_Expr(Ast_Expr::CURRENT_DATE); }
+    | CURRENT_TIME      { $$ = new Ast_Expr(Ast_Expr::CURRENT_TIME); }
     ;
 
-expr: BINARY expr %prec UMINUS { emit("STRTOBIN"); }
+expr: BINARY expr %prec UMINUS { $$ = new Ast_Expr($2, Ast_Expr::BINARY); }
     ;
 
     /* statements: select statement */
-stmt: select_stmt { emit("STMT"); }
+stmt: select_stmt { $$ = new Ast_Stmt($1); }
     ;
 
-select_stmt: SELECT select_opts select_expr_list    { emit("SELECTNODATA %d %d", $2, $3); }
+select_stmt: SELECT select_opts select_expr_list    { $$ = new Ast_SelectStmt($2, $3); }
     | SELECT select_opts select_expr_list FROM table_references 
         opt_where opt_groupby opt_having opt_orderby opt_limit opt_into_list 
-        { emit("SELECT %d %d %d", $2, $3, $5); }
+        {  $$ = new Ast_SelectStmt($2, $3, $5, $6, %7, $8, $9, $10, $11); }
     ;
 
-opt_where: /* nil */
-    | WHERE expr { emit("WHERE"); }
+opt_where: /* nil */ { $$ = NULL; }
+    | WHERE expr { $$ = new Ast_OptWhere($2); }
     ;
 
-opt_groupby: /* nil */
-    | GROUP BY groupby_list opt_with_rollup { emit("GROUPBYLIST %d %d", $3, $4); }
+opt_groupby: /* nil */ { $$ = NULL; }
+    | GROUP BY groupby_list opt_with_rollup { $$ = new Ast_OptGroupBy($3, $4); }
     ;
 
-groupby_list: expr opt_asc_desc { emit("GROUPBY %d", $2); $$ = 1; }
-    | groupby_list ',' expr opt_asc_desc { emit("GROUPBY %d", $4); $$ = $1 + 1; }
+groupby_list: expr opt_asc_desc { $$ = new Ast_GroupByList($1, $2) }
+    | groupby_list ',' expr opt_asc_desc { $1->AddGroupBy($3, $4); $$ = $1; }
     ;
 
-opt_asc_desc: /* nil */ { $$ = 0; }
-    | ASC               { $$ = 0; }
-    | DESC              { $$ = 1; }
+opt_asc_desc: /* nil */ { $$ = 1; }
+    | ASC               { $$ = 1; }
+    | DESC              { $$ = 0; }
     ;
 
 opt_with_rollup: /* nil */ { $$ = 0; }
     | WITH ROLLUP { $$ = 1; }
     ;
 
-opt_having: /* nil */
-    | HAVING expr { emit("HAVING"); }
+opt_having: /* nil */ { $$ = NULL; }
+    | HAVING expr { $$ = new Ast_OptHaving($2); }
     ;
 
-opt_orderby: /* nil */
-    | ORDER BY groupby_list { emit("ORDERBY %d", $3); }
+opt_orderby: /* nil */ { $$ = NULL; }
+    | ORDER BY groupby_list { $$ = new Ast_OptOrderBy($3); }
     ;
 
-opt_limit: /* nil */ | LIMIT expr   { emit("LIMIT 1"); }
-    | LIMIT expr ',' expr           { emit("KIMIT 2"); }
+opt_limit: /* nil */ { $$ = NULL; }
+    | LIMIT expr   { $$ = new Ast_OptLimit($2); }
+    | LIMIT expr ',' expr           { $$ = new Ast_OptLimit($2, $4); }
     ;
 
-opt_into_list: /* nil */
-    | INTO column_list { emit("INTO %d", $2); }
+opt_into_list: /* nil */ { $$ = NULL; }
+    | INTO column_list { $$ = Ast_OptLimit($2); }
     ;
 
-column_list: NAME { emit("COLUMN %s", $1); $$ = 1; }
-    | column_list ',' NAME { emit("COLUMN %s", $3); free($3); $$ = $1 + 1; }
+column_list: NAME { $$ = Ast_ColumnList($1); }
+    | column_list ',' NAME { $1->AddName($3); $$ = $1; }
     ;
 
 
@@ -478,91 +479,91 @@ select_opts: /* nil */  { $$ = 0; }
     | select_opts SQL_CALC_FOUND_ROWS { if($1 & 0200) yyerror("duplicate SQL_CALC_FOUND_ROWS option"); $$ = $1 | 0200; }
     ;
 
-select_expr_list: select_expr { $$ = 1; }
-    | select_expr_list ',' select_expr { $$ = $1 + 1; }
-    | '*' { emit("SELECTALL"); $$ = 1; }
+select_expr_list: select_expr { $$ = new Ast_SelectExprList($1); }
+    | select_expr_list ',' select_expr { $1->addSelectExpr($3); $$ = $1; }
+    | '*' { $$ = new Ast_SelectExprList(Ast_SelectExprList::SELECTALL); }
     ;
 
-select_expr: expr opt_as_alias 
+select_expr: expr opt_as_alias { $$ = new Ast_SelectExpr($1, $2); }
     ;
 
-opt_as_alias: AS NAME   { emit("ALIAS %s", $2); free($2); }
-    | NAME              { emit("ALIAS %s", $1); free($1); }
-    | /* nil */
+opt_as_alias: AS NAME   { $$ = $2; }
+    | NAME              { $$ = $1; }
+    | /* nil */         { $$ = NULL; }
     ;
 
-table_references: table_reference { $$ = 1; }
-    | table_references ',' table_reference { $$ = $1 + 1; }
+table_references: table_reference { $$ = new Ast_TableReferences($1); }
+    | table_references ',' table_reference { $1->addReference($3); $$ = $1; }
     ;
 
-table_reference: table_factor
-    | join_table
+table_reference: table_factor { $$ = new Ast_TableReference($1); }
+    | join_table { $$ = new Ast_TableReference($1); }
     ;
 
-table_factor: NAME opt_as_alias index_hint  { emit("TABLE %s", $1); free($1); }
-    | NAME '.' NAME opt_as_alias index_hint { emit("TABLE %s.%s", $1, $3); free($1); free($3); }
-    | table_subquery opt_as NAME { emit("SUBQUERYAS %s", $3); free($3); }
-    | '(' table_references ')' { emit("TABLEREFERENCES %d", $2); }
+table_factor: NAME opt_as_alias index_hint  { $$ = new Ast_TableFactor($1, $2, $3); }
+    | NAME '.' NAME opt_as_alias index_hint { $$ = new Ast_TableFactor($1, $3, $4, $5); }
+    | table_subquery opt_as NAME { $$ = new Ast_TableFactor($1, $3); }
+    | '(' table_references ')' { $$ = new Ast_TableFactor($2); }
     ;
 
 opt_as: AS
     | /* nil */
     ;
 
-join_table: table_reference opt_inner_cross JOIN table_factor opt_join_condition { emit("JOIN %d", 100+$2); }
-    | table_reference STRAIGHT_JOIN table_factor { emit("JOIN %d", 200); }
-    | table_reference STRAIGHT_JOIN table_factor ON expr { emit("JOIN %d", 200); }
-    | table_reference left_or_right opt_outer JOIN table_factor join_condition { emit("JOIN %d", 300+$2+$3); }
-    | table_reference NATURAL opt_left_or_right_outer JOIN table_factor { emit("JOIN %d", 400+$3); }
+join_table: table_reference opt_inner_cross JOIN table_factor opt_join_condition { $$ = new Ast_JoinTable($1, $2, $4, $5); }
+    | table_reference STRAIGHT_JOIN table_factor { $$ = new Ast_JoinTable($1, $3); }
+    | table_reference STRAIGHT_JOIN table_factor ON expr { $$ = new Ast_JoinTable($1, Ast_JoinTable::INNER, $3, $5); }
+    | table_reference left_or_right opt_outer JOIN table_factor join_condition { $$ = new Ast_JoinTable($1, $2, $5, $6); }
+    | table_reference NATURAL opt_left_or_right_outer JOIN table_factor { $$ = new Ast_JoinTable($1, $3, $5); }
     ;
 
-opt_inner_cross: /* nil */ { $$ = 0; }
-    | INNER { $$ = 1; }
-    | CROSS { $$ = 2; }
+opt_inner_cross: /* nil */ { $$ = Ast_JoinTable::INNER; }
+    | INNER { $$ = Ast_JoinTable::INNER; }
+    | CROSS { $$ = Ast_JoinTable::CROSS; }
     ;
 
 opt_outer: /* nil */ { $$ = 0; }
-    | OUTER { $$ = 4; }
+    | OUTER { $$ = 0; }
     ;
 
-left_or_right: LEFT { $$ = 1; }
-    | RIGHT { $$ = 2; }
+left_or_right: LEFT { $$ = Ast_JoinTable::LEFT_OUTER; }
+    | RIGHT { $$ = Ast_JoinTable::RIGHT_OUTER; }
     ;
 
-opt_left_or_right_outer: LEFT opt_outer { $$ = 1 + $2; }
-    | RIGHT opt_outer { $$ = 2 + $2; }
-    | /* nil */ { $$ = 0; }
+opt_left_or_right_outer: LEFT opt_outer { $$ = Ast_JoinTable::LEFT_OUTER; }
+    | RIGHT opt_outer { $$ = Ast_JoinTable::RIGHT_OUTER;; }
+    | /* nil */ { $$ = Ast_JoinTable::INNER; }
     ;
 
-opt_join_condition: /* nil */
-    | join_condition
+opt_join_condition: /* nil */ { $$ = NULL; }
+    | join_condition { $$ = $1; }
     ;
 
-join_condition: ON expr { emit("ONEXPR"); }
-    | USING '(' column_list ')' { emit("USING %d", $3); }
+join_condition: ON expr { $$ = new Ast_JoinCondition($2); }
+    | USING '(' column_list ')' { $$ = new Ast_JoinCondition($3); }
     ;
 
-index_hint: USE KEY opt_for_join '(' index_list ')'     { emit("INDEXHINT %d %d", $5, 10+$3); }
-    | IGNORE KEY opt_for_join '(' index_list ')'        { emit("INDEXHINT %d %d", $5, 20+$3); }
-    | /* nil */
+index_hint: USE KEY opt_for_join '(' index_list ')'     { $$ = new Ast_IndexHint(1, $3, $5); }
+    | IGNORE KEY opt_for_join '(' index_list ')'        { $$ = new Ast_IndexHint(0, $3, $5); }
+    | /* nil */ { $$ = NULL; }
     ;
 
 opt_for_join: FOR JOIN { $$ = 1; }
     | /* nil */ { $$ = 0; }
     ;
 
-index_list: NAME    { emit("INDEX %s", $1);  free($1); $$ = 1; }
-    | index_list ',' NAME { emit("INDEX %s", $3); free($3); $$ = $1 + 1; }
+index_list: NAME    { $$ = new Ast_IndexList($1); }
+    | index_list ',' NAME { $1->addName($3); $$ = $1; }
     ;
 
-table_subquery: '(' select_stmt ')' { emit("SUBQUERY"); }
+table_subquery: '(' select_stmt ')' { $$ = new Ast_TableSubqeury($2); }
     ;
 
 
-stmt: delete_stmt { emit("STMT"); }
+stmt: delete_stmt { $$ = new Ast_Stmt($1); }
     ;
 
-delete_stmt: DELETE delete_opts FROM NAME opt_where opt_orderby opt_limit { emit("DELETEONE %d %s", $2, $4); free($4); }
+delete_stmt: DELETE delete_opts FROM NAME opt_where opt_orderby opt_limit { $$ = new Ast_DeleteStmt($2, $4, $5, $6, $7); }
     ;
 
 delete_opts: delete_opts LOW_PRIORITY { $$ = $1 + 01; }
@@ -571,11 +572,11 @@ delete_opts: delete_opts LOW_PRIORITY { $$ = $1 + 01; }
     | /* nil */ { $$ = 0; }
     ;
 
-delete_stmt: DELETE delete_opts delete_list FROM table_references opt_where { emit("DELETEMULTI %d %d %d", $2, $3, $5); }
+delete_stmt: DELETE delete_opts delete_list FROM table_references opt_where { $$ = new Ast_DeleteStmt($2, $3, $5, $6); }
     ;
 
-delete_list: NAME opt_dot_star { emit("TABLE %s", $1); free($1); $$ = 1; }
-    | delete_list ',' NAME opt_dot_star { emit("TABLE %s", $3); free($3); $$ = $1 + 1; }
+delete_list: NAME opt_dot_star { $$ = new Ast_DEleteList($1); }
+    | delete_list ',' NAME opt_dot_star { $1->addName($3); $$ = $1; }
     ;
 
 opt_dot_star: /* nil */
@@ -583,18 +584,18 @@ opt_dot_star: /* nil */
     ;
 
 delete_stmt: DELETE delete_opts FROM delete_list USING table_references opt_where 
-                { emit("DELETEMULTI %d %d %d", $2, $4, $6); }
+                { $$ = new Ast_DeleteStmt($2, $4, $6, $7); }
     ;
 
-stmt: insert_stmt { emit("STMT"); }
+stmt: insert_stmt { $$ = new Ast_Stmt($1); }
     ;
 
-insert_stmt: INSERT insert_opts opt_into NAME opt_col_names VALUES insert_vals_list opt_ondupupdate { 
-                emit("INSERTVALS %d %d %s", $2, $7, $4); free($4); }
+insert_stmt: INSERT insert_opts opt_into NAME opt_col_names VALUES insert_vals_list opt_ondupupdate 
+                { $$ = new Ast_InsertStmt($2, $4, $5, $7, $8); }
     ;
 
-opt_ondupupdate: /* nil */
-    | ONDUPLICATE KEY UPDATE insert_asgn_list { emit("DUPUPDATE %d", $4); }
+opt_ondupupdate: /* nil */ { $$ = NULL; }
+    | ONDUPLICATE KEY UPDATE insert_asgn_list { $$ = new Ast_OptOnDupUpdate($4); }
     ;
 
 insert_opts: /* nil */ { $$ = 0; }
@@ -608,56 +609,56 @@ opt_into: INTO
     | /* nil */
     ;
 
-opt_col_names: /* nil */
-    | '(' column_list ')' { emit("INSERTCOLS %d", $2); }
+opt_col_names: /* nil */ { $$ = NULL; }
+    | '(' column_list ')' { $$ = new Ast_OptColNames($2); }
     ;
 
-insert_vals_list: '(' insert_vals ')' { emit("VALUES %d", $2); $$ = 1; }
-    | insert_vals_list ',' '(' insert_vals ')' { emit("VALUES %d", $4); $$ = $1 + 1; }
+insert_vals_list: '(' insert_vals ')' { $$ = new Ast_InsertValList($2); }
+    | insert_vals_list ',' '(' insert_vals ')' { $1->addInsertVals($4); $$ = $1; }
     ;
 
-insert_vals: expr { $$ = 1; }
-    | DEFAULT { emit("DEFAULT"); $$ = 1; }
-    | insert_vals ',' expr { $$ = $1 + 1; }
-    | insert_vals ',' DEFAULT { emit("DEFAULT"); $$ = $1 + 1; }
+insert_vals: expr { $$ = new Ast_InsertVals($1); }
+    | DEFAULT { $$ = new Ast_InsertVals(NULL); }
+    | insert_vals ',' expr { $1->addInsertVals($3); $$ = $1;}
+    | insert_vals ',' DEFAULT { $1->addInsertVals(NULL); $$ = $1; }
     ;
 
 insert_stmt: INSERT insert_opts opt_into NAME SET insert_asgn_list opt_ondupupdate {
-                emit("INSERTASGN %d %d %s", $2, $6, $4); free($4); }
+                $$ = new Ast_InsertStmt($2, $4, $6, $7); }
     ;
 
 insert_asgn_list: NAME COMPARISON expr { if($2 != 4) { yyerror("bad insert assignment to %s", $1); YYERROR; }
-                    emit("ASSIGN %s", $1); free($1); $$ = 1; }
+                    $$ = new Ast_InsertAsgnList($1, $3); }
     | NAME COMPARISON DEFAULT { if($2 != 4) { yyerror("bad insert assignment to %s", $1); YYERROR; }
-                    emit("DEFAULT"); emit("ASSIGN %s", $1); free($1); $$ = 1; }
+                    $$ = new Ast_InsertAsgnList($1, NULL); }
     | insert_asgn_list ',' NAME COMPARISON expr { if($4 != 4) { yyerror("bad assignment to %s", $1); YYERROR; }
-                    emit("ASSIGN %s", $3); free($3); $$ = $1 + 1; }
+                    $1->AddInsertAsgn($3, $5); $$ = $1; }
     | insert_asgn_list ',' NAME COMPARISON DEFAULT { if($4 != 4) {yyerror("bad assignment to %s", $1); YYERROR; }
-                    emit("DEFAULT"); emit("ASSIGN %s", $3); free($3); $$ = $1 + 1; }
+                    $1->AddInsertAsgn($3, NULL); $$ = $1; }
     ;
 
 
 insert_stmt: INSERT insert_opts opt_into NAME opt_col_names select_stmt opt_ondupupdate 
-                { emit("INSERTSELECT %d %s", $2, $4); free($4); }
+                { $$ = new Ast_InsertStmt($2, $4, $5, $6, $7); }
     ;
 
-stmt: replace_stmt { emit("STMT"); }
+stmt: replace_stmt { $$ = new Ast_Stmt($1); }
     ;
 
 replace_stmt: REPLACE insert_opts opt_into NAME opt_col_names VALUES insert_vals_list opt_ondupupdate
-                { emit("REPLACEVALS %d %d %s", $2, $7, $4); free($4); }
+                { $$ = new Ast_ReplaceStmt($2, $4, $5, $7, $8); }
     ;
 
 replace_stmt: REPLACE insert_opts opt_into NAME SET insert_asgn_list opt_ondupupdate
-                { emit("REPLACEASGN %d %d %s", $2, $6, $4); free($4); }
+                { $$ = new Ast_ReplaceStmt($2, $4, $6, $7); }
     ;
 
 replace_stmt: REPLACE insert_opts opt_into NAME opt_col_names select_stmt opt_ondupupdate
-                { emit("REPLACESELECT %d %s", $2, $4); free($4); }
+                { $$ = new Ast_ReplaceStmt($2, $4, $5, $6, $7); }
     ;
 
 
-stmt: update_stmt { emit("STMT"); }
+stmt: update_stmt { $$ = new Ast_Stmt($1); }
     ;
 
 update_stmt: UPDATE update_opts table_references SET update_asgn_list opt_where opt_orderby opt_limit
@@ -670,20 +671,20 @@ update_opts: /* nil */ { $$ = 0; }
     ;
 
 update_asgn_list: NAME COMPARISON expr { if ($2 != 4) { yyerror("bad update assignment to %s", $1); YYERROR; }
-                        emit("ASSIGN %s", $1); free($1); $$ = 1; }
+                        $$ = new Ast_UpdateAsgnList($1, $3); }
     | NAME '.' NAME COMPARISON expr { if($4 != 4) {yyerror("bad update assignment to %s", $1); YYERROR; }
-        emit("ASSIGN %s.%s", $1, $3); free($1); free($3); $$ = 1; }
+        $$ = new Ast_UpdateAsgnList($1, $3, $5); }
     | update_asgn_list ',' NAME COMPARISON expr { if($4 != 4) {yyerror("bad update assignment to %s", $3); YYERROR; }
-        emit("ASSIGN %s", $3); free($3); $$ = $1 + 1; }
+        $1->addUpdateAsgn($3, $5); $$ = $1; }
     | update_asgn_list ',' NAME '.' NAME COMPARISON expr { if ($6 != 4) {yyerror("bad update assignment to %s.%s", $3, $5); YYERROR; }
-        emit("ASSIGN %s.%s", $3, $5); free($3); free($5); $$ = 1; }
+        $1->addUpdateAsgn($3, $5, $7); $$ = $1; }
     ;
 
-stmt: create_database_stmt { emit("STMT"); }
+stmt: create_database_stmt { $$ = new Ast_Stmt($1) }
     ;
 
-create_database_stmt: CREATE DATABASE opt_if_not_exists NAME { emit("CREATEDATABASE %d %s", $3, $4); free($4); }
-    | CREATE SCHEMA opt_if_not_exists NAME { emit("CREATEDATABASE %d %s", $3, $4); free($4); }
+create_database_stmt: CREATE DATABASE opt_if_not_exists NAME { $$ = new Ast_CreateDatabaseStmt($3, $4); }
+    | CREATE SCHEMA opt_if_not_exists NAME { e$$ = new Ast_CreateDatabaseStmt($3, $4); }
     ;
 
 opt_if_not_exists: /* nil */ { $$ = 0; }
@@ -691,63 +692,63 @@ opt_if_not_exists: /* nil */ { $$ = 0; }
         $$ = $2; /* NOT EXISTS hack */ }
     ;
 
-stmt: create_table_stmt { emit("STMT"); }
+stmt: create_table_stmt { $$ = new Ast_Stmt($1); }
     ;
 
 create_table_stmt: CREATE opt_temporary TABLE opt_if_not_exists NAME '(' create_col_list ')' { 
-        emit("CREATE %d %d %d %s", $2, $4, $7, $5); free($5); }
+        $$ = new Ast_CreateTableStmt($2, $4, $5, $7); }
     ;
 
 create_table_stmt: CREATE opt_temporary TABLE opt_if_not_exists NAME '.' NAME '(' create_col_list ')' {
-        emit("CREATE %d %d %d %s.%s", $2, $4, $9, $5, $7); free($5); free($7); }
+        $$ = new Ast_CreateTableStmt($2, $4, $5, $7, $9); }
     ;
 
 create_table_stmt: CREATE opt_temporary TABLE opt_if_not_exists NAME '(' create_col_list ')' create_select_statement {
-        emit("CREATESELECT %d %d %d %s", $2, $4, $7, $5); free($5); }
+        $$ = new Ast_CreateTableStmt($2, $4, $5, $7, $9); }
     ;
 
 create_table_stmt: CREATE opt_temporary TABLE opt_if_not_exists NAME create_select_statement {
-        emit("CREATESELECT %d %d 0 %s", $2, $4, $5); free($5); }
+        $$ = new Ast_CreateTableStmt($2, $4, $5, $6); }
     ;
 
 create_table_stmt: CREATE opt_temporary TABLE opt_if_not_exists NAME '.' NAME '(' create_col_list ')' create_select_statement {
-        emit("CREATESELECT %d %d 0 %s.%s", $2, $4, $5, $7); free($5), free($7); }
+        $$ = new Ast_CreateTableStmt($2, $4, $5, $7, $9, $11); }
     ;
 
 create_table_stmt: CREATE opt_temporary TABLE opt_if_not_exists NAME '.' NAME create_select_statement {
-        emit("CREATESELECT %d %d 0 %s.%s", $2, $4, $5, $7); free($5); free($7); }
+        $$ = new Ast_CreateTableStmt($2, $4, $5, $7, $8); }
     ;
 
 opt_temporary: /* nil */ { $$ = 0; }
     | TEMPORARY { $$ = 1; }
     ;
 
-create_col_list: create_definition { $$ = 1; }
-    | create_col_list ',' create_definition { $$ = $1 + 1; }
+create_col_list: create_definition { $$ = new Ast_CreateColList($1); }
+    | create_col_list ',' create_definition { $1->addCreateDefinition($3); $$ = $1; }
     ;
 
-create_definition: PRIMARY KEY '(' column_list ')' { emit("PRIKEY %d", $4); }
-    | KEY '(' column_list ')'               { emit("KEY %d", $3); }
-    | FULLTEXT KEY '(' column_list ')'      { emit("TEXTINDEX %d", $4); }
+create_definition: PRIMARY KEY '(' column_list ')' { $$ = new Ast_CreateDefinition(Ast_CreateDefinition::PRIKEY_KEY, $4); }
+    | KEY '(' column_list ')'               { $$ = new Ast_CreateDefinition(Ast_CreateDefinition::KEY, $3); }
+    | FULLTEXT KEY '(' column_list ')'      { $$ = new Ast_CreateDefinition(Ast_CreateDefinition::FULLTEXT_KEY, $4); }
     ;
 
-create_definition: { emit("STARTCOL"); }
-    | NAME data_type column_atts { emit("COLUMNDEF %d %d", $3, $2); }
+create_definition: 
+    | NAME data_type column_atts { $$ = new Ast_CreateDefinition($1, $2, $3); }
     ;
 
-column_atts: /* nil */ { $$ = 0; }
-    | column_atts NOT NULLX { emit("ATTR NOTNULL"); $$ = $1 + 1; }
+column_atts: /* nil */ { $$ = new Ast_ColumnAttrs(); }
+    | column_atts NOT NULLX { $1->addAttr(Ast_ColumnAttrs::NOT_NULL); $$ = $1; }
     | column_atts NULLX
-    | column_atts DEFAULT STRING { emit("ATTR DEFAULT STRING %s", $3); free($3); $$ = $1 + 1; }
-    | column_atts DEFAULT INTNUM { emit("ATTR DEFAULT NUMBER %d", $3); $$ = $1 + 1; }
-    | column_atts DEFAULT APPROXNUM { emit("ATTR DEFAULT FLOAT %g", $3); $$ = $1 + 1; }
-    | column_atts DEFAULT BOOL { emit("ATTR DEFAULT BOOL %d", $3); $$ = $1 + 1; }
-    | column_atts AUTO_INCREMENT { emit("ATTR AUTOINC"); $$ = $1 + 1; }
-    | column_atts UNIQUE '(' column_list ')' { emit("ATTR UNIQUEKEY %d", $4); $$ = $1 + 1; }
-    | column_atts UNIQUE KEY { emit("ATTR UNIQUEKEY"); $$ = $1 + 1; }
-    | column_atts PRIMARY KEY { emit("ATTR PRIKEY"); $$ = $1 + 1; }
-    | column_atts KEY { emit("ATTR PRIKEY"); $$ = $1 + 1; }
-    | column_atts COMMENT STRING { emit("ATTR COMMENT %s", $3); free($3); $$ = $1 + 1; }
+    | column_atts DEFAULT STRING { $1->addAttr(Ast_ColumnAttrs::DEFAULT_STRING, $3); $$ = $1; }
+    | column_atts DEFAULT INTNUM { $1->addAttr(Ast_ColumnAttrs::DEFAULT_INTNUM, $3); $$ = $1; }
+    | column_atts DEFAULT APPROXNUM { $1->addAttr(Ast_ColumnAttrs::DEFAULT_APPROXNUM, $3); $$ = $1; }
+    | column_atts DEFAULT BOOL { $1->addAttr(Ast_ColumnAttrs::DEFAULT_BOOL, $3); $$ = $1; }
+    | column_atts AUTO_INCREMENT { $1->addAttr(Ast_ColumnAttrs::AUTO_INCREMENT); $$ = $1; }
+    | column_atts UNIQUE '(' column_list ')' { $1->addAttr(Ast_ColumnList::UNIQUE, $4); $$ = $1; }
+    | column_atts UNIQUE KEY { $1->addAttr(Ast_ColumnList::UNIQUE_KEY); $$ = $1; }
+    | column_atts PRIMARY KEY { $1->addAttr(Ast_ColumnList::PRIMARY_KEY); $$ = $1; }
+    | column_atts KEY { $1->addAttr(Ast_ColumnList::INDEX_KEY); $$ = $1; }
+    | column_atts COMMENT STRING { $1->addAttr(Ast_ColumnList::COMMENT, $3); $$ = $1; }
     ;
 
 opt_length: /* nil */ { $$ = 0; }
@@ -757,55 +758,55 @@ opt_length: /* nil */ { $$ = 0; }
 
 
 opt_binary: /* nil */ { $$ = 0; }
-    | BINARY { $$ = 4000; }
+    | BINARY { $$ = 1; }
     ;
 
 opt_uz: /* nil */ { $$ = 0; }
-    | opt_uz UNSIGNED { $$ = $1 | 1000; }
-    | opt_uz ZEROFILL { $$ = $1 | 2000; }
+    | opt_uz UNSIGNED { $$ = 1; }
+    | opt_uz ZEROFILL { $$ = 2; }
     ;
 
-opt_csc: /* nil */
-    | opt_csc CHAR SET STRING { emit("COLCHARSET %s", $4); free($4); }
-    | opt_csc COLLATE STRING { emit("COLCOLLATE %s", $3); free($3); }
+opt_csc: /* nil */ { $$ = NULL; }
+    | opt_csc CHAR SET STRING { $$ = new Ast_OptCSC(Ast_OptCSC::CHARSET, $4); }
+    | opt_csc COLLATE STRING { $$ = new Ast_OptCSC(Ast_OptCSC::COLLATE, $3); }
     ;
 
-data_type: BIT opt_length { $$ = 10000 + $2; }
-    | TINYINT opt_length opt_uz { $$ = 10000 + $2; }
-    | SAMLLINT opt_length opt_uz { $$ = 20000 + $2 + $3; }
-    | MEDIUMINT opt_length opt_uz { $$ = 30000 + $2 + $3; }
-    | INTEGER opt_length opt_uz { $$ = 50000 + $2 + $3; }
-    | BIGINT opt_length opt_uz { $$ = 60000 + $2 + $3; }
-    | REAL opt_length opt_uz { $$ = 70000 + $2 + $3; }
-    | DOUBLE opt_length opt_uz { $$ = 80000 + $2 + $3; }
-    | FLOAT opt_length opt_uz { $$ = 90000 + $2 + $3; }
-    | DECIMAL opt_length opt_uz { $$ = 110000 + $2 + $3; }
-    | DATE { $$ = 100001; }
-    | TIME { $$ = 100002; }
-    | TIMESTAMP { $$ = 100003; }
-    | DATETIME { $$ = 100004; }
-    | YEAR { $$ = 100005; }
-    | CHAR opt_length opt_csc { $$ = 120000 + $2; }
-    | VARCHAR '(' INTNUM ')' opt_csc { $$ = 130000 + $3; }
-    | BINARY opt_length { $$ = 140000 + $2; }
-    | VARBINARY '(' INTNUM ')' { $$ = 150000 + $3; }
-    | TINYBLOB { $$ = 160001; }
-    | BLOB { $$ = 160002; }
-    | MEDIUMBLOB { $$ = 160003; }
-    | LONGBLOB { $$ = 160004; }
-    | TINYTEXT opt_binary opt_csc { $$ = 170000 + $2; }
-    | TEXT opt_binary opt_csc { $$ = 171000 + $2; }
-    | MEDIUMTEXT opt_binary opt_csc { $$ = 172000 + $2; }
-    | LONGTEXT opt_binary opt_csc { $$ = 173000 + $2; }
-    | ENUM '(' enum_list ')' opt_csc { $$ = 200000 + $3; }
-    | SET '(' enum_list ')' opt_csc { $$ = 210000 + $3; }
+data_type: BIT opt_length { $$ = new Ast_DataType(Ast_DataType::BIT, $2, false, false); }
+    | TINYINT opt_length opt_uz { $$ = new Ast_DataType(Ast_DataType::TINYINT, $2, $3 == 1, $3 == 2); }
+    | SAMLLINT opt_length opt_uz { $$ = new Ast_DataType(Ast_DataType::SAMLLINT, $2, $3 == 1, $3 == 2); }
+    | MEDIUMINT opt_length opt_uz { $$ = new Ast_DataType(Ast_DataType::MEDIUMINT, $2, $3 == 1, $3 == 2); }
+    | INTEGER opt_length opt_uz { $$ = new Ast_DataType(Ast_DataType::INTEGER, $2, $3 == 1, $3 == 2); }
+    | BIGINT opt_length opt_uz { $$ = new Ast_DataType(Ast_DataType::BIGINT, $2, $3 == 1, $3 == 2); }
+    | REAL opt_length opt_uz { $$ = new Ast_DataType(Ast_DataType::REAL, $2, $3 == 1, $3 == 2); }
+    | DOUBLE opt_length opt_uz { $$ = new Ast_DataType(Ast_DataType::DOUBLE, $2, $3 == 1, $3 == 2); }
+    | FLOAT opt_length opt_uz { $$ = new Ast_DataType(Ast_DataType::FLOAT, $2, $3 == 1, $3 == 2); }
+    | DECIMAL opt_length opt_uz { $$ = new Ast_DataType(Ast_DataType::DECIMAL, $2, $3 == 1, $3 == 2); }
+    | DATE { $$ = new Ast_DataType(Ast_DataType::DATE); }
+    | TIME { $$ = new Ast_DataType(Ast_DataType::TIME); }
+    | TIMESTAMP { $$ = new Ast_DataType(Ast_DataType::TIMESTAMP); }
+    | DATETIME { $$ = new Ast_DataType(Ast_DataType::DATETIME); }
+    | YEAR { $$ = new Ast_DataType(Ast_DataType::YEAR); }
+    | CHAR opt_length opt_csc { $$ = new Ast_DataType(Ast_DataType::CHAR, $2, false, $3); }
+    | VARCHAR '(' INTNUM ')' opt_csc { $$ = new Ast_DataType(Ast_DataType::VARCHAR, $3, false, $5); }
+    | BINARY opt_length { $$ = new Ast_DataType(Ast_DataType::BINARY, $2, false, NULL); }
+    | VARBINARY '(' INTNUM ')' { $$ = new Ast_DataType(Ast_DataType::VARBINARY, $3, false, NULL); }
+    | TINYBLOB { $$ = new Ast_DataType(Ast_DataType::TINYBLOB); }
+    | BLOB { $$ = new Ast_DataType(Ast_DataType::BLOB; }
+    | MEDIUMBLOB { $$ = new Ast_DataType(Ast_DataType::MEDIUMBLOB); }
+    | LONGBLOB { $$ = new Ast_DataType(Ast_DataType::LONGBLOB); }
+    | TINYTEXT opt_binary opt_csc { $$ = new Ast_DataType(Ast_DataType::TINYTEXT, 1 << 8, $2, $3); }
+    | TEXT opt_binary opt_csc { $$ = new Ast_DataType(Ast_DataType::TEXT, 1 << 16, $2, $3); }
+    | MEDIUMTEXT opt_binary opt_csc { $$ = new Ast_DataType(Ast_DataType::MEDIUMTEXT, 1 << 28, $2, $3); }
+    | LONGTEXT opt_binary opt_csc { $$ = new Ast_DataType(Ast_DataType::LONGTEXT, 1 << 28, $2, $3); }
+    | ENUM '(' enum_list ')' opt_csc { $$ = new Ast_DataType(Ast_DataType::ENUM, $3, $5); }
+    | SET '(' enum_list ')' opt_csc { $$ = new Ast_DataType(Ast_DataType::SET, $3, $5); }
     ;
 
-enum_list: STRING { emit("ENUMVAL %s", $1); free($1); $$ = 1; }
-    | enum_list ',' STRING { emit("ENUMVAL %s", $3); free($3); $$ = $1 + 1; }
+enum_list: STRING { $$ = new Ast_EnumList($1); }
+    | enum_list ',' STRING { $1->addEnum($3); $$ = $1; }
     ;
 
-create_select_statement: opt_ignore_replace opt_as select_stmt { emit("CREATESELECT %d", $1); }
+create_select_statement: opt_ignore_replace opt_as select_stmt { $$ = new Ast_CreateSelectStmt($1, $3); }
     ;
 
 opt_ignore_replace: /* nil */ { $$ = 0; }
@@ -813,32 +814,22 @@ opt_ignore_replace: /* nil */ { $$ = 0; }
     | REPLACE { $$ = 2; }
     ;
 
-stmt: set_stmt { emit("STMT"); }
+stmt: set_stmt { $$ = new Ast_Stmt($1); }
     ;
 
-set_stmt: SET set_list
+set_stmt: SET set_list { $$ = new Ast_SetStmt($2); }
     ;
 
-set_list: set_expr | set_list ',' set_expr
+set_list: set_expr { $$ = new Ast_SetList($1); }
+    | set_list ',' set_expr { $1->addSetExpr($3), $$ = $1; }
     ;
 
 set_expr: USERVAR COMPARISON expr { if($2 != 4) {yyerror("bad set to @%s", $1); YYERROR; } 
-        emit("SET %s", $1); free($1); }
-    | USERVAR ASSIGN expr { emit("SET %s", $1); free($1); }
+        $$ = new Ast_SetExpr($1, $3); }
+    | USERVAR ASSIGN expr { $$ = new Ast_SetExpr($1, $3); }
     ;
 
 %%
-
-void emit(char *s, ...) {
-    extern unsigned int yylineno;
-
-    va_list ap;
-    va_start(ap, s);
-
-    printf("rpn: ");
-    vfprintf(stdout, s, ap);
-    printf("\n");
-}
 
 void yyerror(char *s, ...) {
     extern unsigned int yylineno;

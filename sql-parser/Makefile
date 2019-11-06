@@ -21,6 +21,6 @@ pmysql.o: pmysql.c pmysql.tab.h
 .SUFFIXES: .pgm .l .y .c
 
 clean:
-	rm -f *.o *.output pmysql
+	rm -f *.o *.output pmysql pmysql.tab.*  pymysql.c
 
 

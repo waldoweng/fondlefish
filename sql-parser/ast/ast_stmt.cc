@@ -1,4 +1,4 @@
-#include "ast.h"
+#include "include/ast/ast_stmt.h"
 
 Ast_Stmt::Ast_Stmt(Ast_SelectStmt *stmt) {
     this->m_stmt.select_stmt = stmt;
@@ -48,3 +48,5 @@ Ast_Stmt::~Ast_Stmt() {
     }
 }
 
+void Ast_Stmt::illustrate() const {
+}
