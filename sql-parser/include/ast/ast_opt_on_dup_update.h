@@ -7,7 +7,7 @@ class Ast_InsertAsgnList;
 
 class Ast_OptOnDupUpdate : public Ast_Base {
 public:
-    Ast_OptOnDupUpdate(Ast_InsertAsgnList *insert_asgn_list);
+    explicit Ast_OptOnDupUpdate(Ast_InsertAsgnList *insert_asgn_list);
     virtual ~Ast_OptOnDupUpdate();
 
 public:

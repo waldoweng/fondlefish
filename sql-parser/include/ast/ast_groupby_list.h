@@ -13,7 +13,7 @@ struct groupby_item {
 
 class Ast_GroupByList : public Ast_Base{
 public:
-    Ast_GroupByList(Ast_Expr *expr, bool asc);
+    explicit Ast_GroupByList(Ast_Expr *expr, bool asc);
     virtual ~Ast_GroupByList();
 
 public:

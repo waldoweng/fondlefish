@@ -7,8 +7,8 @@ class Ast_Expr;
 
 class Ast_OptWhere : public Ast_Base {
 public:
-    Ast_OptWhere(Ast_Expr *expr);
-    ~Ast_OptWhere();
+    explicit Ast_OptWhere(Ast_Expr *expr);
+    virtual ~Ast_OptWhere();
 
 public:
     virtual void illustrate() const;

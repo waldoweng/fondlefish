@@ -7,8 +7,8 @@ class Ast_Expr;
 
 class Ast_OptHaving : public Ast_Base {
 public:
-    Ast_OptHaving(Ast_Expr *expr);
-    ~Ast_OptHaving();
+    explicit Ast_OptHaving(Ast_Expr *expr);
+    virtual ~Ast_OptHaving();
 
 public:
     virtual void illustrate() const;

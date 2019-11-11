@@ -7,18 +7,20 @@ class Ast_Expr;
 
 class Ast_IntervalExp : public Ast_Base {
 public:
-    const static int DAY_HOUR = 1;
-    const static int DAY_MICROSECOND = 2;
-    const static int DAY_MINUTE = 3;
-    const static int DAY_SECOND = 4;
-    const static int YEAR_MONTH = 5;
-    const static int YEAR = 6;
-    const static int HOUR_MICROSECOND = 7;
-    const static int HOUR_MINUTE = 8;
-    const static int HOUR_SECOND = 9;
+    enum {
+        INTERVAL_DAY_HOUR = 1,
+        INTERVAL_DAY_MICROSECOND = 2,
+        INTERVAL_DAY_MINUTE = 3,
+        INTERVAL_DAY_SECOND = 4,
+        INTERVAL_YEAR_MONTH = 5,
+        INTERVAL_YEAR = 6,
+        INTERVAL_HOUR_MICROSECOND = 7,
+        INTERVAL_HOUR_MINUTE = 8,
+        INTERVAL_HOUR_SECOND = 9,
+    };
 
 public:
-    Ast_IntervalExp(Ast_Expr *expr, int type);
+    explicit Ast_IntervalExp(Ast_Expr *expr, int type);
     virtual ~Ast_IntervalExp();
 
 public:

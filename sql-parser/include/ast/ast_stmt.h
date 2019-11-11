@@ -1,7 +1,7 @@
 #ifndef FONDLE_FISH_MYSQL_AST_STMT_H_INCLUDED
 #define FONDLE_FISH_MYSQL_AST_STMT_H_INCLUDED
 
-#include "include/ast/ast_base.h"
+#include "ast_base.h"
 
 class Ast_SelectStmt;
 class Ast_DeleteStmt;
@@ -23,13 +23,14 @@ public:
     const static unsigned char SET_STMT = 6;
 
 public:
-    Ast_Stmt(Ast_SelectStmt *stmt);
-    Ast_Stmt(Ast_UpdateStmt *stmt);
-    Ast_Stmt(Ast_DeleteStmt *stmt);
-    Ast_Stmt(Ast_InsertStmt *stmt);
-    Ast_Stmt(Ast_CreateDatabaseStmt *stmt);
-    Ast_Stmt(Ast_CreateTableStmt *stmt);
-    Ast_Stmt(Ast_SetStmt *stmt);
+    explicit Ast_Stmt(Ast_SelectStmt *stmt);
+    explicit Ast_Stmt(Ast_UpdateStmt *stmt);
+    explicit Ast_Stmt(Ast_DeleteStmt *stmt);
+    explicit Ast_Stmt(Ast_InsertStmt *stmt);
+    explicit Ast_Stmt(Ast_ReplaceStmt *stmt);
+    explicit Ast_Stmt(Ast_CreateDatabaseStmt *stmt);
+    explicit Ast_Stmt(Ast_CreateTableStmt *stmt);
+    explicit Ast_Stmt(Ast_SetStmt *stmt);
     virtual ~Ast_Stmt();
 
 public:

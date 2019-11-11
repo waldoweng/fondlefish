@@ -7,7 +7,7 @@
 class Ast_Expr;
 class Ast_InsertVals : public Ast_Base {
 public:
-    Ast_InsertVals(Ast_Expr *expr);
+    explicit Ast_InsertVals(Ast_Expr *expr);
     virtual ~Ast_InsertVals();
 
 public:
@@ -22,7 +22,7 @@ private:
 
 class Ast_InsertValList : public Ast_Base {
 public:
-    Ast_InsertValList(Ast_InsertVals *insert_vals);
+    explicit Ast_InsertValList(Ast_InsertVals *insert_vals);
     virtual ~Ast_InsertValList();
 
 public:

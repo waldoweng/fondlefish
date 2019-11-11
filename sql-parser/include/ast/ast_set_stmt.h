@@ -9,7 +9,7 @@ class Ast_Expr;
 
 class Ast_SetExpr : public Ast_Base {
 public:
-    Ast_SetExpr(std::string uservar, Ast_Expr *expr);
+    explicit Ast_SetExpr(std::string uservar, Ast_Expr *expr);
     virtual ~Ast_SetExpr();
 
 public:
@@ -20,7 +20,7 @@ private:
 
 class Ast_SetList : public Ast_Base {
 public:
-    Ast_SetList(Ast_SetExpr *set_expr);
+    explicit Ast_SetList(Ast_SetExpr *set_expr);
     virtual ~Ast_SetList();
 
 public:
@@ -34,7 +34,7 @@ private:
 
 class Ast_SetStmt : public Ast_Base {
 public:
-    Ast_SetStmt(Ast_SetList *set_list);
+    explicit Ast_SetStmt(Ast_SetList *set_list);
     virtual ~Ast_SetStmt();
 
 public:

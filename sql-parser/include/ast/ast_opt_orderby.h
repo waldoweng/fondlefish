@@ -7,7 +7,7 @@ class Ast_GroupByList;
 
 class Ast_OptOrderBy : public Ast_Base {
 public:
-    Ast_OptOrderBy(Ast_GroupByList *orderby_list);
+    explicit Ast_OptOrderBy(Ast_GroupByList *orderby_list);
     ~Ast_OptOrderBy();
     
 public:

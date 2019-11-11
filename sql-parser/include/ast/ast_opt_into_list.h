@@ -7,8 +7,8 @@ class Ast_ColumnList;
 
 class Ast_OptIntoList {
 public:
-    Ast_OptIntoList(Ast_ColumnList *column_list);
-    ~Ast_OptIntoList();
+    explicit Ast_OptIntoList(Ast_ColumnList *column_list);
+    virtual ~Ast_OptIntoList();
 
 public:
     virtual void illustrate() const;

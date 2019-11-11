@@ -7,8 +7,14 @@ class Ast_Expr;
 
 class Ast_ValList : public Ast_Base {
 public:
-    Ast_ValList(Ast_Expr *expr);
-    Ast_ValList(Ast_Expr *expr, Ast_ValList *val_list);
+    explicit Ast_ValList(Ast_Expr *expr);
+    explicit Ast_ValList(Ast_Expr *expr, Ast_ValList *val_list);
+    virtual ~Ast_ValList();
+
+public:
+    virtual void illustrate() const;
+
+private:
 };
 
 #endif

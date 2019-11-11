@@ -1,5 +1,5 @@
-#ifndef FONDLE_FISH_MYSQL_AST_OPT_LIMIT_H_INCLUDED
-#define FONDLE_FISH_MYSQL_AST_OPT_LIMIT_H_INCLUDED
+#ifndef FONDLE_FISH_MYSQL_AST_OPT_COLUMN_LIST_H_INCLUDED
+#define FONDLE_FISH_MYSQL_AST_OPT_COLUMN_LIST_H_INCLUDED
 
 #include <string>
 #include <vector>
@@ -7,8 +7,8 @@
 
 class Ast_ColumnList : public Ast_Base{
 public:
-    Ast_ColumnList(std::string *name);
-    ~Ast_ColumnList();
+    explicit Ast_ColumnList(const char *name);
+    virtual ~Ast_ColumnList();
 
 public:
     virtual void illustrate() const;

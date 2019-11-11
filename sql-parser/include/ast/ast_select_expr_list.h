@@ -9,7 +9,7 @@ class Ast_Expr;
 
 class Ast_SelectExpr : public Ast_Base {
 public:
-    Ast_SelectExpr(Ast_Expr *expr, std::string alias);
+    explicit Ast_SelectExpr(Ast_Expr *expr, std::string alias);
     virtual ~Ast_SelectExpr();
 
 public:
@@ -25,15 +25,15 @@ public:
     const static int SELECTALL = 0;
 
 public:
-    Ast_SelectExprList(int type);
-    Ast_SelectExprList(Ast_SelectExpr *expr);
+    explicit Ast_SelectExprList(int type);
+    explicit Ast_SelectExprList(Ast_SelectExpr *expr);
     virtual ~Ast_SelectExprList();
 
 public:
     virtual void illustrate() const;
 
 public:
-    void AddSelectExpr(Ast_SelectExpr *expr);
+    void addSelectExpr(Ast_SelectExpr *expr);
 
 private:
     std::vector<Ast_SelectExpr *> exprs;

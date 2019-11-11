@@ -7,9 +7,9 @@ class Ast_Expr;
 
 class Ast_OptLimit : public Ast_Base{
 public:
-    Ast_OptLimit(Ast_Expr *expr);
-    Ast_OptLimit(Ast_Expr *expr1, Ast_Expr *expr2);
-    ~Ast_OptLimit();
+    explicit Ast_OptLimit(Ast_Expr *expr);
+    explicit Ast_OptLimit(Ast_Expr *expr1, Ast_Expr *expr2);
+    virtual ~Ast_OptLimit();
 
 public:
     virtual void illustrate() const;

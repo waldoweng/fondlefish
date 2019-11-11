@@ -7,7 +7,7 @@
 
 class Ast_CreateDatabaseStmt : public Ast_Base {
 public:
-    Ast_CreateDatabaseStmt(bool opt_if_not_exists, std::string name);
+    explicit Ast_CreateDatabaseStmt(bool opt_if_not_exists, std::string name);
     virtual ~Ast_CreateDatabaseStmt();
 
 public:

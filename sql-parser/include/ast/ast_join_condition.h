@@ -10,8 +10,8 @@ class Ast_JoinCondition : public Ast_Base {
 public:
 
 public:
-    Ast_JoinCondition(Ast_Expr *expr);
-    Ast_JoinCondition(Ast_ColumnList *column_list);
+    explicit Ast_JoinCondition(Ast_Expr *expr);
+    explicit Ast_JoinCondition(Ast_ColumnList *column_list);
     virtual ~Ast_JoinCondition();
 
 public:

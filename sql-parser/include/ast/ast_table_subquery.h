@@ -7,10 +7,10 @@
 
 class Ast_SelectStmt;
 
-class Ast_TableSubqeury : public Ast_Base {
+class Ast_TableSubquery : public Ast_Base {
 public:
-    Ast_TableSubqeury(Ast_SelectStmt *select_stmt);
-    ~Ast_TableSubqeury();
+    explicit Ast_TableSubquery(Ast_SelectStmt *select_stmt);
+    virtual ~Ast_TableSubquery();
 
 public:
     virtual void illustrate() const;

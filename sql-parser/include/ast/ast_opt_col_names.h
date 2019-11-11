@@ -7,7 +7,7 @@ class Ast_ColumnList;
 
 class Ast_OptColNames : public Ast_Base {
 public:
-    Ast_OptColNames(Ast_ColumnList *column_list);
+    explicit Ast_OptColNames(Ast_ColumnList *column_list);
     virtual ~Ast_OptColNames();
 
 public:

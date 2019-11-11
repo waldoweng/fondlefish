@@ -3,7 +3,7 @@
 
 class Ast_Base {
     public:
-        Ast_Base();
+        explicit Ast_Base();
         virtual ~Ast_Base();
 
     public:

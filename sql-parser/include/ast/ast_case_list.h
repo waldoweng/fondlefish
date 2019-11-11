@@ -13,8 +13,8 @@ struct case_item {
 
 class Ast_CaseList : public Ast_Base{
 public:
-    Ast_CaseList(Ast_Expr *when, Ast_Expr *then);
-    ~Ast_CaseList();
+    explicit Ast_CaseList(Ast_Expr *when, Ast_Expr *then);
+    virtual ~Ast_CaseList();
 
 public:
     void addCase(Ast_Expr *when, Ast_Expr *then);

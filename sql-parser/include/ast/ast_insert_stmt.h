@@ -13,18 +13,26 @@ class Ast_SelectStmt;
 
 class Ast_InsertStmt : public Ast_Base {
 public:
-    const static uint32_t LOW_PRIORITY = 1;
-    const static uint32_t DELAYED = (1 << 1);
-    const static uint32_t HIGH_PRIORITY = (1 << 2);
-    const static uint32_t IGNORE = (1 << 3);
+    enum {
+        INSERT_OPTS_LOW_PRIORITY = 1,
+        INSERT_OPTS_DELAYED = (1 << 1),
+        INSERT_OPTS_HIGH_PRIORITY = (1 << 2),
+        INSERT_OPTS_IGNORE = (1 << 3)
+    };
 
 public:
-    Ast_InsertStmt(uint32_t insert_opts, std::string name, Ast_OptColNames *opt_col_names,
+    explicit Ast_InsertStmt(uint32_t insert_opts, std::string name, Ast_OptColNames *opt_col_names,
         Ast_InsertValList *insert_val_list, Ast_OptOnDupUpdate *opt_dupupdate);
-    Ast_InsertStmt(uint32_t insert_opts, std::string name, Ast_InsertAsgnList *insert_asgn_list,
+    explicit Ast_InsertStmt(uint32_t insert_opts, std::string name, Ast_InsertAsgnList *insert_asgn_list,
         Ast_OptOnDupUpdate *opt_ondupupdate);
-    Ast_InsertStmt(uint32_t insert_opts, std::string name, Ast_OptColNames *opt_col_names,
+    explicit Ast_InsertStmt(uint32_t insert_opts, std::string name, Ast_OptColNames *opt_col_names,
         Ast_SelectStmt *select_stmt, Ast_OptOnDupUpdate *opt_ondupupdate);
+    virtual ~Ast_InsertStmt();
+
+public:
+    virtual void illustrate() const;
+
+private:
 };
 
 #endif

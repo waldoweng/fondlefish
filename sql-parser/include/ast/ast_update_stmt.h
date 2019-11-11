@@ -24,16 +24,16 @@ public:
         Ast_Expr *expr;
     };
 public:
-    Ast_UpdateAsgnList(std::string name, Ast_Expr *expr);
-    Ast_UpdateAsgnList(std::string tablename, std::string name, Ast_Expr *expr);
-    ~Ast_UpdateAsgnList();
+    explicit Ast_UpdateAsgnList(std::string name, Ast_Expr *expr);
+    explicit Ast_UpdateAsgnList(std::string tablename, std::string name, Ast_Expr *expr);
+    virtual ~Ast_UpdateAsgnList();
 
 public:
     virtual void illustrate() const;
 
 public:
-    void AddUpdateAsgn(std::string name, Ast_Expr *expr);
-    void AddUpdateAsgn(std::string tablename, std::string name, Ast_Expr *expr);
+    void addUpdateAsgn(std::string name, Ast_Expr *expr);
+    void addUpdateAsgn(std::string tablename, std::string name, Ast_Expr *expr);
 
 private:
     std::vector<Ast_UpdateAsgn> update_asgn_list;
@@ -41,15 +41,20 @@ private:
 
 class Ast_UpdateStmt : public Ast_Base {
 public:
-    const static uint32_t LOW_PRIORITY = 1;
-    const static uint32_t IGNORE = (1 << 1);
+    enum {
+        UPDATE_OPTS_LOW_PRIORITY = 1,
+        UPDATE_OPTS_IGNORE = (1 << 1)
+    };
 public:
-    Ast_UpdateStmt(uint32_t update_opts, Ast_TableReferences *table_reference,
+    explicit Ast_UpdateStmt(uint32_t update_opts, Ast_TableReferences *table_reference,
         Ast_UpdateAsgnList *update_asgn_list, Ast_OptWhere *opt_where,
         Ast_OptOrderBy *opt_orderby, Ast_OptLimit *opt_limit);
-    Ast_UpdateStmt(uint32_t update_opts);
+    explicit Ast_UpdateStmt(uint32_t update_opts);
     virtual ~Ast_UpdateStmt();
+
 public:
+    virtual void illustrate() const;
+
 public:
 private:
 

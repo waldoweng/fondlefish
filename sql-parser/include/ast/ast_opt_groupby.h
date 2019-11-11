@@ -7,8 +7,8 @@ class Ast_GroupByList;
 
 class Ast_OptGroupBy : public Ast_Base {
 public:
-    Ast_OptGroupBy(Ast_GroupByList *groupby_list, bool opt_with_rollup);
-    ~Ast_OptGroupBy();
+    explicit Ast_OptGroupBy(Ast_GroupByList *groupby_list, bool opt_with_rollup);
+    virtual ~Ast_OptGroupBy();
 
 public:
     virtual void illustrate() const;

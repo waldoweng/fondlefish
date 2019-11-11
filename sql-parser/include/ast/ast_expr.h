@@ -3,115 +3,120 @@
 
 #include "ast_base.h"
 
-class Ast_ValList;
 class Ast_SelectStmt;
-class Ast_OptValList;
+class Ast_ValList;
 class Ast_IntervalExp;
 class Ast_CaseList;
 
 class Ast_Expr : public Ast_Base
 {
 public:
-    const static int NAME = 0;
-    const static int NAME2 = 1;
-    const static int USERVAR = 2;
-    const static int STRING = 3;
-    const static int INTNUM = 4;
-    const static int APPROXNUM = 5;
-    const static int BOOL = 6;
+    enum ast_expr_type {
+        EXPR_NAME = 0,
+        EXPR_NAME2 = 1,
+        EXPR_USERVAR = 2,
+        EXPR_STRING = 3,
+        EXPR_INTNUM = 4,
+        EXPR_APPROXNUM = 5,
+        EXPR_BOOL = 6,
 
-    const static int ADD = 10;
-    const static int MINUS = 11;
-    const static int MUL = 12;
-    const static int DIV = 13;
-    const static int MOD = 14;
-    const static int NEG = 15;
-    const static int AND = 16;
-    const static int OR = 17;
-    const static int XOR = 18;
-    const static int BITOR = 19;
-    const static int BITAND = 20;
-    const static int BITXOR = 21;
-    const static int LEFT_SHIFT = 22;
-    const static int RIGHT_SHIFT = 23;
-    const static int NOT = 24;
+        EXPR_ADD = 10,
+        EXPR_MINUS = 11,
+        EXPR_MUL = 12,
+        EXPR_DIV = 13,
+        EXPR_MOD = 14,
+        EXPR_NEG = 15,
+        EXPR_AND = 16,
+        EXPR_OR = 17,
+        EXPR_XOR = 18,
+        EXPR_BITOR = 19,
+        EXPR_BITAND = 20,
+        EXPR_BITXOR = 21,
+        EXPR_LEFT_SHIFT = 22,
+        EXPR_RIGHT_SHIFT = 23,
+        EXPR_NOT = 24,
 
-    const static int CMP_BASE = 30;
+        EXPR_CMP_BASE = 30,
 
-    const static int IS_NULL = 200;
-    const static int IS_NOT_NULL = 201;
-    const static int IS_BOOL = 202;
-    const static int IS_NOT_BOOL = 203;
-    const static int ASSIGN = 204;
+        EXPR_IS_NULL = 200,
+        EXPR_IS_NOT_NULL = 201,
+        EXPR_IS_BOOL = 202,
+        EXPR_IS_NOT_BOOL = 203,
+        EXPR_ASSIGN = 204,
 
-    const static int BETWEEN = 300;
+        EXPR_BETWEEN = 300,
+        
+        EXPR_IS_IN = 400,
+        EXPR_IS_NOT_IN = 401,
+        EXPR_EXISTS = 402,
+        EXPR_NOT_EXISTS = 403,
+
+        EXPR_CALL = 500,
+
+        EXPR_COUNTALL = 600,
+        EXPR_COUNT = 601,
+
+        EXPR_SUBSTR = 700,
+        EXPR_SUBSTR_FROM = 701,
+        EXPR_SUBSTR_FROM_FOR = 702,
+        EXPR_TRIM = 703,
+
+        EXPR_TRIM_FROM = 710,
+        EXPR_TRIM_FROM_LEADING = 711,
+        EXPR_TRIM_FROM_TRAILING = 712,
+        EXPR_TRIM_FROM_BOTH = 713,
+
+        EXPR_DATE_ADD = 800,
+        EXPR_DATE_SUB = 801,
+
+        EXPR_CASE = 900,
+        EXPR_CASE2 = 901,
+        EXPR_CASE3 = 902,
+        EXPR_CASE4 = 903,
+
+        EXPR_LIKE = 1000,
+        EXPR_NOT_LIKE = 1001,
+
+        EXPR_REGEXP = 1100,
+        EXPR_NOT_REGEXP = 1101,
+
+        EXPR_CURRENT_TIMESTAMP = 1200,
+        EXPR_CURRENT_DATE = 1201,
+        EXPR_CURRENT_TIME = 1202,
+
+        EXPR_BINARY = 1300
+    };
+
+public:
+    explicit Ast_Expr(const char *strval, int type);
+    explicit Ast_Expr(const char *strval1, const char *strval2, int type);
+    explicit Ast_Expr(int intval, int type);
+    explicit Ast_Expr(double floatval, int type);
+    explicit Ast_Expr(int type);
+
+    explicit Ast_Expr(Ast_Expr *expr, int type);
+    explicit Ast_Expr(Ast_Expr *expr1, Ast_Expr *expr2, int type);
+    explicit Ast_Expr(Ast_Expr *expr1, Ast_Expr *expr2, Ast_Expr *expr3, int type);
+
+    explicit Ast_Expr(Ast_ValList *val_list, int type);
+    explicit Ast_Expr(Ast_Expr *expr, int boolval, int type);
+    explicit Ast_Expr(const char *strval, Ast_Expr *expr, int type);
+    explicit Ast_Expr(Ast_Expr *expr, Ast_ValList *val_list, int type);
+
+    explicit Ast_Expr(Ast_SelectStmt *stmt, int type);
+    explicit Ast_Expr(Ast_Expr *expr, Ast_SelectStmt *stmt, int type);
+
+    explicit Ast_Expr(const char *strval, Ast_ValList *val_list, int type);
+    explicit Ast_Expr(Ast_Expr *expr, Ast_IntervalExp *interval_expr, int type);
+    explicit Ast_Expr(Ast_CaseList *case_list, int type);
+    explicit Ast_Expr(Ast_Expr *expr, Ast_CaseList *case_list, int type);
+    explicit Ast_Expr(Ast_Expr *expr1, Ast_Expr *expr2, Ast_CaseList *case_list, int type);
+
+    virtual ~Ast_Expr();
     
-    const static int IS_IN = 400;
-    const static int IS_NOT_IN = 401;
-    const static int EXISTS = 402;
-    const static int NOT_EXISTS = 403;
-
-    const static int CALL = 500;
-
-    const static int COUNTALL = 600;
-    const static int COUNT = 601;
-
-    const static int SUBSTR = 700;
-    const static int SUBSTR_FROM = 701;
-    const static int SUBSTR_FROM_FOR = 702;
-    const static int TRIM = 703;
-    const static int TRIM_FROM_LEADING = 704;
-    const static int TRIM_FROM_TRAILING = 705;
-    const static int TRIM_FROM_BOTH = 706;
-
-    const static int DATE_ADD = 800;
-    const static int DATE_SUB = 801;
-
-    const static int CASE = 900;
-    const static int CASE2 = 901;
-    const static int CASE3 = 902;
-    const static int CASE4 = 903;
-
-    const static int LIKE = 1000;
-    const static int NOT_LIKE = 1001;
-
-    const static int REGEXP = 1100;
-    const static int NOT_REGEXP = 1101;
-
-    const static int CURRENT_TIMESTAMP = 1200;
-    const static int CURRENT_DATE = 1201;
-    const static int CURRENT_TIME = 1202;
-
-    const static int BINARY = 1300;
-
 public:
-    Ast_Expr(const char *strval, int type);
-    Ast_Expr(const char *strval1, const char *strval2, int type);
-    Ast_Expr(int intval, int type);
-    Ast_Expr(double floatval, int type);
-    Ast_Expr(int type);
-
-    Ast_Expr(Ast_Expr *expr, int type);
-    Ast_Expr(Ast_Expr *expr1, Ast_Expr *expr2, int type);
-    Ast_Expr(Ast_Expr *expr1, Ast_Expr *expr2, Ast_Expr *expr3, int type);
-
-    Ast_Expr(Ast_ValList *val_list);
-    Ast_Expr(Ast_Expr *expr, int boolval, int type);
-    Ast_Expr(const char *strval, Ast_Expr *expr, int type);
-    Ast_Expr(Ast_Expr *expr, Ast_ValList *val_list, int type);
-
-    Ast_Expr(Ast_SelectStmt *stmt, int type);
-    Ast_Expr(Ast_Expr *expr, Ast_SelectStmt *stmt, int type);
-
-    Ast_Expr(const char *strval, Ast_OptValList *opt_val_list, int type);
-    Ast_Expr(Ast_Expr *expr, Ast_ValList *val_list, int type);
-    Ast_Expr(Ast_Expr *expr, Ast_IntervalExp *interval_expr, int type);
-    Ast_Expr(Ast_CaseList *case_list, int type);
-    Ast_Expr(Ast_Expr *expr, Ast_CaseList *case_list, int type);
-    Ast_Expr(Ast_Expr *expr1, Ast_Expr *expr2, Ast_CaseList *case_list, int type);
-
-public:
-    void Eval();
+    virtual void eval() const;
+    virtual void illustrate() const;
 
 private:
     int type;
@@ -130,7 +135,6 @@ private:
 
     const Ast_ValList *val_list;
     const Ast_SelectStmt *select_stmt;
-    const Ast_OptValList *opt_val_list;
     const Ast_IntervalExp *interval_expr;
     const Ast_CaseList *case_list;
 };

@@ -13,11 +13,11 @@ class Ast_SelectStmt;
 
 class Ast_ReplaceStmt : public Ast_Base {
 public:
-    Ast_ReplaceStmt(uint32_t insert_opts, std::string name, Ast_OptColNames *opt_col_names,
+    explicit Ast_ReplaceStmt(uint32_t insert_opts, std::string name, Ast_OptColNames *opt_col_names,
         Ast_InsertValList *insert_vals_list, Ast_OptOnDupUpdate *opt_ondupupdate);
-    Ast_ReplaceStmt(uint32_t insert_opts, std::string name, Ast_InsertAsgnList *insert_asgn_list,
+    explicit Ast_ReplaceStmt(uint32_t insert_opts, std::string name, Ast_InsertAsgnList *insert_asgn_list,
         Ast_OptOnDupUpdate *opt_ondupupdate);
-    Ast_ReplaceStmt(uint32_t insert_opts, std::string name, Ast_OptColNames *opt_col_names,
+    explicit Ast_ReplaceStmt(uint32_t insert_opts, std::string name, Ast_OptColNames *opt_col_names,
         Ast_SelectStmt *select_stmt, Ast_OptOnDupUpdate *opt_ondupupdate);
     virtual ~Ast_ReplaceStmt();
 public:
