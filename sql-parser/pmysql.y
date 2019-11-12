@@ -873,7 +873,7 @@ opt_csc: /* nil */ { $$ = NULL; }
 
 data_type: BIT opt_length { $$ = new Ast_DataType(Ast_DataType::DATA_TYPE_BIT, $2, false, false); }
     | TINYINT opt_length opt_uz { $$ = new Ast_DataType(Ast_DataType::DATA_TYPE_TINYINT, $2, $3 == 1, $3 == 2); }
-    | SAMLLINT opt_length opt_uz { $$ = new Ast_DataType(Ast_DataType::DATA_TYPE_SAMLLINT, $2, $3 == 1, $3 == 2); }
+    | SAMLLINT opt_length opt_uz { $$ = new Ast_DataType(Ast_DataType::DATA_TYPE_SMALLINT, $2, $3 == 1, $3 == 2); }
     | MEDIUMINT opt_length opt_uz { $$ = new Ast_DataType(Ast_DataType::DATA_TYPE_MEDIUMINT, $2, $3 == 1, $3 == 2); }
     | INTEGER opt_length opt_uz { $$ = new Ast_DataType(Ast_DataType::DATA_TYPE_INTEGER, $2, $3 == 1, $3 == 2); }
     | BIGINT opt_length opt_uz { $$ = new Ast_DataType(Ast_DataType::DATA_TYPE_BIGINT, $2, $3 == 1, $3 == 2); }

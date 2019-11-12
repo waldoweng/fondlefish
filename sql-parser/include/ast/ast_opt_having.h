@@ -11,7 +11,7 @@ public:
     virtual ~Ast_OptHaving();
 
 public:
-    virtual void illustrate() const;
+    virtual void illustrate();
 
 private:
     Ast_Expr *expr;

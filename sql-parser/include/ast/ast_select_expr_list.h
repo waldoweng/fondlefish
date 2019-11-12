@@ -13,7 +13,7 @@ public:
     virtual ~Ast_SelectExpr();
 
 public:
-    virtual void illustrate() const;
+    virtual void illustrate();
 
 private:
     Ast_Expr *expr;
@@ -30,7 +30,7 @@ public:
     virtual ~Ast_SelectExprList();
 
 public:
-    virtual void illustrate() const;
+    virtual void illustrate();
 
 public:
     void addSelectExpr(Ast_SelectExpr *expr);

@@ -34,7 +34,7 @@ public:
     virtual ~Ast_Stmt();
 
 public:
-    virtual void illustrate() const;
+    virtual void illustrate();
 
 private:
     int m_stmt_type;

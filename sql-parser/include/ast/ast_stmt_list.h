@@ -12,7 +12,7 @@ public:
     virtual ~Ast_StmtList();
 
 public:
-    virtual void illustrate() const;
+    virtual void illustrate();
 
 private:
     Ast_StmtList *stmt_list;

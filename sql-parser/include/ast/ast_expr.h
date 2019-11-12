@@ -116,7 +116,7 @@ public:
     
 public:
     virtual void eval() const;
-    virtual void illustrate() const;
+    virtual void illustrate();
 
 private:
     int type;

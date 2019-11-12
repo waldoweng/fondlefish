@@ -15,7 +15,7 @@ public:
     virtual ~Ast_JoinCondition();
 
 public:
-    virtual void illustrate() const;
+    virtual void illustrate();
 
 private:
     Ast_Expr *expr;

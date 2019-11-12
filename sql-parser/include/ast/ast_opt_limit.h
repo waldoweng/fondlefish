@@ -12,7 +12,7 @@ public:
     virtual ~Ast_OptLimit();
 
 public:
-    virtual void illustrate() const;
+    virtual void illustrate();
 
 private:
     Ast_Expr *expr1;

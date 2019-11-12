@@ -11,7 +11,7 @@ public:
     ~Ast_OptOrderBy();
     
 public:
-    virtual void illustrate() const;
+    virtual void illustrate();
 
 private:
     Ast_GroupByList *orderby_list;

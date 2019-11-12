@@ -18,7 +18,7 @@ public:
     virtual ~Ast_TableFactor();
 
 public:
-    virtual void illustrate() const;
+    virtual void illustrate();
 
 private:
 };
@@ -44,7 +44,7 @@ public:
     virtual ~Ast_JoinTable();
 
 public:
-    virtual void illustrate() const;
+    virtual void illustrate();
 
 private:
 };
@@ -56,7 +56,7 @@ public:
     virtual ~Ast_TableReference();
 
 public:
-    virtual void illustrate() const;
+    virtual void illustrate();
 
 private:
     Ast_TableFactor *table_factor;
@@ -69,7 +69,7 @@ public:
     virtual ~Ast_TableReferences();
 
 public:
-    virtual void illustrate() const;
+    virtual void illustrate();
 
 public:
     void addTableReference(Ast_TableReference *reference);

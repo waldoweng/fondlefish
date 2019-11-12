@@ -30,7 +30,7 @@ public:
     virtual ~Ast_InsertStmt();
 
 public:
-    virtual void illustrate() const;
+    virtual void illustrate();
 
 private:
 };

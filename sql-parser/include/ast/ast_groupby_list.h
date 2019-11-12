@@ -6,24 +6,29 @@
 
 class Ast_Expr;
 
-struct groupby_item {
-    Ast_Expr *expr;
-    bool asc;
-};
-
-class Ast_GroupByList : public Ast_Base{
+class Ast_GroupByList : public Ast_Base {
 public:
     explicit Ast_GroupByList(Ast_Expr *expr, bool asc);
     virtual ~Ast_GroupByList();
 
 public:
+    class GroupByItem {
+    public:
+        GroupByItem(Ast_Expr *expr, bool asc);
+        ~GroupByItem();
+    public:
+        Ast_Expr *expr;
+        bool asc;
+    };
+
+public:
     void addGroupBy(Ast_Expr *expr, bool asc);
 
 public:
-    virtual void illustrate() const;
+    virtual void illustrate();
 
 private:
-    std::vector<groupby_item> groupbys;
+    std::vector<GroupByItem> groupby_list;
 };
 
 #endif

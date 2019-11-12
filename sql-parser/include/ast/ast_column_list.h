@@ -11,10 +11,10 @@ public:
     virtual ~Ast_ColumnList();
 
 public:
-    virtual void illustrate() const;
+    virtual void illustrate();
 
 public:
-    void addName(std::string);
+    void addName(const char *name);
 
 private:
     std::vector<std::string> names;

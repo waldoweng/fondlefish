@@ -11,7 +11,7 @@ public:
     virtual ~Ast_OptGroupBy();
 
 public:
-    virtual void illustrate() const;
+    virtual void illustrate();
 
 private:
     Ast_GroupByList *groupby_list;

@@ -36,7 +36,7 @@ public:
     virtual ~Ast_SelectStmt();
 
 public:
-    virtual void illustrate() const;
+    virtual void illustrate();
 
 private:
 };

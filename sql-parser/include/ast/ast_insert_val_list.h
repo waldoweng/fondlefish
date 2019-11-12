@@ -11,7 +11,7 @@ public:
     virtual ~Ast_InsertVals();
 
 public:
-    virtual void illustrate() const;
+    virtual void illustrate();
 
 public:
     void addInsertVal(Ast_Expr *expr);
@@ -26,7 +26,7 @@ public:
     virtual ~Ast_InsertValList();
 
 public:
-    virtual void illustrate() const;
+    virtual void illustrate();
 
 public:
     void addInsertVals(Ast_InsertVals *insert_vals);

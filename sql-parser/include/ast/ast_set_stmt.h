@@ -13,7 +13,7 @@ public:
     virtual ~Ast_SetExpr();
 
 public:
-    virtual void illustrate() const;
+    virtual void illustrate();
 
 private:
 };
@@ -24,7 +24,7 @@ public:
     virtual ~Ast_SetList();
 
 public:
-    virtual void illustrate() const;
+    virtual void illustrate();
 
 public:
     void addSetExpr(Ast_SetExpr *set_expr);
@@ -38,7 +38,7 @@ public:
     virtual ~Ast_SetStmt();
 
 public:
-    virtual void illustrate() const;
+    virtual void illustrate();
 
 private:
 };

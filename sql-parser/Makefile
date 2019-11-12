@@ -1,7 +1,10 @@
+IDIR =../include
+ODIR=obj
+
 CC = c++ -g
 LEX = flex
 YACC = bison
-CPPFLAGS = -DYYDEBUG=1
+CFLAGS = -DYYDEBUG=1 -I$(IDIR)/ast
 
 PROGRAMES = pmysql
 
@@ -18,6 +21,9 @@ pmysql.c: pmysql.l
 	${LEX} -o $*.c $<
 
 pmysql.o: pmysql.c pmysql.tab.h
+
+%.o: %.cc
+	$(CC) -c -o $@ $< $(CFLAGS)
 
 .SUFFIXES: .pgm .l .y .c .cc
 

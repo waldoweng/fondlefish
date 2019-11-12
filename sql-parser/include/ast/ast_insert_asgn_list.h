@@ -13,7 +13,7 @@ public:
     virtual ~Ast_InsertAsgnList();
 
 public:
-    virtual void illustrate() const;
+    virtual void illustrate();
 
 public:
     void addInsertAsgn(std::string name, Ast_Expr *expr);

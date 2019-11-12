@@ -13,7 +13,7 @@ public:
     virtual ~Ast_TableSubquery();
 
 public:
-    virtual void illustrate() const;
+    virtual void illustrate();
 
 private:
 };

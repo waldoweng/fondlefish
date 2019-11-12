@@ -1,4 +1,11 @@
-#include "include/ast/ast_stmt.h"
+#include "ast_stmt.h"
+#include "ast_select_stmt.h"
+#include "ast_update_stmt.h"
+#include "ast_delete_stmt.h"
+#include "ast_insert_stmt.h"
+#include "ast_replace_stmt.h"
+#include "ast_create_database_stmt.h"
+#include "ast_create_table_stmt.h"
 
 Ast_Stmt::Ast_Stmt(Ast_SelectStmt *stmt) {
     this->m_stmt.select_stmt = stmt;
@@ -20,9 +27,9 @@ Ast_Stmt::Ast_Stmt(Ast_InsertStmt *stmt) {
     this->m_stmt_type = Ast_Stmt::INSERT_STMT;
 }
 
-Ast_Stmt::Ast_Stmt(Ast_CreateStmt *stmt) {
-    this->m_stmt.create_stmt = stmt;
-    this->m_stmt_type = Ast_Stmt::CREATE_STMT;
+Ast_Stmt::Ast_Stmt(Ast_CreateTableStmt *stmt) {
+    this->m_stmt.create_table_stmt = stmt;
+    this->m_stmt_type = Ast_Stmt::CREATE_TABLE_STMT;
 }
 
 Ast_Stmt::~Ast_Stmt() {
@@ -40,13 +47,13 @@ Ast_Stmt::~Ast_Stmt() {
         case Ast_Stmt::INSERT_STMT:
             delete this->m_stmt.insert_stmt;
             break;
-        case Ast_Stmt::CREATE_STMT:
-            delete this->m_stmt.create_stmt;
+        case Ast_Stmt::CREATE_TABLE_STMT:
+            delete this->m_stmt.create_table_stmt;
             break;
         default:
             break;
     }
 }
 
-void Ast_Stmt::illustrate() const {
+void Ast_Stmt::illustrate() {
 }

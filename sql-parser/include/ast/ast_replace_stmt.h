@@ -21,7 +21,7 @@ public:
         Ast_SelectStmt *select_stmt, Ast_OptOnDupUpdate *opt_ondupupdate);
     virtual ~Ast_ReplaceStmt();
 public:
-    virtual void illustrate() const;
+    virtual void illustrate();
 private:
 
 };

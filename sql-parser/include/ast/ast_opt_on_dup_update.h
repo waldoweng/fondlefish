@@ -11,7 +11,7 @@ public:
     virtual ~Ast_OptOnDupUpdate();
 
 public:
-    virtual void illustrate() const;
+    virtual void illustrate();
 
 private:
     Ast_InsertAsgnList *insert_asgn_list;

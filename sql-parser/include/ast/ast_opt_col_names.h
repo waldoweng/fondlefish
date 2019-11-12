@@ -11,7 +11,7 @@ public:
     virtual ~Ast_OptColNames();
 
 public:
-    virtual void illustrate() const;
+    virtual void illustrate();
 
 private:
     Ast_ColumnList *column_list;

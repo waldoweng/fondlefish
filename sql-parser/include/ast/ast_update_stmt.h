@@ -29,7 +29,7 @@ public:
     virtual ~Ast_UpdateAsgnList();
 
 public:
-    virtual void illustrate() const;
+    virtual void illustrate();
 
 public:
     void addUpdateAsgn(std::string name, Ast_Expr *expr);
@@ -53,7 +53,7 @@ public:
     virtual ~Ast_UpdateStmt();
 
 public:
-    virtual void illustrate() const;
+    virtual void illustrate();
 
 public:
 private:

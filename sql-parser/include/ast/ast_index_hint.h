@@ -7,11 +7,11 @@
 
 class Ast_IndexList : public Ast_Base {
 public:
-    explicit Ast_IndexList(std::string name);
+    explicit Ast_IndexList(const char *name);
     virtual ~Ast_IndexList();
 
 public:
-    virtual void illustrate() const;
+    virtual void illustrate();
 
 public:
     void addName(const char *str);
@@ -26,7 +26,7 @@ public:
     virtual ~Ast_IndexHint();
 
 public:
-    virtual void illustrate() const;
+    virtual void illustrate();
 
 private:
     Ast_IndexList *index_list;

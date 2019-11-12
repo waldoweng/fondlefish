@@ -7,11 +7,11 @@
 
 class Ast_DeleteList : public Ast_Base {
 public:
-    explicit Ast_DeleteList(std::string name);
+    explicit Ast_DeleteList(const char *name);
     virtual ~Ast_DeleteList();
 
 public:
-    virtual void illustrate() const;
+    virtual void illustrate();
 
 public:
     void addName(const char *name);

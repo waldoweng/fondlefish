@@ -24,7 +24,7 @@ public:
     virtual ~Ast_IntervalExp();
 
 public:
-    virtual void illustrate() const;
+    virtual void illustrate();
 
 private:
     int m_type;

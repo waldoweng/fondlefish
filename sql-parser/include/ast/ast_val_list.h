@@ -12,7 +12,7 @@ public:
     virtual ~Ast_ValList();
 
 public:
-    virtual void illustrate() const;
+    virtual void illustrate();
 
 private:
 };
