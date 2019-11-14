@@ -16,6 +16,7 @@ public:
     virtual void illustrate();
 
 private:
+    Ast_SelectStmt *select_stmt;
 };
 
 #endif

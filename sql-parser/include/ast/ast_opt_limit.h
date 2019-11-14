@@ -7,16 +7,16 @@ class Ast_Expr;
 
 class Ast_OptLimit : public Ast_Base{
 public:
-    explicit Ast_OptLimit(Ast_Expr *expr);
-    explicit Ast_OptLimit(Ast_Expr *expr1, Ast_Expr *expr2);
+    explicit Ast_OptLimit(Ast_Expr *limit);
+    explicit Ast_OptLimit(Ast_Expr *offset, Ast_Expr *limit);
     virtual ~Ast_OptLimit();
 
 public:
     virtual void illustrate();
 
 private:
-    Ast_Expr *expr1;
-    Ast_Expr *expr2;
+    Ast_Expr *offset;
+    Ast_Expr *limit;
 };
 
 #endif

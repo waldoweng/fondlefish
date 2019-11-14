@@ -14,7 +14,7 @@ public:
     virtual void illustrate();
 
 public:
-    void addName(const char *str);
+    void addName(const char *name);
 
 private:
     std::vector<std::string> names;
@@ -29,6 +29,8 @@ public:
     virtual void illustrate();
 
 private:
+    bool use;
+    bool for_join;
     Ast_IndexList *index_list;
 };
 

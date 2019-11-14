@@ -393,80 +393,80 @@ stmt_list: stmt ';'
     ;
 
     /**** expressions ****/
-expr: NAME          { $$ = new Ast_Expr($1, Ast_Expr::EXPR_NAME); }
-    | NAME '.' NAME { $$ = new Ast_Expr($1, $3, Ast_Expr::EXPR_NAME2); }
-    | USERVAR       { $$ = new Ast_Expr($1, Ast_Expr::EXPR_USERVAR); }
-    | STRING        { $$ = new Ast_Expr($1, Ast_Expr::EXPR_STRING); }
-    | INTNUM        { $$ = new Ast_Expr($1, Ast_Expr::EXPR_INTNUM); }
-    | APPROXNUM     { $$ = new Ast_Expr($1, Ast_Expr::EXPR_APPROXNUM); }
-    | BOOL          { $$ = new Ast_Expr($1, Ast_Expr::EXPR_BOOL); }
+expr: NAME          { $$ = new Ast_LiteralExpr(Ast_LiteralExpr::LiteralTypeName, "", $1); }
+    | NAME '.' NAME { $$ = new Ast_LiteralExpr(Ast_LiteralExpr::LiteralTypeDetailName, $1, $3); }
+    | USERVAR       { $$ = new Ast_LiteralExpr(Ast_LiteralExpr::LiteralTypeUserVar, "", $1); }
+    | STRING        { $$ = new Ast_LiteralExpr(Ast_LiteralExpr::LiteralTypeString, "", $1); }
+    | INTNUM        { $$ = new Ast_LiteralExpr($1); }
+    | APPROXNUM     { $$ = new Ast_LiteralExpr($1); }
+    | BOOL          { $$ = new Ast_LiteralExpr($1); }
     ;
 
-expr: expr '+' expr { $$ = new Ast_Expr($1, $3, Ast_Expr::EXPR_ADD); }
-    | expr '-' expr { $$ = new Ast_Expr($1, $3, Ast_Expr::EXPR_MINUS); }
-    | expr '*' expr { $$ = new Ast_Expr($1, $3, Ast_Expr::EXPR_MUL); }
-    | expr "/" expr { $$ = new Ast_Expr($1, $3, Ast_Expr::EXPR_DIV); }
-    | expr "%" expr { $$ = new Ast_Expr($1, $3, Ast_Expr::EXPR_MOD); }
-    | expr MOD expr { $$ = new Ast_Expr($1, $3, Ast_Expr::EXPR_MOD); }
-    | '-' expr %prec UMINUS     { $$ = new Ast_Expr($2, Ast_Expr::EXPR_NEG); }
-    | expr ANDOP expr   { $$ = new Ast_Expr($1, $3, Ast_Expr::EXPR_AND); }
-    | expr OR expr  { $$ = new Ast_Expr($1, $3, Ast_Expr::EXPR_OR); }
-    | expr XOR expr { $$ = new Ast_Expr($1, $3, Ast_Expr::EXPR_XOR); }
-    | expr '|' expr { $$ = new Ast_Expr($1, $3, Ast_Expr::EXPR_BITOR); }
-    | expr '&' expr { $$ = new Ast_Expr($1, $3, Ast_Expr::EXPR_BITAND); }
-    | expr '^' expr { $$ = new Ast_Expr($1, $3, Ast_Expr::EXPR_BITXOR); }
-    | expr SHIFT expr   { $$ = new Ast_Expr($1, $3, $2==1 ? Ast_Expr::EXPR_LEFT_SHIFT : Ast_Expr::EXPR_RIGHT_SHIFT); }
-    | NOT expr      { $$ = new Ast_Expr($2, Ast_Expr::EXPR_NOT); }
-    | '!' expr      { $$ = new Ast_Expr($2, Ast_Expr::EXPR_NOT); }
-    | expr COMPARISON expr { $$ = new Ast_Expr($1, $3, Ast_Expr::EXPR_CMP_BASE + $2); }
+expr: expr '+' expr { $$ = new Ast_ArithmeticExpr(Ast_ArithmeticExpr::CompoundTypeAdd, $1, $3); }
+    | expr '-' expr { $$ = new Ast_ArithmeticExpr(Ast_ArithmeticExpr::CompoundTypeSub, $1, $3); }
+    | expr '*' expr { $$ = new Ast_ArithmeticExpr(Ast_ArithmeticExpr::CompoundTypeMul, $1, $3); }
+    | expr "/" expr { $$ = new Ast_ArithmeticExpr(Ast_ArithmeticExpr::CompoundTypeDiv, $1, $3); }
+    | expr "%" expr { $$ = new Ast_ArithmeticExpr(Ast_ArithmeticExpr::CompoundTypeMod, $1, $3); }
+    | expr MOD expr { $$ = new Ast_ArithmeticExpr(Ast_ArithmeticExpr::CompoundTypeMod, $1, $3); }
+    | '-' expr %prec UMINUS     { $$ = new Ast_ArithmeticExpr(Ast_ArithmeticExpr::CompoundTypeNeg, $2); }
+    | expr ANDOP expr   { $$ = new Ast_ArithmeticExpr(Ast_ArithmeticExpr::CompoundTypeAnd, $1, $3); }
+    | expr OR expr  { $$ = new Ast_ArithmeticExpr(Ast_ArithmeticExpr::CompoundTypeOr, $1, $3); }
+    | expr XOR expr { $$ = new Ast_ArithmeticExpr(Ast_ArithmeticExpr::CompoundTypeXor, $1, $3); }
+    | expr '|' expr { $$ = new Ast_ArithmeticExpr(Ast_ArithmeticExpr::CompoundTypeBitOr, $1, $3); }
+    | expr '&' expr { $$ = new Ast_ArithmeticExpr(Ast_ArithmeticExpr::CompoundTypeBitAnd, $1, $3); }
+    | expr '^' expr { $$ = new Ast_ArithmeticExpr(Ast_ArithmeticExpr::CompoundTypeMod, $1, $3); }
+    | expr SHIFT expr   { $$ = new Ast_ArithmeticExpr($2==1 ? Ast_ArithmeticExpr::CompoundTypeLeftShift : Ast_ArithmeticExpr::CompoundTypeRightShift, $1, $3); }
+    | NOT expr      { $$ = new Ast_ArithmeticExpr(Ast_ArithmeticExpr::CompoundTypeNot, $2); }
+    | '!' expr      { $$ = new Ast_ArithmeticExpr(Ast_ArithmeticExpr::CompoundTypeNot, $2); }
+    | expr COMPARISON expr { $$ = new Ast_ArithmeticExpr(static_cast<enum Ast_ArithmeticExpr::arithmetic_type>(Ast_ArithmeticExpr::CompoundTypeCompareEQ + $2), $1, $3); }
 
         /* recursive selects and comparisons thereto */
-    | expr COMPARISON '(' select_stmt ')'  { $$ = new Ast_Expr($1, $4, Ast_Expr::EXPR_CMP_BASE + $2 + 1); }
-    | expr COMPARISON ANY '(' select_stmt ')' { $$ = new Ast_Expr($1, $5, Ast_Expr::EXPR_CMP_BASE + $2 + 2); }
-    | expr COMPARISON SOME '(' select_stmt ')' { $$ = new Ast_Expr($1, $5, Ast_Expr::EXPR_CMP_BASE + $2 + 3); }
-    | expr COMPARISON ALL '(' select_stmt ')' { $$ = new Ast_Expr($1, $5, Ast_Expr::EXPR_CMP_BASE + $2 + 4); }
+    | expr COMPARISON '(' select_stmt ')'  { $$ = new Ast_CompareExpr(static_cast<enum Ast_CompareExpr::compare_type>(Ast_CompareExpr::CompoundTypeCompareEQ + $2), $1, $4); }
+    | expr COMPARISON ANY '(' select_stmt ')' { $$ = new Ast_CompareExpr(static_cast<enum Ast_CompareExpr::compare_type>(Ast_CompareExpr::CompoundTypeCompareEQ + $2), Ast_CompareExpr::CompareSubTypeAny, $1, $5); }
+    | expr COMPARISON SOME '(' select_stmt ')' { $$ = new Ast_CompareExpr(static_cast<enum Ast_CompareExpr::compare_type>(Ast_CompareExpr::CompoundTypeCompareEQ + $2), Ast_CompareExpr::CompareSubTypeSome, $1, $5); }
+    | expr COMPARISON ALL '(' select_stmt ')' { $$ = new Ast_CompareExpr(static_cast<enum Ast_CompareExpr::compare_type>(Ast_CompareExpr::CompoundTypeCompareEQ + $2), Ast_CompareExpr::CompareSubTypeAll, $1, $5); }
     ;
 
-expr: expr IS NULLX     { $$ = new Ast_Expr($1, Ast_Expr::EXPR_IS_NULL); }
-    | expr IS NOT NULLX { $$ = new Ast_Expr($1, Ast_Expr::EXPR_IS_NOT_NULL); }
-    | expr IS BOOL      { $$ = new Ast_Expr($1, $3, Ast_Expr::EXPR_IS_BOOL); }
-    | expr IS NOT BOOL  { $$ = new Ast_Expr($1, $4, Ast_Expr::EXPR_IS_NOT_BOOL); }
+expr: expr IS NULLX     { $$ = new Ast_IsExpr(Ast_IsExpr::CompoundTypeIsNull, $1); }
+    | expr IS NOT NULLX { $$ = new Ast_IsExpr(Ast_IsExpr::CompoundTypeIsNotNull, $1); }
+    | expr IS BOOL      { $$ = new Ast_IsExpr(Ast_IsExpr::CompoundTypeIsBool, $1, $3); }
+    | expr IS NOT BOOL  { $$ = new Ast_IsExpr(Ast_IsExpr::CompoundTypeIsBool, $1, $4); }
 
-    | USERVAR ASSIGN expr   { $$ = new Ast_Expr($1, $3, Ast_Expr::EXPR_ASSIGN); }
+    | USERVAR ASSIGN expr   { $$ = new Ast_AsgnExpr($1, $3); }
     ;
 
-expr: expr BETWEEN expr AND expr %prec BETWEEN { $$ = new Ast_Expr($1, $3, $5, Ast_Expr::EXPR_BETWEEN); }
+expr: expr BETWEEN expr AND expr %prec BETWEEN { $$ = new Ast_BetweenExpr($1, $3, $5); }
     ;
 
 val_list: expr { $$ = new Ast_ValList($1); }
-    | expr ',' val_list { $$ = new Ast_ValList($1, $3); }
+    | expr ',' val_list { $3->addExpr($1); $$ = $3; }
     ;
 
 opt_val_list: /* nil */ { $$ = 0; }
     | val_list { $$ = $1; }
     ;
 
-expr: expr IN '(' val_list ')'          { $$ = new Ast_Expr($1, $4, Ast_Expr::EXPR_IS_IN); }
-    | expr NOT IN '(' val_list ')'      { $$ = new Ast_Expr($1, $5, Ast_Expr::EXPR_IS_NOT_IN); }
-    | expr IN '(' select_stmt ')'       { $$ = new Ast_Expr($1, $4, Ast_Expr::EXPR_IS_IN); }
-    | expr NOT IN '(' select_stmt ')'   { $$ = new Ast_Expr($1, $5, Ast_Expr::EXPR_IS_NOT_IN); }
-    | EXISTS '(' select_stmt ')'        { $$ = new Ast_Expr($3, $1 ? Ast_Expr::EXPR_EXISTS : Ast_Expr::EXPR_NOT_EXISTS); }
+expr: expr IN '(' val_list ')'          { $$ = new Ast_InExpr(Ast_InExpr::CompoundTypeIn, $1, $4); }
+    | expr NOT IN '(' val_list ')'      { $$ = new Ast_InExpr(Ast_InExpr::CompoundTypeNotIn, $1, $5); }
+    | expr IN '(' select_stmt ')'       { $$ = new Ast_InExpr(Ast_InExpr::CompoundTypeIn, $1, $4); }
+    | expr NOT IN '(' select_stmt ')'   { $$ = new Ast_InExpr(Ast_InExpr::CompoundTypeNotIn, $1, $5); }
+    | EXISTS '(' select_stmt ')'        { $$ = new Ast_ExistExpr($1 ? Ast_ExistExpr::CompoundTypeExists : Ast_ExistExpr::CompoundTypeNotExists, $3); }
     ;
 
     /* regular functions */
-expr: NAME '(' opt_val_list ')'     { $$ = new Ast_Expr($1, $3, Ast_Expr::EXPR_CALL); }
+expr: NAME '(' opt_val_list ')'     { $$ = new Ast_RegularFunctionExpr($1, $3); }
     ;
 
     /* functions with special syntax */
-expr: FCOUNT '(' '*' ')'    { $$ = new Ast_Expr(Ast_Expr::EXPR_COUNTALL); }
-    | FCOUNT '(' expr ')'   { $$ = new Ast_Expr($3, Ast_Expr::EXPR_COUNT); }
+expr: FCOUNT '(' '*' ')'    { $$ = new Ast_CountFuncExpr(nullptr); }
+    | FCOUNT '(' expr ')'   { $$ = new Ast_CountFuncExpr($3); }
     ;
 
-expr: FSUBSTRING '(' val_list ')'               { $$ = new Ast_Expr($3, Ast_Expr::EXPR_SUBSTR); }
-    | FSUBSTRING '(' expr FROM expr ')'         { $$ = new Ast_Expr($3, $5, Ast_Expr::EXPR_SUBSTR_FROM); }
-    | FSUBSTRING '(' expr FROM expr FOR expr ')'    { $$ = new Ast_Expr($3, $5, $7, Ast_Expr::EXPR_SUBSTR_FROM_FOR); }
-    | FTRIM '(' val_list ')'                    { $$ = new Ast_Expr($3, Ast_Expr::EXPR_TRIM); }
-    | FTRIM '(' trim_ltb expr FROM val_list ')' { $$ = new Ast_Expr($4, $6, Ast_Expr::EXPR_TRIM_FROM + $3); }
+expr: FSUBSTRING '(' val_list ')'               { $$ = new Ast_SubtringFuncExpr($3); }
+    | FSUBSTRING '(' expr FROM expr ')'         { $$ = new Ast_SubtringFuncExpr($3, $5, nullptr); }
+    | FSUBSTRING '(' expr FROM expr FOR expr ')'    { $$ = new Ast_SubtringFuncExpr($3, $5, $7); }
+    | FTRIM '(' val_list ')'                    { $$ = new Ast_TrimFuncExpr($3); }
+    | FTRIM '(' trim_ltb expr FROM val_list ')' { $$ = new Ast_TrimFuncExpr(static_cast<Ast_TrimFuncExpr::trim_ltb>($3), $4, $6); }
     ;
 
 trim_ltb: LEADING   { $$ = 1; }
@@ -474,55 +474,55 @@ trim_ltb: LEADING   { $$ = 1; }
     | BOTH          { $$ = 3; }
     ;
 
-expr: FDATE_ADD '(' expr ',' interval_exp ')'   { $$ = new Ast_Expr($3, $5, Ast_Expr::EXPR_DATE_ADD); }
-    | FDATE_SUB '(' expr ',' interval_exp ')'   { $$ = new Ast_Expr($3, $5, Ast_Expr::EXPR_DATE_SUB); }
+expr: FDATE_ADD '(' expr ',' interval_exp ')'   { $$ = new Ast_DateFuncExpr(Ast_DateFuncExpr::CompoundTypeFuncDateAdd, $3, $5); }
+    | FDATE_SUB '(' expr ',' interval_exp ')'   { $$ = new Ast_DateFuncExpr(Ast_DateFuncExpr::CompoundTypeFuncDateSub, $3, $5); }
     ;
 
-interval_exp: INTERVAL expr DAY_HOUR    { $$ = new Ast_IntervalExp($2, 1); }
-    | INTERVAL expr DAY_MICROSECOND     { $$ = new Ast_IntervalExp($2, 2); }
-    | INTERVAL expr DAY_MINUTE          { $$ = new Ast_IntervalExp($2, 3); }
-    | INTERVAL expr DAY_SECOND          { $$ = new Ast_IntervalExp($2, 4); }
-    | INTERVAL expr YEAR_MONTH          { $$ = new Ast_IntervalExp($2, 5); }
-    | INTERVAL expr YEAR                { $$ = new Ast_IntervalExp($2, 6); }
-    | INTERVAL expr HOUR_MICROSECOND    { $$ = new Ast_IntervalExp($2, 7); }
-    | INTERVAL expr HOUR_MINUTE         { $$ = new Ast_IntervalExp($2, 8); }
-    | INTERVAL expr HOUR_SECOND         { $$ = new Ast_IntervalExp($2, 9); }
+interval_exp: INTERVAL expr DAY_HOUR    { $$ = new Ast_IntervalExp(Ast_IntervalExp::INTERVAL_DAY_HOUR, $2); }
+    | INTERVAL expr DAY_MICROSECOND     { $$ = new Ast_IntervalExp(Ast_IntervalExp::INTERVAL_DAY_MICROSECOND, $2); }
+    | INTERVAL expr DAY_MINUTE          { $$ = new Ast_IntervalExp(Ast_IntervalExp::INTERVAL_DAY_MINUTE, $2); }
+    | INTERVAL expr DAY_SECOND          { $$ = new Ast_IntervalExp(Ast_IntervalExp::INTERVAL_DAY_SECOND, $2); }
+    | INTERVAL expr YEAR_MONTH          { $$ = new Ast_IntervalExp(Ast_IntervalExp::INTERVAL_YEAR_MONTH, $2); }
+    | INTERVAL expr YEAR                { $$ = new Ast_IntervalExp(Ast_IntervalExp::INTERVAL_YEAR, $2); }
+    | INTERVAL expr HOUR_MICROSECOND    { $$ = new Ast_IntervalExp(Ast_IntervalExp::INTERVAL_HOUR_MICROSECOND, $2); }
+    | INTERVAL expr HOUR_MINUTE         { $$ = new Ast_IntervalExp(Ast_IntervalExp::INTERVAL_HOUR_MINUTE, $2); }
+    | INTERVAL expr HOUR_SECOND         { $$ = new Ast_IntervalExp(Ast_IntervalExp::INTERVAL_HOUR_SECOND, $2); }
     ;
 
-expr: CASE expr case_list END           { $$ = new Ast_Expr($2, $3, Ast_Expr::EXPR_CASE); }
-    | CASE expr case_list ELSE expr END { $$ = new Ast_Expr($2, $5, $3, Ast_Expr::EXPR_CASE2); }
-    | CASE case_list END                { $$ = new Ast_Expr($2, Ast_Expr::EXPR_CASE3); }
-    | CASE case_list ELSE expr END      { $$ = new Ast_Expr($4, $2, Ast_Expr::EXPR_CASE4); }
+expr: CASE expr case_list END           { $$ = new Ast_CaseExpr($2, $3, nullptr); }
+    | CASE expr case_list ELSE expr END { $$ = new Ast_CaseExpr($2, $3, $5); }
+    | CASE case_list END                { $$ = new Ast_CaseExpr(nullptr, $2, nullptr); }
+    | CASE case_list ELSE expr END      { $$ = new Ast_CaseExpr(nullptr, $2, $4); }
     ;
 
 case_list: WHEN expr THEN expr { $$ = new Ast_CaseList($2, $4); }
     | case_list WHEN expr THEN expr { $1->addCase($3, $5); $$ = $1; }
     ;
 
-expr: expr LIKE expr { $$ = new Ast_Expr($1, $3, Ast_Expr::EXPR_LIKE); }
-    | expr NOT LIKE expr { $$ = new Ast_Expr($1, $4, Ast_Expr::EXPR_NOT_LIKE); }
+expr: expr LIKE expr { $$ = new Ast_LikeExpr(Ast_LikeExpr::CompoundTypeLike, $1, $3); }
+    | expr NOT LIKE expr { $$ = new Ast_LikeExpr(Ast_LikeExpr::CompoundTypeNotLike, $1, $4); }
     ;
 
-expr: expr REGEXP expr { $$ = new Ast_Expr($1, $3, Ast_Expr::EXPR_REGEXP); }
-    | expr NOT REGEXP expr { $$ = new Ast_Expr($1, $4, Ast_Expr::EXPR_NOT_REGEXP); }
+expr: expr REGEXP expr { $$ = new Ast_RegexpExpr(Ast_RegexpExpr::CompoundTypeRegexp, $1, $3); }
+    | expr NOT REGEXP expr { $$ = new Ast_RegexpExpr(Ast_RegexpExpr::CompoundTypeNotRegexp, $1, $4); }
     ;
 
-expr: CURRENT_TIMESTAMP { $$ = new Ast_Expr(Ast_Expr::EXPR_CURRENT_TIMESTAMP); }
-    | CURRENT_DATE      { $$ = new Ast_Expr(Ast_Expr::EXPR_CURRENT_DATE); }
-    | CURRENT_TIME      { $$ = new Ast_Expr(Ast_Expr::EXPR_CURRENT_TIME); }
+expr: CURRENT_TIMESTAMP { $$ = new Ast_LiteralExpr(Ast_LiteralExpr::LiteralTypeCurTs); }
+    | CURRENT_DATE      { $$ = new Ast_LiteralExpr(Ast_LiteralExpr::LiteralTypeCurDate); }
+    | CURRENT_TIME      { $$ = new Ast_LiteralExpr(Ast_LiteralExpr::LiteralTypeCurTime); }
     ;
 
-expr: BINARY expr %prec UMINUS { $$ = new Ast_Expr($2, Ast_Expr::EXPR_BINARY); }
+expr: BINARY expr %prec UMINUS { $$ = new Ast_BinaryExpr($2); }
     ;
 
     /* statements: select statement */
 stmt: select_stmt { $$ = new Ast_Stmt($1); }
     ;
 
-select_stmt: SELECT select_opts select_expr_list    { $$ = new Ast_SelectStmt($2, $3); }
+select_stmt: SELECT select_opts select_expr_list    { $$ = new Ast_SelectStmt(static_cast<Ast_SelectStmt::select_opts>($2), $3); }
     | SELECT select_opts select_expr_list FROM table_references 
         opt_where opt_groupby opt_having opt_orderby opt_limit opt_into_list 
-        {  $$ = new Ast_SelectStmt($2, $3, $5, $6, $7, $8, $9, $10, $11); }
+        {  $$ = new Ast_SelectStmt(static_cast<Ast_SelectStmt::select_opts>($2), $3, $5, $6, $7, $8, $9, $10, $11); }
     ;
 
 opt_where: /* nil */ { $$ = NULL; }
@@ -581,7 +581,7 @@ select_opts: /* nil */  { $$ = 0; }
 
 select_expr_list: select_expr { $$ = new Ast_SelectExprList($1); }
     | select_expr_list ',' select_expr { $1->addSelectExpr($3); $$ = $1; }
-    | '*' { $$ = new Ast_SelectExprList(Ast_SelectExprList::SELECTALL); }
+    | '*' { $$ = new Ast_SelectExprList(); }
     ;
 
 select_expr: expr opt_as_alias { $$ = new Ast_SelectExpr($1, $2); }
@@ -610,11 +610,11 @@ opt_as: AS
     | /* nil */
     ;
 
-join_table: table_reference opt_inner_cross JOIN table_factor opt_join_condition { $$ = new Ast_JoinTable($1, $2, $4, $5); }
-    | table_reference STRAIGHT_JOIN table_factor { $$ = new Ast_JoinTable($1, $3); }
-    | table_reference STRAIGHT_JOIN table_factor ON expr { $$ = new Ast_JoinTable($1, Ast_JoinTable::JOIN_TABLE_INNER, $3, $5); }
-    | table_reference left_or_right opt_outer JOIN table_factor join_condition { $$ = new Ast_JoinTable($1, $2, $5, $6); }
-    | table_reference NATURAL opt_left_or_right_outer JOIN table_factor { $$ = new Ast_JoinTable($1, $3, $5); }
+join_table: table_reference opt_inner_cross JOIN table_factor opt_join_condition { $$ = new Ast_JoinTable($1, static_cast<enum Ast_JoinTable::join_type>($2), $4, $5); }
+    | table_reference STRAIGHT_JOIN table_factor { $$ = new Ast_JoinTable($1, Ast_JoinTable::JOIN_TABLE_STRAIGHT_JOIN, $3); }
+    | table_reference STRAIGHT_JOIN table_factor ON expr { $$ = new Ast_JoinTable($1, Ast_JoinTable::JOIN_TABLE_STRAIGHT_JOIN, $3, $5); }
+    | table_reference left_or_right opt_outer JOIN table_factor join_condition { $$ = new Ast_JoinTable($1, static_cast<enum Ast_JoinTable::join_type>($2), $5, $6); }
+    | table_reference NATURAL opt_left_or_right_outer JOIN table_factor { $$ = new Ast_JoinTable($1, static_cast<enum Ast_JoinTable::join_type>($3), $5); }
     ;
 
 opt_inner_cross: /* nil */ { $$ = Ast_JoinTable::JOIN_TABLE_INNER; }
@@ -663,7 +663,7 @@ table_subquery: '(' select_stmt ')' { $$ = new Ast_TableSubquery($2); }
 stmt: delete_stmt { $$ = new Ast_Stmt($1); }
     ;
 
-delete_stmt: DELETE delete_opts FROM NAME opt_where opt_orderby opt_limit { $$ = new Ast_DeleteStmt($2, $4, $5, $6, $7); }
+delete_stmt: DELETE delete_opts FROM NAME opt_where opt_orderby opt_limit { $$ = new Ast_DeleteStmt(static_cast<enum Ast_DeleteStmt::delete_opts>($2), $4, $5, $6, $7); }
     ;
 
 delete_opts: delete_opts LOW_PRIORITY { $$ = $1 + 01; }
@@ -672,7 +672,7 @@ delete_opts: delete_opts LOW_PRIORITY { $$ = $1 + 01; }
     | /* nil */ { $$ = 0; }
     ;
 
-delete_stmt: DELETE delete_opts delete_list FROM table_references opt_where { $$ = new Ast_DeleteStmt($2, $3, $5, $6); }
+delete_stmt: DELETE delete_opts delete_list FROM table_references opt_where { $$ = new Ast_DeleteStmt(static_cast<enum Ast_DeleteStmt::delete_opts>($2), $3, $5, $6); }
     ;
 
 delete_list: NAME opt_dot_star { $$ = new Ast_DeleteList($1); }
@@ -684,14 +684,14 @@ opt_dot_star: /* nil */
     ;
 
 delete_stmt: DELETE delete_opts FROM delete_list USING table_references opt_where 
-                { $$ = new Ast_DeleteStmt($2, $4, $6, $7); }
+                { $$ = new Ast_DeleteStmt(static_cast<enum Ast_DeleteStmt::delete_opts>($2), $4, $6, $7); }
     ;
 
 stmt: insert_stmt { $$ = new Ast_Stmt($1); }
     ;
 
 insert_stmt: INSERT insert_opts opt_into NAME opt_col_names VALUES insert_vals_list opt_ondupupdate 
-                { $$ = new Ast_InsertStmt($2, $4, $5, $7, $8); }
+                { $$ = new Ast_InsertStmt(static_cast<enum Ast_InsertStmt::insert_opts>($2), $4, $5, $7, $8); }
     ;
 
 opt_ondupupdate: /* nil */ { $$ = NULL; }
@@ -724,7 +724,7 @@ insert_vals: expr { $$ = new Ast_InsertVals($1); }
     ;
 
 insert_stmt: INSERT insert_opts opt_into NAME SET insert_asgn_list opt_ondupupdate {
-                $$ = new Ast_InsertStmt($2, $4, $6, $7); }
+                $$ = new Ast_InsertStmt(static_cast<enum Ast_InsertStmt::insert_opts>($2), $4, $6, $7); }
     ;
 
 insert_asgn_list: NAME COMPARISON expr { if($2 != 4) { yyerror("bad insert assignment to %s", $1); YYERROR; }
@@ -739,22 +739,22 @@ insert_asgn_list: NAME COMPARISON expr { if($2 != 4) { yyerror("bad insert assig
 
 
 insert_stmt: INSERT insert_opts opt_into NAME opt_col_names select_stmt opt_ondupupdate 
-                { $$ = new Ast_InsertStmt($2, $4, $5, $6, $7); }
+                { $$ = new Ast_InsertStmt(static_cast<enum Ast_InsertStmt::insert_opts>($2), $4, $5, $6, $7); }
     ;
 
 stmt: replace_stmt { $$ = new Ast_Stmt($1); }
     ;
 
 replace_stmt: REPLACE insert_opts opt_into NAME opt_col_names VALUES insert_vals_list opt_ondupupdate
-                { $$ = new Ast_ReplaceStmt($2, $4, $5, $7, $8); }
+                { $$ = new Ast_ReplaceStmt(static_cast<enum Ast_ReplaceStmt::replace_opts>($2), $4, $5, $7, $8); }
     ;
 
 replace_stmt: REPLACE insert_opts opt_into NAME SET insert_asgn_list opt_ondupupdate
-                { $$ = new Ast_ReplaceStmt($2, $4, $6, $7); }
+                { $$ = new Ast_ReplaceStmt(static_cast<enum Ast_ReplaceStmt::replace_opts>($2), $4, $6, $7); }
     ;
 
 replace_stmt: REPLACE insert_opts opt_into NAME opt_col_names select_stmt opt_ondupupdate
-                { $$ = new Ast_ReplaceStmt($2, $4, $5, $6, $7); }
+                { $$ = new Ast_ReplaceStmt(static_cast<enum Ast_ReplaceStmt::replace_opts>($2), $4, $5, $6, $7); }
     ;
 
 
@@ -762,7 +762,7 @@ stmt: update_stmt { $$ = new Ast_Stmt($1); }
     ;
 
 update_stmt: UPDATE update_opts table_references SET update_asgn_list opt_where opt_orderby opt_limit
-                { $$ = new Ast_UpdateStmt($2, $3, $5, $6, $7, $8); }
+                { $$ = new Ast_UpdateStmt(static_cast<enum Ast_UpdateStmt::update_opts>($2), $3, $5, $6, $7, $8); }
     ;
 
 update_opts: /* nil */ { $$ = 0; }
@@ -946,7 +946,7 @@ int main(int argc, char *argv[]) {
     extern FILE *yyin;
 
     if( argc > 1 && !strcmp(argv[1], "-d")) {
-        yydebug = 1;
+        //yydebug = 1;
         argc --;
         argv ++;
     }

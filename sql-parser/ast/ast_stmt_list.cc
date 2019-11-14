@@ -2,24 +2,29 @@
 #include "ast_stmt.h"
 
 Ast_StmtList::Ast_StmtList(Ast_Stmt *stmt) {
-    this->stmt = stmt;
-}
-
-Ast_StmtList::Ast_StmtList(Ast_StmtList *stmt_list, Ast_Stmt *stmt) {
-    this->stmt_list = stmt_list;
-    this->stmt = stmt;
+    this->stmt_list.push_back(stmt);
 }
 
 Ast_StmtList::~Ast_StmtList() {
-    if (this->stmt_list)
-        delete this->stmt_list;
-    if (this->stmt)
-        delete this->stmt;
+    for (std::vector<Ast_Stmt *>::iterator it = this->stmt_list.begin();
+        it != this->stmt_list.end();
+        it ++)
+    {
+        if (*it)
+            delete (*it);
+    }
+}
+
+void Ast_StmtList::addStmt(Ast_Stmt *stmt) {
+    this->stmt_list.push_back(stmt);
 }
 
 void Ast_StmtList::illustrate() {
-    if (this->stmt_list)
-        this->stmt_list->illustrate();
-    if (this->stmt)
-        this->stmt->illustrate();
+    for (std::vector<Ast_Stmt *>::iterator it = this->stmt_list.begin();
+        it != this->stmt_list.end();
+        it ++)
+    {
+        if (*it)
+            (*it)->illustrate();
+    }
 }

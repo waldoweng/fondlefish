@@ -5,48 +5,109 @@
 #include <vector>
 #include "ast_base.h"
 
+class Ast_JoinCondition;
+class Ast_Expr;
 class Ast_IndexHint;
 class Ast_TableSubquery;
+class Ast_TableReference;
+class Ast_TableReferences;
 
 class Ast_TableFactor : public Ast_Base {
 public:
-    explicit Ast_TableFactor(std::string name, std::string alias, Ast_IndexHint *index_hint);
-    explicit Ast_TableFactor(std::string tablename, std::string name, std::string alias,
+    enum factor_type {
+        FACTOR_TYPE_NORMAL      = 0,
+        FACTOR_TYPE_SUBQUERY    = 1,
+        FACTOR_TYPE_REFERENCES  = 2
+    };
+public:
+    explicit Ast_TableFactor(const char *name, const char *alias, Ast_IndexHint *index_hint);
+    explicit Ast_TableFactor(const char *database_name, const char *name, const char *alias,
         Ast_IndexHint *index_hint);
-    explicit Ast_TableFactor(Ast_TableSubquery *sub_query, std::string name);
+    explicit Ast_TableFactor(Ast_TableSubquery *subquery, const char *name);
     explicit Ast_TableFactor(Ast_TableReferences *references);
     virtual ~Ast_TableFactor();
+
+public:
+    class TableFactorNormal {
+    public:
+        explicit TableFactorNormal(const char *database_name, const char *name, 
+            const char *alias, Ast_IndexHint *index_hint);
+        ~TableFactorNormal();
+    public:
+        std::string database_name;
+        std::string name;
+        std::string alias;
+        Ast_IndexHint *index_hint;
+    };
+
+    class TableFactorSubquery {
+    public:
+        explicit TableFactorSubquery(Ast_TableSubquery *subquery, const char *name);
+        ~TableFactorSubquery();
+    public:
+        Ast_TableSubquery *subquery;
+        std::string name;
+    };
+
+    class TableFactorReferences {
+    public:
+        explicit TableFactorReferences(Ast_TableReferences *references);
+        ~TableFactorReferences();
+    public:
+        Ast_TableReferences *references;
+    };
+
+    union TableFactor {
+    public:
+        explicit TableFactor(TableFactorNormal *normal);
+        explicit TableFactor(TableFactorSubquery *subquery);
+        explicit TableFactor(TableFactorReferences *references);
+        ~TableFactor();
+    public:
+        TableFactorNormal *normal;
+        TableFactorSubquery *subquery;
+        TableFactorReferences *references;
+    };
 
 public:
     virtual void illustrate();
 
 private:
+    factor_type factor_type;
+    TableFactor factor;
 };
-
-class Ast_JoinCondition;
-class Ast_Expr;
-class Ast_TableReference;
 
 class Ast_JoinTable : public Ast_Base {
 public:
-    enum {
-        JOIN_TABLE_INNER = 0,
-        JOIN_TABLE_CROSS = 1,
-        JOIN_TABLE_LEFT_OUTER = 2,
-        JOIN_TABLE_RIGHT_OUTER = 3
+    enum join_type {
+        JOIN_TABLE_INNER            = 0,
+        JOIN_TABLE_CROSS            = 1,
+        JOIN_TABLE_LEFT_OUTER       = 2,
+        JOIN_TABLE_RIGHT_OUTER      = 3,
+        JOIN_TABLE_STRAIGHT_JOIN    = 4
     };
 
 public:
-    explicit Ast_JoinTable(Ast_TableReference *reference, uint32_t join_type, Ast_TableFactor *table_factor, Ast_JoinCondition *join_condition);
+    explicit Ast_JoinTable(Ast_TableReference *reference, join_type join_type, 
+        Ast_TableFactor *table_factor, Ast_JoinCondition *join_condition);
     explicit Ast_JoinTable(Ast_TableReference *reference, Ast_TableFactor *table_factor);
-    explicit Ast_JoinTable(Ast_TableReference *reference, uint32_t join_type, Ast_TableFactor *table_factor, Ast_Expr *expr);
-    explicit Ast_JoinTable(Ast_TableReference *reference, uint32_t join_type, Ast_TableFactor *table_factor);
+    explicit Ast_JoinTable(Ast_TableReference *reference, join_type join_type, 
+        Ast_TableFactor *table_factor, Ast_Expr *expr);
+    explicit Ast_JoinTable(Ast_TableReference *reference, join_type join_type, 
+        Ast_TableFactor *table_factor);
     virtual ~Ast_JoinTable();
 
 public:
     virtual void illustrate();
 
 private:
+    const char * joinTypeName(enum Ast_JoinTable::join_type join_type);
+
+private:
+    Ast_TableReference *reference;
+    join_type join_type;
+    Ast_TableFactor *table_factor;
+    Ast_JoinCondition *join_condition;
 };
 
 class Ast_TableReference : public Ast_Base {

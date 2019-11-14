@@ -9,16 +9,27 @@ class Ast_Expr;
 
 class Ast_InsertAsgnList : public Ast_Base {
 public:
-    explicit Ast_InsertAsgnList(std::string name, Ast_Expr *expr);
+    explicit Ast_InsertAsgnList(const char *name, Ast_Expr *expr);
     virtual ~Ast_InsertAsgnList();
+
+public:
+    class InsertAsgn {
+    public:
+        InsertAsgn(const char *name, Ast_Expr *expr);
+        ~InsertAsgn();
+    public:
+        std::string name;
+        Ast_Expr *expr;
+    };
 
 public:
     virtual void illustrate();
 
 public:
-    void addInsertAsgn(std::string name, Ast_Expr *expr);
+    void addInsertAsgn(const char *name, Ast_Expr *expr);
 
 private:
+    std::vector<InsertAsgn *> asgn_list;
 };
 
 #endif

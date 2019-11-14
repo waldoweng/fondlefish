@@ -5,6 +5,7 @@
 #include "ast_base.h"
 
 class Ast_Expr;
+
 class Ast_InsertVals : public Ast_Base {
 public:
     explicit Ast_InsertVals(Ast_Expr *expr);

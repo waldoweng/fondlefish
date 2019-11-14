@@ -13,16 +13,87 @@ class Ast_SelectStmt;
 
 class Ast_ReplaceStmt : public Ast_Base {
 public:
-    explicit Ast_ReplaceStmt(uint32_t insert_opts, std::string name, Ast_OptColNames *opt_col_names,
+    enum replace_opts {
+        REPLACE_OPTS_LOW_PRIORITY    = 1,
+        REPLACE_OPTS_DELAYED         = 2,
+        REPLACE_OPTS_HIGH_PRIORITY   = 3,
+        REPLACE_OPTS_IGNORE          = 4
+    };
+    enum replace_type {
+        REPLACE_TYPE_VALLIST     = 0,
+        REPLACE_TYPE_ASGNLIST    = 1,
+        REPLACE_TYPE_SELECT      = 2
+    };
+
+public:
+    class ReplaceStmtValList {
+    public:
+        explicit ReplaceStmtValList(replace_opts insert_opts, const char *name, Ast_OptColNames *opt_col_names,
+            Ast_InsertValList *insert_val_list, Ast_OptOnDupUpdate *opt_dupupdate);
+        ~ReplaceStmtValList();
+    public:
+        replace_opts replace_opts;
+        std::string name;
+        Ast_OptColNames *opt_col_names;
+        Ast_InsertValList *insert_val_list;
+        Ast_OptOnDupUpdate *opt_dupupdate;
+    };
+
+    class ReplaceStmtAsgnList {
+    public:
+        explicit ReplaceStmtAsgnList(replace_opts insert_opts, const char *name, 
+            Ast_InsertAsgnList *insert_asgn_list, Ast_OptOnDupUpdate *opt_ondupupdate);
+        ~ReplaceStmtAsgnList();
+    public:
+        replace_opts replace_opts;
+        std::string name; 
+        Ast_InsertAsgnList *insert_asgn_list;
+        Ast_OptOnDupUpdate *opt_ondupupdate;
+    };
+
+    class ReplaceStmtSelect {
+    public:
+        explicit ReplaceStmtSelect(replace_opts insert_opts, const char *name, Ast_OptColNames *opt_col_names,
+            Ast_SelectStmt *select_stmt, Ast_OptOnDupUpdate *opt_ondupupdate);
+        virtual ~ReplaceStmtSelect();
+    public:
+        replace_opts replace_opts;
+        std::string name;
+        Ast_OptColNames *opt_col_names;
+        Ast_SelectStmt *select_stmt;
+        Ast_OptOnDupUpdate *opt_ondupupdate;
+    };
+
+    union ReplaceStmt {
+    public:
+        explicit ReplaceStmt(ReplaceStmtValList *_val_list);
+        explicit ReplaceStmt(ReplaceStmtAsgnList *_asgn_list);
+        explicit ReplaceStmt(ReplaceStmtSelect *_select);
+        ~ReplaceStmt();
+    public:
+        ReplaceStmtValList *_val_list;
+        ReplaceStmtAsgnList *_asgn_list;
+        ReplaceStmtSelect *_select;
+    };
+
+public:
+    explicit Ast_ReplaceStmt(replace_opts insert_opts, const char *name, Ast_OptColNames *opt_col_names,
         Ast_InsertValList *insert_vals_list, Ast_OptOnDupUpdate *opt_ondupupdate);
-    explicit Ast_ReplaceStmt(uint32_t insert_opts, std::string name, Ast_InsertAsgnList *insert_asgn_list,
+    explicit Ast_ReplaceStmt(replace_opts insert_opts, const char *name, Ast_InsertAsgnList *insert_asgn_list,
         Ast_OptOnDupUpdate *opt_ondupupdate);
-    explicit Ast_ReplaceStmt(uint32_t insert_opts, std::string name, Ast_OptColNames *opt_col_names,
+    explicit Ast_ReplaceStmt(replace_opts insert_opts, const char *name, Ast_OptColNames *opt_col_names,
         Ast_SelectStmt *select_stmt, Ast_OptOnDupUpdate *opt_ondupupdate);
     virtual ~Ast_ReplaceStmt();
+
 public:
     virtual void illustrate();
+
 private:
+    const char * replaceOptName(replace_opts insert_opts);
+
+private:
+    replace_type replace_type;
+    ReplaceStmt stmt;
 
 };
 

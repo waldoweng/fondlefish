@@ -18,9 +18,10 @@ public:
     const static unsigned char UPDATE_STMT = 1;
     const static unsigned char DELETE_STMT = 2;
     const static unsigned char INSERT_STMT = 3;
-    const static unsigned char CREATE_DATABASE_STMT = 4;
-    const static unsigned char CREATE_TABLE_STMT = 5;
-    const static unsigned char SET_STMT = 6;
+    const static unsigned char REPLACE_STMT = 4;
+    const static unsigned char CREATE_DATABASE_STMT = 5;
+    const static unsigned char CREATE_TABLE_STMT = 6;
+    const static unsigned char SET_STMT = 7;
 
 public:
     explicit Ast_Stmt(Ast_SelectStmt *stmt);
@@ -44,6 +45,7 @@ private:
         Ast_UpdateStmt *update_stmt;
         Ast_DeleteStmt *delete_stmt;
         Ast_InsertStmt *insert_stmt;
+        Ast_ReplaceStmt *replace_stmt;
         Ast_CreateDatabaseStmt *create_database_stmt;
         Ast_CreateTableStmt *create_table_stmt;
         Ast_SetStmt *set_stmt;

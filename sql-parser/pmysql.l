@@ -1,6 +1,7 @@
 %option noyywrap nodefault yylineno case-insensitive
 %{
-#include "pmysql.tab.h"
+#include "include/ast/ast.h"
+#include "pmysql.tab.hpp"
 #include <stdarg.h>
 #include <string.h>
 
@@ -271,13 +272,13 @@ B'[01]+'        { yylval.strval = strdup(yytext); return STRING; }
 "&&"                { return ANDOP; }
 "||"                { return OR; }
 
-"="                 { yylval.subtok = 4; return COMPARISON; }
-"<=>"               { yylval.subtok = 12; return COMPARISON; }
-">="                { yylval.subtok = 6; return COMPARISON; }
-">"                 { yylval.subtok = 2; return COMPARISON; }
+"="                 { yylval.subtok = 1; return COMPARISON; }
+"<=>"               { yylval.subtok = 2; return COMPARISON; }
+">="                { yylval.subtok = 3; return COMPARISON; }
+">"                 { yylval.subtok = 4; return COMPARISON; }
 "<="                { yylval.subtok = 5; return COMPARISON; }
-"<"                 { yylval.subtok = 1; return COMPARISON; }
-"!="|"<>"           { yylval.subtok = 3; return COMPARISON; }
+"<"                 { yylval.subtok = 6; return COMPARISON; }
+"!="|"<>"           { yylval.subtok = 7; return COMPARISON; }
 
 "<<"                { yylval.subtok = 1; return SHIFT; }
 ">>"                { yylval.subtok = 2; return SHIFT; }
@@ -292,7 +293,7 @@ DATE_SUB/"("        { return FDATE_SUB; }
 
     /* check trailing context manually */
 COUNT               { 
-                        int c = input(); unput(c);
+                        int c = yyinput(); unput(c);
                         if (c == '(') return FCOUNT;
                         yylval.strval = strdup(yytext);
                         return NAME;

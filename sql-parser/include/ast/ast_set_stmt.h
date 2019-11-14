@@ -3,33 +3,37 @@
 
 #include <cstdint>
 #include <string>
+#include <vector>
 #include "ast_base.h"
 
 class Ast_Expr;
 
 class Ast_SetExpr : public Ast_Base {
 public:
-    explicit Ast_SetExpr(std::string uservar, Ast_Expr *expr);
+    explicit Ast_SetExpr(const char *uservar, Ast_Expr *expr);
     virtual ~Ast_SetExpr();
 
 public:
     virtual void illustrate();
 
 private:
+    std::string uservar;
+    Ast_Expr *expr;
 };
 
 class Ast_SetList : public Ast_Base {
 public:
-    explicit Ast_SetList(Ast_SetExpr *set_expr);
+    explicit Ast_SetList(Ast_SetExpr *expr);
     virtual ~Ast_SetList();
 
 public:
     virtual void illustrate();
 
 public:
-    void addSetExpr(Ast_SetExpr *set_expr);
+    void addSetExpr(Ast_SetExpr *expr);
 
 private:
+    std::vector<Ast_SetExpr *> exprs;
 };
 
 class Ast_SetStmt : public Ast_Base {
@@ -41,6 +45,7 @@ public:
     virtual void illustrate();
 
 private:
+    Ast_SetList *set_list;
 };
 
 #endif

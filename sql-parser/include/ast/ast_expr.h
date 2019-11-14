@@ -1,6 +1,7 @@
 #ifndef FONDLE_FISH_AST_EXPR_H_INCLUDE
 #define FONDLE_FISH_AST_EXPR_H_INCLUDE
 
+#include <string>
 #include "ast_base.h"
 
 class Ast_SelectStmt;
@@ -8,135 +9,431 @@ class Ast_ValList;
 class Ast_IntervalExp;
 class Ast_CaseList;
 
-class Ast_Expr : public Ast_Base
-{
+class Ast_Expr : public Ast_Base {
 public:
-    enum ast_expr_type {
-        EXPR_NAME = 0,
-        EXPR_NAME2 = 1,
-        EXPR_USERVAR = 2,
-        EXPR_STRING = 3,
-        EXPR_INTNUM = 4,
-        EXPR_APPROXNUM = 5,
-        EXPR_BOOL = 6,
-
-        EXPR_ADD = 10,
-        EXPR_MINUS = 11,
-        EXPR_MUL = 12,
-        EXPR_DIV = 13,
-        EXPR_MOD = 14,
-        EXPR_NEG = 15,
-        EXPR_AND = 16,
-        EXPR_OR = 17,
-        EXPR_XOR = 18,
-        EXPR_BITOR = 19,
-        EXPR_BITAND = 20,
-        EXPR_BITXOR = 21,
-        EXPR_LEFT_SHIFT = 22,
-        EXPR_RIGHT_SHIFT = 23,
-        EXPR_NOT = 24,
-
-        EXPR_CMP_BASE = 30,
-
-        EXPR_IS_NULL = 200,
-        EXPR_IS_NOT_NULL = 201,
-        EXPR_IS_BOOL = 202,
-        EXPR_IS_NOT_BOOL = 203,
-        EXPR_ASSIGN = 204,
-
-        EXPR_BETWEEN = 300,
-        
-        EXPR_IS_IN = 400,
-        EXPR_IS_NOT_IN = 401,
-        EXPR_EXISTS = 402,
-        EXPR_NOT_EXISTS = 403,
-
-        EXPR_CALL = 500,
-
-        EXPR_COUNTALL = 600,
-        EXPR_COUNT = 601,
-
-        EXPR_SUBSTR = 700,
-        EXPR_SUBSTR_FROM = 701,
-        EXPR_SUBSTR_FROM_FOR = 702,
-        EXPR_TRIM = 703,
-
-        EXPR_TRIM_FROM = 710,
-        EXPR_TRIM_FROM_LEADING = 711,
-        EXPR_TRIM_FROM_TRAILING = 712,
-        EXPR_TRIM_FROM_BOTH = 713,
-
-        EXPR_DATE_ADD = 800,
-        EXPR_DATE_SUB = 801,
-
-        EXPR_CASE = 900,
-        EXPR_CASE2 = 901,
-        EXPR_CASE3 = 902,
-        EXPR_CASE4 = 903,
-
-        EXPR_LIKE = 1000,
-        EXPR_NOT_LIKE = 1001,
-
-        EXPR_REGEXP = 1100,
-        EXPR_NOT_REGEXP = 1101,
-
-        EXPR_CURRENT_TIMESTAMP = 1200,
-        EXPR_CURRENT_DATE = 1201,
-        EXPR_CURRENT_TIME = 1202,
-
-        EXPR_BINARY = 1300
-    };
-
-public:
-    explicit Ast_Expr(const char *strval, int type);
-    explicit Ast_Expr(const char *strval1, const char *strval2, int type);
-    explicit Ast_Expr(int intval, int type);
-    explicit Ast_Expr(double floatval, int type);
-    explicit Ast_Expr(int type);
-
-    explicit Ast_Expr(Ast_Expr *expr, int type);
-    explicit Ast_Expr(Ast_Expr *expr1, Ast_Expr *expr2, int type);
-    explicit Ast_Expr(Ast_Expr *expr1, Ast_Expr *expr2, Ast_Expr *expr3, int type);
-
-    explicit Ast_Expr(Ast_ValList *val_list, int type);
-    explicit Ast_Expr(Ast_Expr *expr, int boolval, int type);
-    explicit Ast_Expr(const char *strval, Ast_Expr *expr, int type);
-    explicit Ast_Expr(Ast_Expr *expr, Ast_ValList *val_list, int type);
-
-    explicit Ast_Expr(Ast_SelectStmt *stmt, int type);
-    explicit Ast_Expr(Ast_Expr *expr, Ast_SelectStmt *stmt, int type);
-
-    explicit Ast_Expr(const char *strval, Ast_ValList *val_list, int type);
-    explicit Ast_Expr(Ast_Expr *expr, Ast_IntervalExp *interval_expr, int type);
-    explicit Ast_Expr(Ast_CaseList *case_list, int type);
-    explicit Ast_Expr(Ast_Expr *expr, Ast_CaseList *case_list, int type);
-    explicit Ast_Expr(Ast_Expr *expr1, Ast_Expr *expr2, Ast_CaseList *case_list, int type);
-
+    explicit Ast_Expr();
     virtual ~Ast_Expr();
     
 public:
-    virtual void eval() const;
+    virtual Ast_Expr eval() const;
+    virtual void illustrate();
+};
+
+
+class Ast_LiteralExpr : public Ast_Expr {
+public:
+    enum literal_type {
+        LiteralTypeName         = 0,
+        LiteralTypeDetailName   = 1,
+        LiteralTypeUserVar      = 2,
+        LiteralTypeString       = 3,
+        LiteralTypeIntNum       = 4,
+        LiteralTypeApproxNum    = 5,
+        LiteralTypeBool         = 6,
+        LiteralTypeCurTs        = 7,
+        LiteralTypeCurDate      = 8,
+        LiteralTypeCurTime      = 9
+    };
+
+public:
+    explicit Ast_LiteralExpr(literal_type literal_type, const char *first, const char *second);
+    explicit Ast_LiteralExpr(int int_var);
+    explicit Ast_LiteralExpr(double float_var);
+    explicit Ast_LiteralExpr(bool bool_var);
+    explicit Ast_LiteralExpr(literal_type literal_type);
+    virtual ~Ast_LiteralExpr();
+
+public:
+    virtual Ast_Expr eval() const;
     virtual void illustrate();
 
 private:
-    int type;
+    literal_type literal_type;
+    union {
+        struct {
+            std::string first;
+            std::string second;
+        } name;
+        int int_var;
+        double float_var;
+        bool bool_var;
+    };
+};
+
+class Ast_ArithmeticExpr : public Ast_Expr {
+public:
+    enum arithmetic_type {
+        CompoundTypeAdd         = 0,
+        CompoundTypeSub         = 1,
+        CompoundTypeMul         = 2,
+        CompoundTypeDiv         = 3,
+        CompoundTypeMod         = 4,
+        CompoundTypeNeg         = 5,
+        CompoundTypeAnd         = 6,
+        CompoundTypeOr          = 7,
+        CompoundTypeXor         = 8,
+        CompoundTypeBitOr       = 9,
+        CompoundTypeBitAnd      = 10,
+        CompoundTypeBitXor      = 11,
+        CompoundTypeLeftShift   = 12,
+        CompoundTypeRightShift  = 13,
+        CompoundTypeNot         = 14,
+        CompoundTypeCompareEQ   = 15,
+        CompoundTypeCompareNSEQ = 16, // NULL SAFE EQUAL
+        CompoundTypeCompareGE   = 17,
+        CompoundTypeCompareGT   = 18,
+        CompoundTypeCompareLE   = 19,
+        ComponudTypeCompareLT   = 20,
+        CompoundTypeCompareNOEQ = 21,
+    };
+
+    enum inner_type {
+        InnerTypeSingleOp       = 0,
+        InnerTypeBinaryOp       = 1
+    };
+public:
+    explicit Ast_ArithmeticExpr(arithmetic_type arithmetic_type, Ast_Expr *expr);
+    explicit Ast_ArithmeticExpr(arithmetic_type arithmetic_type, Ast_Expr *lhs, Ast_Expr *rhs);
+    virtual ~Ast_ArithmeticExpr();
     
-    const char *strval;
-    const char *strval1;
-    const char *strval2;
-    int intval;
-    double floatval;
-    int boolval;
+public:
+    virtual Ast_Expr eval() const;
+    virtual void illustrate();
 
-    const Ast_Expr *expr;
-    const Ast_Expr *expr1;
-    const Ast_Expr *expr2;
-    const Ast_Expr *expr3;
+private:
+    const char * arithmeticTypeName(arithmetic_type arithmetic_type);
 
-    const Ast_ValList *val_list;
-    const Ast_SelectStmt *select_stmt;
-    const Ast_IntervalExp *interval_expr;
-    const Ast_CaseList *case_list;
+private:
+    arithmetic_type arithmetic_type;
+    inner_type inner_type;
+    union {
+        Ast_Expr *single_op;
+        struct { Ast_Expr *lhs; Ast_Expr *rhs; };
+    };
+};
+
+class Ast_CompareExpr : public Ast_Expr {
+public:
+    enum compare_type {
+        CompoundTypeCompareEQ   = 0,
+        CompoundTypeCompareNSEQ = 1, // NULL SAFT EQUAL
+        CompoundTypeCompareGE   = 2,
+        CompoundTypeCompareGT   = 3,
+        CompoundTypeCompareLE   = 4,
+        ComponudTypeCompareLT   = 5,
+        CompoundTypeCompareNOEQ = 6,
+    };
+
+    enum compare_subtype {
+        CompareSubTypeNone  = 0,
+        CompareSubTypeAny   = 1,
+        CompareSubTypeSome  = 2,
+        CompareSubTypeAll   = 3
+    };
+
+public:
+    explicit Ast_CompareExpr(compare_type compare_type, Ast_Expr *lhs, Ast_SelectStmt *rhs);
+    explicit Ast_CompareExpr(compare_type compare_type, compare_subtype compare_subtype, 
+        Ast_Expr *lhs, Ast_SelectStmt *rhs);
+    virtual ~Ast_CompareExpr();
+    
+public:
+    virtual Ast_Expr eval() const;
+    virtual void illustrate();
+
+private:
+    const char * compareTypeName(compare_type compare_type);
+    const char * compareSubTypeName(compare_subtype compare_subtype);
+
+private:
+    compare_type compare_type;
+    compare_subtype compare_subtype;
+    Ast_Expr *lhs;
+    Ast_SelectStmt *rhs;
+};
+
+class Ast_IsExpr : public Ast_Expr {
+public:
+    enum is_type {
+        CompoundTypeIsNull      = 22,
+        CompoundTypeIsNotNull   = 23,
+        CompoundTypeIsBool      = 24,
+        CompoundTypeIsNotBool   = 25,
+    };
+
+public:
+    explicit Ast_IsExpr(is_type is_type, Ast_Expr *lhs);
+    explicit Ast_IsExpr(is_type is_type, Ast_Expr *lhs, bool bool_var);
+    virtual ~Ast_IsExpr();
+
+public:
+    virtual Ast_Expr eval() const;
+    virtual void illustrate();
+
+private:
+    is_type is_type;
+    union {
+        Ast_Expr *is_null;
+        struct {
+            Ast_Expr *lhs;
+            bool bool_var;
+        };
+    };
+};
+
+class Ast_AsgnExpr : public Ast_Expr {
+public:
+    explicit Ast_AsgnExpr(const char *name, Ast_Expr *expr);
+    virtual ~Ast_AsgnExpr();
+
+public:
+    virtual Ast_Expr eval() const;
+    virtual void illustrate();
+
+private:
+    std::string name;
+    Ast_Expr *expr;
+};
+
+class Ast_BetweenExpr : public Ast_Expr {
+public:
+    explicit Ast_BetweenExpr(Ast_Expr *expr, Ast_Expr *low, Ast_Expr *high);
+    ~Ast_BetweenExpr();
+
+public:
+    virtual Ast_Expr eval() const;
+    virtual void illustrate();
+
+private:
+    Ast_Expr *expr;
+    Ast_Expr *low;
+    Ast_Expr *high;
+};
+
+class Ast_InExpr : public Ast_Expr {
+public:
+    enum in_type {
+        CompoundTypeIn          = 28,
+        CompoundTypeNotIn       = 29
+    };
+
+    enum inner_type {
+        InnerTypeOptWithSelect  = 0,
+        InnerTypeOptWithValList = 1
+    };
+
+public:
+    explicit Ast_InExpr(in_type in_type, Ast_Expr *expr, Ast_ValList *val_list);
+    explicit Ast_InExpr(in_type in_type, Ast_Expr *expr, Ast_SelectStmt *select);
+    virtual ~Ast_InExpr();
+
+public:
+    virtual Ast_Expr eval() const;
+    virtual void illustrate();
+
+private:
+    in_type in_type;
+    inner_type inner_type;
+    Ast_Expr *expr;
+    union {
+        Ast_ValList *val_list;
+        Ast_SelectStmt *select;
+    };
+};
+
+class Ast_ExistExpr : public Ast_Expr {
+public:
+    enum exist_type {
+        CompoundTypeExists      = 0,
+        CompoundTypeNotExists   = 1,
+    };
+
+public:
+    explicit Ast_ExistExpr(exist_type exist_type, Ast_SelectStmt *stmt);
+    virtual ~Ast_ExistExpr();
+
+public:
+    virtual Ast_Expr eval() const;
+    virtual void illustrate();
+
+private:
+    exist_type exist_type;
+    Ast_SelectStmt *stmt;
+};
+
+
+class Ast_RegularFunctionExpr : public Ast_Expr {
+public:
+    explicit Ast_RegularFunctionExpr(const char *func_name, Ast_ValList *params);
+    virtual ~Ast_RegularFunctionExpr();
+
+public:
+    virtual Ast_Expr eval() const;
+    virtual void illustrate();
+
+private:
+    std::string func_name;
+    Ast_ValList *params;
+};
+
+class Ast_CountFuncExpr : public Ast_Expr {
+public:
+    explicit Ast_CountFuncExpr(Ast_Expr *expr);
+    virtual ~Ast_CountFuncExpr();
+
+public:
+    virtual Ast_Expr eval() const;
+    virtual void illustrate();
+
+private:
+    Ast_Expr *expr;
+};
+
+class Ast_SubtringFuncExpr : public Ast_Expr {
+public:
+    enum inner_type {
+        InnerTypeOptWithExpr  = 0,
+        InnerTypeOptWithValList = 1
+    };
+public:
+    explicit Ast_SubtringFuncExpr(Ast_ValList *val_list);
+    explicit Ast_SubtringFuncExpr(Ast_Expr *str, Ast_Expr *begin, Ast_Expr *length);
+    virtual ~Ast_SubtringFuncExpr();
+
+public:
+    virtual Ast_Expr eval() const;
+    virtual void illustrate();
+
+private:
+    inner_type inner_type;
+    union {
+        Ast_ValList *val_list;
+        struct {
+            Ast_Expr *str;
+            Ast_Expr *begin;
+            Ast_Expr *length;
+        };
+    };
+};
+
+class Ast_TrimFuncExpr : public Ast_Expr {
+public:
+    enum trim_ltb {
+        TRIM_NULL       = 0,
+        TRIM_LEADING    = 1,
+        TRIM_TRAILING   = 2,
+        TRIM_BOTH       = 3,
+    };
+
+public:
+    explicit Ast_TrimFuncExpr(Ast_ValList *val_list);
+    explicit Ast_TrimFuncExpr(trim_ltb trim_ltb, Ast_Expr *pattern, Ast_ValList *val_list);
+    virtual ~Ast_TrimFuncExpr();
+
+public:
+    virtual Ast_Expr eval() const;
+    virtual void illustrate();
+
+private:
+    const char * trimLtbName(trim_ltb trim_ltb);
+
+private:
+    Ast_ValList *val_list;
+    struct {
+        trim_ltb _trim_ltb;
+        Ast_Expr *pattern;
+    };
+};
+
+class Ast_DateFuncExpr : public Ast_Expr {
+public:
+    enum date_func_type {
+        CompoundTypeFuncDateAdd = 36,
+        CompoundTypeFuncDateSub = 37,
+    };
+
+public:
+    explicit Ast_DateFuncExpr(date_func_type date_func_type, Ast_Expr *expr, Ast_IntervalExp *interval_exp);
+    virtual ~Ast_DateFuncExpr();
+
+public:
+    virtual Ast_Expr eval() const;
+    virtual void illustrate();
+
+private:
+    date_func_type date_func_type;
+    Ast_Expr *expr;
+    Ast_IntervalExp *interval_exp;
+};
+
+class Ast_CaseExpr : public Ast_Expr {
+public:
+    explicit Ast_CaseExpr(Ast_Expr *expr, Ast_CaseList *case_list, Ast_Expr *_else);
+    virtual ~Ast_CaseExpr();
+
+public:
+    virtual Ast_Expr eval() const;
+    virtual void illustrate();
+
+private:
+    Ast_Expr *expr;
+    Ast_CaseList *case_list;
+    Ast_Expr *_else;
+};
+
+class Ast_LikeExpr : public Ast_Expr {
+public:
+    enum like_type {
+        CompoundTypeLike        = 39,
+        CompoundTypeNotLike     = 40,
+    };
+
+public:
+    explicit Ast_LikeExpr(like_type like_type, Ast_Expr *lhs, Ast_Expr *rhs);
+    virtual ~Ast_LikeExpr();
+
+public:
+    virtual Ast_Expr eval() const;
+    virtual void illustrate();
+
+private:
+    like_type like_type;
+    Ast_Expr *lhs;
+    Ast_Expr *rhs;
+};
+
+class Ast_RegexpExpr : public Ast_Expr {
+public:
+    enum regexp_type {
+        CompoundTypeRegexp      = 41,
+        CompoundTypeNotRegexp   = 42,
+    };
+
+public:
+    explicit Ast_RegexpExpr(regexp_type regexp_type, Ast_Expr *lhs, Ast_Expr *rhs);
+    virtual ~Ast_RegexpExpr();
+
+public:
+    virtual Ast_Expr eval() const;
+    virtual void illustrate();
+
+private:    
+    regexp_type regexp_type;
+    Ast_Expr *lhs;
+    Ast_Expr *rhs;
+};
+
+class Ast_BinaryExpr : public Ast_Expr {
+public:
+    explicit Ast_BinaryExpr(Ast_Expr *expr);
+    virtual ~Ast_BinaryExpr();
+
+public:
+    virtual Ast_Expr eval() const;
+    virtual void illustrate();
+
+private:
+    Ast_Expr *expr;
 };
 
 #endif
