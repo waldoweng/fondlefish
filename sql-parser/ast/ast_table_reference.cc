@@ -54,14 +54,14 @@ Ast_TableFactor::TableFactor::~TableFactor() {}
 
 Ast_TableFactor::Ast_TableFactor(const char *name, const char *alias, Ast_IndexHint *index_hint)
     : factor_type(Ast_TableFactor::FACTOR_TYPE_NORMAL),
-        factor(new TableFactorNormal("", name, alias, index_hint))
+        factor(new TableFactorNormal("", name, alias ? alias : "", index_hint))
 {
 }
 
 Ast_TableFactor::Ast_TableFactor(const char *database_name, const char *name, 
     const char *alias, Ast_IndexHint *index_hint)
     : factor_type(Ast_TableFactor::FACTOR_TYPE_NORMAL),
-        factor(new TableFactorNormal(database_name, name, alias, index_hint))
+        factor(new TableFactorNormal(database_name, name, alias ? alias : "", index_hint))
 {
 }
 
@@ -103,7 +103,7 @@ void Ast_TableFactor::illustrate() {
             this->factor.normal->name.c_str(),
             this->factor.normal->alias.c_str());
         this->incLevel();
-        this->factor.normal->index_hint->illustrate();
+        if (this->factor.normal->index_hint) this->factor.normal->index_hint->illustrate();
         this->decLevel();
         break;
     case Ast_TableFactor::FACTOR_TYPE_SUBQUERY:
@@ -192,8 +192,10 @@ Ast_TableReference::~Ast_TableReference()
 
 void Ast_TableReference::illustrate() {
     this->putLine("TABLE REFERENCE");
+    this->incLevel();
     if (this->table_factor) this->table_factor->illustrate();
     if (this->join_table) this->join_table->illustrate();
+    this->decLevel();
 }
 
 Ast_TableReferences::Ast_TableReferences(Ast_TableReference *reference) {

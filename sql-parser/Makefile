@@ -1,35 +1,36 @@
 IDIR =../include
 ODIR=obj
 
-CPP = c++ -g -std=c++11
+CPP = c++ -g -std=c++11 -Wall -Wno-deprecated-register -Wno-writable-strings
 LEX = flex
 YACC = bison
-CPPFLAGS = -DYYDEBUG=1 -I$(IDIR)/ast
+CPPFLAGS = -DYYDEBUG=1 -DYYERROR_VERBOSE=1 -I$(IDIR)/ast
 
 PROGRAMES = pmysql
 
 .PHONY: clean
 
-pmysql: pmysql.tab.o pmysql.o
+pmysql: pmysql.tab.o pmysql.o ast/ast.a
 	${CPP} -o $@ pmysql.tab.o pmysql.o ast/ast.a 
 
-pmysql.tab.cpp pmysql.tab.hpp: pmysql.ypp
-	${YACC} -vd pmysql.ypp
+ast/ast.a :
+	cd ast; make
+
+pmysql.tab.cc pmysql.tab.hh: pmysql.yy
+	${YACC} -vd pmysql.yy
 
 pmysql.cc: pmysql.l
 	${LEX} -o $*.cc $<
 
-pmysql.o: pmysql.cc pmysql.tab.hpp
+pmysql.o: pmysql.cc pmysql.tab.hh
 
 %.o: %.cc
-	$(CPP) -c -o $@ $< $(CFLAGS)
+	$(CPP) -c -o $@ $< $(CPPFLAGS)
 
-%.o: %.cpp
-	$(CPP) -c -o $@ $< $(CFLAGS)
-
-.SUFFIXES: .pgm .l .ypp .c .cc
+.SUFFIXES: .pgm .l .yy .c .cc
 
 clean:
 	rm -f *.o *.output pmysql pmysql.tab.*  pmysql.cc
+	cd ast; make clean
 
 

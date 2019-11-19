@@ -2,7 +2,7 @@
 #include "ast_expr.h"
 
 Ast_SelectExpr::Ast_SelectExpr(Ast_Expr *expr, const char *alias) 
-    : expr(expr), alias(alias)
+    : expr(expr), alias(alias ? alias : "")
 {
 }
 

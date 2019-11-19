@@ -516,7 +516,7 @@ expr: BINARY expr %prec UMINUS { $$ = new Ast_BinaryExpr($2); }
     ;
 
     /* statements: select statement */
-stmt: select_stmt { $$ = new Ast_Stmt($1); }
+stmt: select_stmt { $$ = new Ast_Stmt($1); $1->illustrate(); }
     ;
 
 select_stmt: SELECT select_opts select_expr_list    { $$ = new Ast_SelectStmt(static_cast<Ast_SelectStmt::select_opts>($2), $3); }

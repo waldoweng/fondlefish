@@ -1,3 +1,4 @@
+#include <map>
 #include "ast_select_stmt.h"
 #include "ast_select_expr_list.h"
 #include "ast_table_reference.h"
@@ -84,17 +85,29 @@ Ast_SelectStmt::~Ast_SelectStmt() {
 }
 
 const char * Ast_SelectStmt::selectOptsName(Ast_SelectStmt::select_opts select_opts) {
-    static const char names[8][32] = {
-        "ALL",
-        "DISTINCT",
-        "DISTINCT ROW",
-        "HIGH PRIORITY",
-        "STRAIGHT JOIN",
-        "SQL SMALL RESULT",
-        "SQL BIG RESULT",
-        "SQL CALC FOUND ROWS"
+    static const std::map<int, std::string> names = {
+        {Ast_SelectStmt::SELECT_OPTS_ALL, "ALL "},
+        {Ast_SelectStmt::SELECT_OPTS_DISTINCT, "DISTINCT "},
+        {Ast_SelectStmt::SELECT_OPTS_DISTINCTROW, "DISTINCT ROW "},
+        {Ast_SelectStmt::SELECT_OPTS_HIGH_PRIORITY, "HIGH PRIORITY "},
+        {Ast_SelectStmt::SELECT_OPTS_STRAIGHT_JOIN, "STRAIGHT JOIN "},
+        {Ast_SelectStmt::SELECT_OPTS_SQL_SMALL_RESULT, "SQL SMALL RESULT "},
+        {Ast_SelectStmt::SELECT_OPTS_SQL_BIG_RESULT, "SQL BIG RESULT "},
+        {Ast_SelectStmt::SELECT_OPTS_SQL_CALC_FOUND_ROWS, "SQL CALC FOUND ROWS "}
     };
-    return names[select_opts-1];
+    
+    static std::string s;
+    s.clear();
+
+    for (std::map<int, std::string>::const_iterator it = names.begin();
+        it != names.end();
+        ++ it)
+    {
+        if (select_opts & it->first)
+            s += (it->second);
+    }
+    
+    return s.c_str();
 }
 
 void Ast_SelectStmt::illustrate() {
@@ -111,12 +124,12 @@ void Ast_SelectStmt::illustrate() {
         this->incLevel();
         this->stmt.table->select_expr_list->illustrate();
         this->stmt.table->table_references->illustrate();
-        this->stmt.table->opt_where->illustrate();
-        this->stmt.table->opt_groupby->illustrate();
-        this->stmt.table->opt_having->illustrate();
-        this->stmt.table->opt_orderby->illustrate();
-        this->stmt.table->opt_limit->illustrate();
-        this->stmt.table->opt_into_list->illustrate();
+        if (this->stmt.table->opt_where) this->stmt.table->opt_where->illustrate();
+        if (this->stmt.table->opt_groupby) this->stmt.table->opt_groupby->illustrate();
+        if (this->stmt.table->opt_having) this->stmt.table->opt_having->illustrate();
+        if (this->stmt.table->opt_orderby) this->stmt.table->opt_orderby->illustrate();
+        if (this->stmt.table->opt_limit) this->stmt.table->opt_limit->illustrate();
+        if (this->stmt.table->opt_into_list) this->stmt.table->opt_into_list->illustrate();
         this->decLevel();
         break;
     default:
