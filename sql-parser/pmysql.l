@@ -10,7 +10,7 @@ void yyerror(char *s, ...);
 int oldstate;
 %}
 
-%x COMMENT
+%x COMMENTON
 %s BTWMODE
 %%
 
@@ -317,10 +317,10 @@ COUNT               {
 #.*                 ;
 "--"[ \t].*         ;
 
-"/*"                { oldstate = YYSTART; BEGIN COMMENT; }
-<COMMENT>"*/"       { BEGIN oldstate; }
-<COMMENT>.|\n       ;
-<COMMENT><<EOF>>    { yyerror("unclose comment"); }
+"/*"                { oldstate = YYSTART; BEGIN COMMENTON; }
+<COMMENTON>"*/"       { BEGIN oldstate; }
+<COMMENTON>.|\n       ;
+<COMMENTON><<EOF>>    { yyerror("unclose comment"); }
 
     /* everything else */
 [ \t\n]     /* whitespace */

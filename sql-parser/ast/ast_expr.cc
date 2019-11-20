@@ -25,8 +25,8 @@ Ast_LiteralExpr::Ast_LiteralExpr(enum Ast_LiteralExpr::literal_type literal_type
     const char *first, const char *second)
     : literal_type(literal_type)
 {
-    this->name.first = first ? first : "";
-    this->name.second = second;
+    this->first = first ? first : "";
+    this->second = second;
 }
 
 Ast_LiteralExpr::Ast_LiteralExpr(int int_var)
@@ -51,16 +51,16 @@ void Ast_LiteralExpr::illustrate() {
     {
     case Ast_LiteralExpr::LiteralTypeName:
     case Ast_LiteralExpr::LiteralTypeDetailName:
-        if (this->name.first.empty())
-            this->putLine("%s.%s", this->name.first.c_str(), this->name.second.c_str());
+        if (this->first.empty())
+            this->putLine("%s.%s", this->first.c_str(), this->second.c_str());
         else
-            this->putLine("%s", this->name.second.c_str());
+            this->putLine("%s", this->second.c_str());
         break;
     case Ast_LiteralExpr::LiteralTypeString:
-        this->putLine("%s", this->name.second.c_str());
+        this->putLine("%s", this->second.c_str());
         break;
     case Ast_LiteralExpr::LiteralTypeUserVar:
-        this->putLine("@%s", this->name.second.c_str());
+        this->putLine("@%s", this->second.c_str());
         break;
     case Ast_LiteralExpr::LiteralTypeIntNum:
         this->putLine("%d", this->int_var);

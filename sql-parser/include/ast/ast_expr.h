@@ -53,7 +53,7 @@ private:
         struct {
             std::string first;
             std::string second;
-        } name;
+        };
         int int_var;
         double float_var;
         bool bool_var;
