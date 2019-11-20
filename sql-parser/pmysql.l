@@ -5,12 +5,12 @@
 #include <stdarg.h>
 #include <string.h>
 
-void yyerror(char *s, ...);
+void yyerror(const char *s, ...);
 
 int oldstate;
 %}
 
-%x COMMENTON
+%x COMMENTX
 %s BTWMODE
 %%
 
@@ -253,7 +253,7 @@ FALSE           { yylval.intval = 0; return BOOL; }
 
     /* strings */
 '(\\.|''|[^'\n])*'  |
-\"(\\.|"\"|[^"\n])*\"   { yylval.strval = strdup(yytext); return STRING; }
+\"(\\.|\"\"|[^"\n])*\"   { yylval.strval = strdup(yytext); return STRING; }
 
 '(\\.[^'\n])*$      { yyerror("Unterminated string %s", yytext); }
 \"(\\.|[^"\n])*$    { yyerror("Unterminated string %s", yytext); }
@@ -317,10 +317,10 @@ COUNT               {
 #.*                 ;
 "--"[ \t].*         ;
 
-"/*"                { oldstate = YYSTART; BEGIN COMMENTON; }
-<COMMENTON>"*/"       { BEGIN oldstate; }
-<COMMENTON>.|\n       ;
-<COMMENTON><<EOF>>    { yyerror("unclose comment"); }
+"/*"                { oldstate = YYSTART; BEGIN COMMENTX; }
+<COMMENTX>"*/"       { BEGIN oldstate; }
+<COMMENTX>.|\n       ;
+<COMMENTX><<EOF>>    { yyerror("unclose comment"); }
 
     /* everything else */
 [ \t\n]     /* whitespace */

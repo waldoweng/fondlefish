@@ -6,7 +6,7 @@
 
 extern int yylex (void);
 
-void yyerror(char *s, ...);
+void yyerror(const char *s, ...);
 void emit(char *s, ...);
 %}
 
@@ -81,6 +81,7 @@ void emit(char *s, ...);
     /* operators and precedence levels */
 %right ASSIGN
 %left OR
+%left XOR
 %left ANDOP
 %nonassoc IN IS LIKE REGEXP
 %left NOT '!'
@@ -405,8 +406,8 @@ expr: NAME          { $$ = new Ast_LiteralExpr(Ast_LiteralExpr::LiteralTypeName,
 expr: expr '+' expr { $$ = new Ast_ArithmeticExpr(Ast_ArithmeticExpr::CompoundTypeAdd, $1, $3); }
     | expr '-' expr { $$ = new Ast_ArithmeticExpr(Ast_ArithmeticExpr::CompoundTypeSub, $1, $3); }
     | expr '*' expr { $$ = new Ast_ArithmeticExpr(Ast_ArithmeticExpr::CompoundTypeMul, $1, $3); }
-    | expr "/" expr { $$ = new Ast_ArithmeticExpr(Ast_ArithmeticExpr::CompoundTypeDiv, $1, $3); }
-    | expr "%" expr { $$ = new Ast_ArithmeticExpr(Ast_ArithmeticExpr::CompoundTypeMod, $1, $3); }
+    | expr '/' expr { $$ = new Ast_ArithmeticExpr(Ast_ArithmeticExpr::CompoundTypeDiv, $1, $3); }
+    | expr '%' expr { $$ = new Ast_ArithmeticExpr(Ast_ArithmeticExpr::CompoundTypeMod, $1, $3); }
     | expr MOD expr { $$ = new Ast_ArithmeticExpr(Ast_ArithmeticExpr::CompoundTypeMod, $1, $3); }
     | '-' expr %prec UMINUS     { $$ = new Ast_ArithmeticExpr(Ast_ArithmeticExpr::CompoundTypeNeg, $2); }
     | expr ANDOP expr   { $$ = new Ast_ArithmeticExpr(Ast_ArithmeticExpr::CompoundTypeAnd, $1, $3); }
@@ -931,7 +932,7 @@ set_expr: USERVAR COMPARISON expr { if($2 != 4) {yyerror("bad set to @%s", $1); 
 
 %%
 
-void yyerror(char *s, ...) {
+void yyerror(const char *s, ...) {
     extern unsigned int yylineno;
 
     va_list ap;

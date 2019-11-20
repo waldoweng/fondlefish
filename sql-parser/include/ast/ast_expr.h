@@ -88,7 +88,7 @@ public:
     };
 
     enum inner_type {
-        InnerTypeSingleOp       = 0,
+        InnerTypeUnaryOp       = 0,
         InnerTypeBinaryOp       = 1
     };
 public:
@@ -107,7 +107,7 @@ private:
     arithmetic_type arithmetic_type;
     inner_type inner_type;
     union {
-        Ast_Expr *single_op;
+        Ast_Expr *unary_op;
         struct { Ast_Expr *lhs; Ast_Expr *rhs; };
     };
 };

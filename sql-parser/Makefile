@@ -1,7 +1,7 @@
 IDIR =../include
 ODIR=obj
 
-CPP = c++ -g -std=c++11 -Wall -Wno-deprecated-register -Wno-writable-strings
+CPP = c++ -g -std=c++11 -Wall -Wno-deprecated-register
 LEX = flex
 YACC = bison
 CPPFLAGS = -DYYDEBUG=1 -DYYERROR_VERBOSE=1 -I$(IDIR)/ast

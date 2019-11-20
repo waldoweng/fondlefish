@@ -90,7 +90,7 @@ Ast_Expr Ast_LiteralExpr::eval() const {
 }
 
 Ast_ArithmeticExpr::Ast_ArithmeticExpr(enum Ast_ArithmeticExpr::arithmetic_type arithmetic_type, Ast_Expr *expr)
-    : arithmetic_type(arithmetic_type), inner_type(InnerTypeSingleOp), single_op(expr)
+    : arithmetic_type(arithmetic_type), inner_type(InnerTypeUnaryOp), unary_op(expr)
 {
 }
 
@@ -102,8 +102,8 @@ Ast_ArithmeticExpr::Ast_ArithmeticExpr(enum Ast_ArithmeticExpr::arithmetic_type 
 }
 
 Ast_ArithmeticExpr::~Ast_ArithmeticExpr() {
-    if (this->inner_type == Ast_ArithmeticExpr::InnerTypeSingleOp)
-        delete this->single_op;
+    if (this->inner_type == Ast_ArithmeticExpr::InnerTypeUnaryOp)
+        delete this->unary_op;
     else {
         delete this->lhs;
         delete this->rhs;
@@ -142,8 +142,8 @@ void Ast_ArithmeticExpr::illustrate() {
     this->putLine("%s Expr", this->arithmeticTypeName(this->arithmetic_type));
 
     this->incLevel();
-    if (this->inner_type == Ast_ArithmeticExpr::InnerTypeSingleOp)
-        this->single_op->illustrate();
+    if (this->inner_type == Ast_ArithmeticExpr::InnerTypeUnaryOp)
+        this->unary_op->illustrate();
     else {
         this->lhs->illustrate();
         this->rhs->illustrate();
