@@ -1,4 +1,5 @@
 %option noyywrap nodefault yylineno case-insensitive
+
 %{
 #include "include/ast/ast.h"
 #include "pmysql.tab.hh"
@@ -12,6 +13,16 @@ int oldstate;
 
 %x COMMENTX
 %s BTWMODE
+
+%{
+    /* handle locations */
+    int yycolumn = 1;
+
+    #define YY_USER_ACTION yylloc.first_line = yylloc.last_line = yylineno; \
+        yylloc.first_column = yycolumn; yylloc.last_column = yycolumn+yyleng-1; \
+        yycolumn += yyleng;
+%}
+
 %%
 
     /* keywords */
@@ -86,7 +97,7 @@ END             { return END; }
 ENUM            { return ENUM; }
 ESCAPE          { return ESCAPE; }
 EXISTS          { yylval.subtok = 0; return EXISTS; }
-NOT[ \t\n]+EXISTS   { yylval.subtok = 1; return EXISTS; }
+NOT[ \t]+EXISTS   { yylval.subtok = 1; return EXISTS; }
 EXIT            { return EXIT; }
 EXPLAIN         { return EXPLAIN; }
 FETCH           { return FETCH; }
@@ -149,7 +160,7 @@ NO_WRITE_TO_BINLOG  { return NO_WRITE_TO_BINLOG; }
 NULL            { return NULLX; }
 NUMBER          { return NUMBER; }
 ON              { return ON; }
-ON[ \t\n]+DUPLICATE     { return ONDUPLICATE; } /* hack due to limited lookahead */
+ON[ \t]+DUPLICATE     { return ONDUPLICATE; } /* hack due to limited lookahead */
 OPTIMIZE        { return OPTIMIZE; }
 OPTION          { return OPTION; }
 OPTIONALLY      { return OPTIONALLY; }
@@ -318,11 +329,13 @@ COUNT               {
 "--"[ \t].*         ;
 
 "/*"                { oldstate = YYSTART; BEGIN COMMENTX; }
-<COMMENTX>"*/"       { BEGIN oldstate; }
-<COMMENTX>.|\n       ;
-<COMMENTX><<EOF>>    { yyerror("unclose comment"); }
+<COMMENTX>"*/"      { BEGIN oldstate; }
+<COMMENTX>.         ;
+<COMMENTX>\n        { yycolumn = 1; }
+<COMMENTX><<EOF>>   { yyerror("unclose comment"); }
 
     /* everything else */
-[ \t\n]     /* whitespace */
+[ \t]       /* whitespace */
+\n          { yycolumn = 1; } 
 .           {yyerror("mystery character '%s'", *yytext); }
 

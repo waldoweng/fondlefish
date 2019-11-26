@@ -1,3 +1,5 @@
+%locations
+
 %{
 #include <stdlib.h>
 #include <stdarg.h>
@@ -7,7 +9,8 @@
 extern int yylex (void);
 
 void yyerror(const char *s, ...);
-void emit(char *s, ...);
+void lyyerror(struct YYLTYPE t, const char *s, ...);
+
 %}
 
 %union {
@@ -565,7 +568,9 @@ opt_into_list: /* nil */ { $$ = NULL; }
     ;
 
 column_list: NAME { $$ = new Ast_ColumnList($1); }
+    | STRING { lyyerror(@1, "string %s found where name are requered\n", $1); $$ = new Ast_ColumnList($1); free($1); }
     | column_list ',' NAME { $1->addName($3); $$ = $1; }
+    | column_list ',' STRING { lyyerror(@3, "string %s found where name are requered\n", $3); $1->addName($3); free($3); $$ = $1; }
     ;
 
 
@@ -688,7 +693,7 @@ delete_stmt: DELETE delete_opts FROM delete_list USING table_references opt_wher
                 { $$ = new Ast_DeleteStmt(static_cast<enum Ast_DeleteStmt::delete_opts>($2), $4, $6, $7); }
     ;
 
-stmt: insert_stmt { $$ = new Ast_Stmt($1); }
+stmt: insert_stmt { $$ = new Ast_Stmt($1); $1->illustrate(); }
     ;
 
 insert_stmt: INSERT insert_opts opt_into NAME opt_col_names VALUES insert_vals_list opt_ondupupdate 
@@ -940,6 +945,15 @@ void yyerror(const char *s, ...) {
 
     fprintf(stderr, "%d: error: ", yylineno);
     vfprintf(stderr, s, ap);
+    fprintf(stderr, "\n");
+}
+
+void lyyerror(YYLTYPE t, const char *s, ...) {
+    va_list ap; va_start(ap, s);
+
+    if(t.first_line) 
+        fprintf(stderr, "%d.%d-%d.%d: error: ", t.first_line, t.first_column, t.last_line, t.last_column); 
+    vfprintf(stderr, s, ap); 
     fprintf(stderr, "\n");
 }
 

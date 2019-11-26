@@ -1,1 +1,2 @@
-select col1, col2, col3 from test_db.t_test where col1 = '123';
+insert into test(a, 'b', c) values(1, 2, 3);
+

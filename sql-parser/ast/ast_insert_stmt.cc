@@ -145,6 +145,7 @@ void Ast_InsertStmt::illustrate() {
         this->decLevel();
         break;
     default:
+        this->putLine("unrecognized insert type!");
         break;
     }
 }
