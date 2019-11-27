@@ -1,6 +1,0 @@
-/Users/wengzhao/Desktop/fondlefish/sql-parser/build/CMakeFiles/rebuild_cache.dir
-/Users/wengzhao/Desktop/fondlefish/sql-parser/build/CMakeFiles/edit_cache.dir
-/Users/wengzhao/Desktop/fondlefish/sql-parser/build/CMakeFiles/pymsql.dir
-/Users/wengzhao/Desktop/fondlefish/sql-parser/build/ast/CMakeFiles/rebuild_cache.dir
-/Users/wengzhao/Desktop/fondlefish/sql-parser/build/ast/CMakeFiles/edit_cache.dir
-/Users/wengzhao/Desktop/fondlefish/sql-parser/build/ast/CMakeFiles/libast.dir

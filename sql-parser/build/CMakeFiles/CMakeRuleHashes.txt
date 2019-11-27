@@ -1,3 +1,0 @@
-# Hashes of file build rules.
-604aaa58fb34d16c8c0c440e619680d1 pmysql.cc
-75aec93c717677a0220163aa202bb092 pmysql.tab.cc
