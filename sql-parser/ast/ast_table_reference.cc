@@ -1,8 +1,89 @@
 #include "ast_table_reference.h"
-#include "ast_index_hint.h"
-#include "ast_table_subquery.h"
-#include "ast_join_condition.h"
 #include "ast_expr.h"
+#include "ast_select_stmt.h"
+#include "ast_column_list.h"
+
+Ast_IndexList::Ast_IndexList(const char *name) {
+    names.push_back(name);
+}
+
+Ast_IndexList::~Ast_IndexList() {}
+
+void Ast_IndexList::illustrate() {
+    std::string tmp;
+    for (std::vector<std::string>::iterator it = names.begin();
+        it != names.end();
+        it ++)
+    {
+        tmp += (*it + ", ");
+    }
+
+    this->putLine(tmp.c_str());
+}
+
+void Ast_IndexList::addName(const char *name) {
+    names.push_back(name);
+}
+
+Ast_IndexHint::Ast_IndexHint(bool use, bool for_join, Ast_IndexList *index_list) 
+    : use(use), for_join(for_join), index_list(index_list)
+{
+}
+
+Ast_IndexHint::~Ast_IndexHint() {
+    if (index_list) delete index_list;
+}
+
+void Ast_IndexHint::illustrate() {
+    this->putLine("INDEX HINT %s %s", 
+        this->use ? " USE " : "",
+        this->for_join ? " FOR JOIN " : ""
+    );
+    this->incLevel();
+    this->index_list->illustrate();
+    this->decLevel();
+}
+
+Ast_JoinCondition::Ast_JoinCondition(Ast_Expr *expr) 
+    : expr(expr), column_list(NULL)
+{
+}
+
+Ast_JoinCondition::Ast_JoinCondition(Ast_ColumnList *column_list)
+    : expr(NULL), column_list(column_list)
+{
+}
+
+Ast_JoinCondition::~Ast_JoinCondition() {
+    if (expr) delete expr;
+    if (column_list) delete column_list;
+}
+
+void Ast_JoinCondition::illustrate() {
+    this->putLine("JOIN ON");
+    this->incLevel();
+    if (expr) this->expr->illustrate();
+    if (column_list) this->column_list->illustrate();
+    this->decLevel();
+}
+
+
+Ast_TableSubquery::Ast_TableSubquery(Ast_SelectStmt *select_stmt)
+    : select_stmt(select_stmt)
+{
+}
+
+Ast_TableSubquery::~Ast_TableSubquery()
+{
+    if (select_stmt) delete select_stmt;
+}
+
+void Ast_TableSubquery::illustrate() {
+    this->putLine("SUBQUERY");
+    this->incLevel();
+    this->select_stmt->illustrate();
+    this->decLevel();
+}
 
 Ast_TableFactor::TableFactorNormal::TableFactorNormal(const char *database_name, 
     const char *name, const char *alias, Ast_IndexHint *index_hint)

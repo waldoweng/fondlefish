@@ -2,12 +2,80 @@
 #define FONDLE_FISH_AST_EXPR_H_INCLUDE
 
 #include <string>
+#include <vector>
 #include "ast_base.h"
 
 class Ast_SelectStmt;
 class Ast_ValList;
-class Ast_IntervalExp;
-class Ast_CaseList;
+class Ast_Expr;
+
+class Ast_CaseList : public Ast_Base{
+public:
+    struct case_item {
+        Ast_Expr *when_expr;
+        Ast_Expr *then_expr;
+    };
+
+public:
+    explicit Ast_CaseList(Ast_Expr *when, Ast_Expr *then);
+    virtual ~Ast_CaseList();
+
+public:
+    void addCase(Ast_Expr *when, Ast_Expr *then);
+
+public:
+    virtual void illustrate();
+
+private:
+    std::vector<case_item> cases;
+};
+
+
+
+class Ast_IntervalExp : public Ast_Base {
+public:
+    enum interval_type {
+        INTERVAL_DAY_HOUR = 1,
+        INTERVAL_DAY_MICROSECOND = 2,
+        INTERVAL_DAY_MINUTE = 3,
+        INTERVAL_DAY_SECOND = 4,
+        INTERVAL_YEAR_MONTH = 5,
+        INTERVAL_YEAR = 6,
+        INTERVAL_HOUR_MICROSECOND = 7,
+        INTERVAL_HOUR_MINUTE = 8,
+        INTERVAL_HOUR_SECOND = 9,
+    };
+
+public:
+    explicit Ast_IntervalExp(interval_type interval_type, Ast_Expr *expr);
+    virtual ~Ast_IntervalExp();
+
+public:
+    virtual void illustrate();
+
+private:
+    const char * intervalTypeName(interval_type interval_type);
+
+private:
+    interval_type interval_type;
+    Ast_Expr *expr;
+};
+
+
+class Ast_ValList : public Ast_Base {
+public:
+    explicit Ast_ValList(Ast_Expr *expr);
+    virtual ~Ast_ValList();
+
+public:
+    virtual void illustrate();
+
+public:
+    void addExpr(Ast_Expr *expr);
+
+private:
+    std::vector<Ast_Expr *> exprs;
+};
 
 class Ast_Expr : public Ast_Base {
 public:

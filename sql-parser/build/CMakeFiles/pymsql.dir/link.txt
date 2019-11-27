@@ -1,0 +1,1 @@
+/Library/Developer/CommandLineTools/usr/bin/c++   -O0 -ggdb -Wall -Wno-deprecated-register -isysroot /Library/Developer/CommandLineTools/SDKs/MacOSX10.14.sdk -Wl,-search_paths_first -Wl,-headerpad_max_install_names  CMakeFiles/pymsql.dir/pmysql.tab.cc.o CMakeFiles/pymsql.dir/pmysql.cc.o  -o pymsql ast/libast.a 

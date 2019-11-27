@@ -1,9 +1,111 @@
 #include <time.h>
 #include "ast_expr.h"
 #include "ast_select_stmt.h"
-#include "ast_val_list.h"
-#include "ast_interval_exp.h"
-#include "ast_case_list.h"
+
+Ast_CaseList::Ast_CaseList(Ast_Expr *when, Ast_Expr *then) {
+    case_item item;
+    item.when_expr = when;
+    item.then_expr = then;
+    cases.push_back(item);
+}
+
+Ast_CaseList::~Ast_CaseList() {
+    for (std::vector<Ast_CaseList::case_item>::iterator it = cases.begin(); 
+        it != cases.end();
+        it ++) 
+    {
+        if (it->when_expr)
+            delete it->when_expr;
+        if (it->then_expr)
+            delete it->then_expr;
+    }
+}
+
+void Ast_CaseList::addCase(Ast_Expr *when, Ast_Expr *then) {
+    case_item item;
+    item.when_expr = when;
+    item.then_expr = then;
+    cases.push_back(item);
+}
+
+void Ast_CaseList::illustrate() {
+    for (int i = 0; i < this->getLevel(); i++)
+        printf("\t");
+    printf("CaseList:\n");
+    
+    this->incLevel();
+    for (std::vector<Ast_CaseList::case_item>::iterator it = cases.begin();
+        it != cases.end();
+        it ++) 
+    {
+        if (it->when_expr)
+            it->when_expr->illustrate();
+        if (it->then_expr)
+            it->then_expr->illustrate();
+    }
+    this->decLevel();
+}
+
+
+Ast_IntervalExp::Ast_IntervalExp(enum Ast_IntervalExp::interval_type interval_type, Ast_Expr *expr)
+    : interval_type(interval_type), expr(expr)
+{
+}
+
+Ast_IntervalExp::~Ast_IntervalExp() {
+    if (expr) delete expr;
+}
+
+const char * Ast_IntervalExp::intervalTypeName(enum Ast_IntervalExp::interval_type interval_type) {
+    static const char names[9][32] = {
+        "DAY HOUR",
+        "DAY MICROSECOND",
+        "DAY MINUTE",
+        "DAY SECOND",
+        "YEAR MONTH",
+        "YEAR",
+        "HOUR MICROSECOND",
+        "HOUR MINUTE",
+        "HOUR SECOND"
+    };
+
+    return names[interval_type-1];
+}
+
+void Ast_IntervalExp::illustrate() {
+    this->putLine("INTERVAL %s", this->intervalTypeName(this->interval_type));
+    this->incLevel();
+    this->expr->illustrate();
+    this->decLevel();
+}
+
+
+Ast_ValList::Ast_ValList(Ast_Expr *expr) {
+    this->exprs.push_back(expr);
+}
+
+Ast_ValList::~Ast_ValList() {
+    for (std::vector<Ast_Expr *>::iterator it = this->exprs.begin();
+        it != this->exprs.end();
+        ++ it)
+    {
+        if (*it) delete (*it);
+    }
+}
+
+void Ast_ValList::addExpr(Ast_Expr *expr) {
+    this->exprs.push_back(expr);
+}
+
+void Ast_ValList::illustrate() {
+    for (std::vector<Ast_Expr *>::iterator it = this->exprs.begin();
+        it != this->exprs.end();
+        ++ it)
+    {
+        if (*it) (*it)->illustrate();
+    }
+}
+
 
 Ast_Expr::Ast_Expr() {}
 

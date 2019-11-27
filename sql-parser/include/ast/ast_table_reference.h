@@ -5,12 +5,71 @@
 #include <vector>
 #include "ast_base.h"
 
-class Ast_JoinCondition;
 class Ast_Expr;
-class Ast_IndexHint;
 class Ast_TableSubquery;
 class Ast_TableReference;
 class Ast_TableReferences;
+class Ast_SelectStmt;
+class Ast_ColumnList;
+
+class Ast_IndexList : public Ast_Base {
+public:
+    explicit Ast_IndexList(const char *name);
+    virtual ~Ast_IndexList();
+
+public:
+    virtual void illustrate();
+
+public:
+    void addName(const char *name);
+
+private:
+    std::vector<std::string> names;
+};
+
+class Ast_IndexHint : public Ast_Base {
+public:
+    explicit Ast_IndexHint(bool use, bool for_join, Ast_IndexList *index_list);
+    virtual ~Ast_IndexHint();
+
+public:
+    virtual void illustrate();
+
+private:
+    bool use;
+    bool for_join;
+    Ast_IndexList *index_list;
+};
+
+class Ast_JoinCondition : public Ast_Base {
+public:
+
+public:
+    explicit Ast_JoinCondition(Ast_Expr *expr);
+    explicit Ast_JoinCondition(Ast_ColumnList *column_list);
+    virtual ~Ast_JoinCondition();
+
+public:
+    virtual void illustrate();
+
+private:
+    Ast_Expr *expr;
+    Ast_ColumnList *column_list;
+};
+
+
+class Ast_TableSubquery : public Ast_Base {
+public:
+    explicit Ast_TableSubquery(Ast_SelectStmt *select_stmt);
+    virtual ~Ast_TableSubquery();
+
+public:
+    virtual void illustrate();
+
+private:
+    Ast_SelectStmt *select_stmt;
+};
+
 
 class Ast_TableFactor : public Ast_Base {
 public:

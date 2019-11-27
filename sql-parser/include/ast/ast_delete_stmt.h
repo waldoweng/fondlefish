@@ -3,13 +3,29 @@
 
 #include <cstdint>
 #include <string>
+#include <vector>
 #include "ast_base.h"
 
-class Ast_DeleteList;
 class Ast_OptWhere;
 class Ast_OptOrderBy;
 class Ast_OptLimit;
 class Ast_TableReferences;
+
+class Ast_DeleteList : public Ast_Base {
+public:
+    explicit Ast_DeleteList(const char *name);
+    virtual ~Ast_DeleteList();
+
+public:
+    virtual void illustrate();
+
+public:
+    void addName(const char *name);
+
+private:
+    std::vector<std::string> names;
+};
+
 
 class Ast_DeleteStmt : public Ast_Base {
 public:

@@ -1,9 +1,30 @@
 #include "ast_delete_stmt.h"
-#include "ast_delete_list.h"
-#include "ast_opt_where.h"
-#include "ast_opt_orderby.h"
-#include "ast_opt_limit.h"
+#include "ast_opts.h"
 #include "ast_table_reference.h"
+
+Ast_DeleteList::Ast_DeleteList(const char *name) {
+    names.push_back(name);
+}
+
+Ast_DeleteList::~Ast_DeleteList() {}
+
+void Ast_DeleteList::illustrate() {
+    this->putLine("DeleteList [");
+    
+    std::string tmp;
+    for (std::vector<std::string>::iterator it = names.begin();
+        it != names.end();
+        it ++)
+        tmp += (*it + ' ');
+    
+    this->putLine(tmp.c_str());
+
+    this->putLine("]");
+}
+
+void Ast_DeleteList::addName(const char *name) {
+    names.push_back(name);
+}
 
 Ast_DeleteStmt::DeleteStmt::DeleteStmt(enum Ast_DeleteStmt::delete_opts delete_opts, const char *name, 
     Ast_OptWhere *opt_where, Ast_OptOrderBy *opt_orderby, Ast_OptLimit *opt_limit) 

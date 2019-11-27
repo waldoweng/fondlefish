@@ -1,0 +1,92 @@
+[
+{
+  "directory": "/Users/wengzhao/Desktop/fondlefish/sql-parser/build",
+  "command": "/Library/Developer/CommandLineTools/usr/bin/c++   -I/Users/wengzhao/Desktop/fondlefish/sql-parser/../include/ast -I/Users/wengzhao/Desktop/fondlefish/sql-parser -I/Users/wengzhao/Desktop/fondlefish/sql-parser/ast   -O0 -ggdb -Wall -Wno-deprecated-register -isysroot /Library/Developer/CommandLineTools/SDKs/MacOSX10.14.sdk   -std=gnu++11 -o CMakeFiles/pymsql.dir/pmysql.tab.cc.o -c /Users/wengzhao/Desktop/fondlefish/sql-parser/build/pmysql.tab.cc",
+  "file": "/Users/wengzhao/Desktop/fondlefish/sql-parser/build/pmysql.tab.cc"
+},
+{
+  "directory": "/Users/wengzhao/Desktop/fondlefish/sql-parser/build",
+  "command": "/Library/Developer/CommandLineTools/usr/bin/c++   -I/Users/wengzhao/Desktop/fondlefish/sql-parser/../include/ast -I/Users/wengzhao/Desktop/fondlefish/sql-parser -I/Users/wengzhao/Desktop/fondlefish/sql-parser/ast   -O0 -ggdb -Wall -Wno-deprecated-register -isysroot /Library/Developer/CommandLineTools/SDKs/MacOSX10.14.sdk   -std=gnu++11 -o CMakeFiles/pymsql.dir/pmysql.cc.o -c /Users/wengzhao/Desktop/fondlefish/sql-parser/build/pmysql.cc",
+  "file": "/Users/wengzhao/Desktop/fondlefish/sql-parser/build/pmysql.cc"
+},
+{
+  "directory": "/Users/wengzhao/Desktop/fondlefish/sql-parser/build/ast",
+  "command": "/Library/Developer/CommandLineTools/usr/bin/c++   -I/Users/wengzhao/Desktop/fondlefish/sql-parser/../include/ast -I/Users/wengzhao/Desktop/fondlefish/sql-parser -I/Users/wengzhao/Desktop/fondlefish/sql-parser/ast/../include/ast -I/Users/wengzhao/Desktop/fondlefish/sql-parser/ast   -O0 -ggdb -Wall -Wno-deprecated-register -isysroot /Library/Developer/CommandLineTools/SDKs/MacOSX10.14.sdk   -std=gnu++11 -o CMakeFiles/libast.dir/ast_base.cc.o -c /Users/wengzhao/Desktop/fondlefish/sql-parser/ast/ast_base.cc",
+  "file": "/Users/wengzhao/Desktop/fondlefish/sql-parser/ast/ast_base.cc"
+},
+{
+  "directory": "/Users/wengzhao/Desktop/fondlefish/sql-parser/build/ast",
+  "command": "/Library/Developer/CommandLineTools/usr/bin/c++   -I/Users/wengzhao/Desktop/fondlefish/sql-parser/../include/ast -I/Users/wengzhao/Desktop/fondlefish/sql-parser -I/Users/wengzhao/Desktop/fondlefish/sql-parser/ast/../include/ast -I/Users/wengzhao/Desktop/fondlefish/sql-parser/ast   -O0 -ggdb -Wall -Wno-deprecated-register -isysroot /Library/Developer/CommandLineTools/SDKs/MacOSX10.14.sdk   -std=gnu++11 -o CMakeFiles/libast.dir/ast_column_list.cc.o -c /Users/wengzhao/Desktop/fondlefish/sql-parser/ast/ast_column_list.cc",
+  "file": "/Users/wengzhao/Desktop/fondlefish/sql-parser/ast/ast_column_list.cc"
+},
+{
+  "directory": "/Users/wengzhao/Desktop/fondlefish/sql-parser/build/ast",
+  "command": "/Library/Developer/CommandLineTools/usr/bin/c++   -I/Users/wengzhao/Desktop/fondlefish/sql-parser/../include/ast -I/Users/wengzhao/Desktop/fondlefish/sql-parser -I/Users/wengzhao/Desktop/fondlefish/sql-parser/ast/../include/ast -I/Users/wengzhao/Desktop/fondlefish/sql-parser/ast   -O0 -ggdb -Wall -Wno-deprecated-register -isysroot /Library/Developer/CommandLineTools/SDKs/MacOSX10.14.sdk   -std=gnu++11 -o CMakeFiles/libast.dir/ast_create_database_stmt.cc.o -c /Users/wengzhao/Desktop/fondlefish/sql-parser/ast/ast_create_database_stmt.cc",
+  "file": "/Users/wengzhao/Desktop/fondlefish/sql-parser/ast/ast_create_database_stmt.cc"
+},
+{
+  "directory": "/Users/wengzhao/Desktop/fondlefish/sql-parser/build/ast",
+  "command": "/Library/Developer/CommandLineTools/usr/bin/c++   -I/Users/wengzhao/Desktop/fondlefish/sql-parser/../include/ast -I/Users/wengzhao/Desktop/fondlefish/sql-parser -I/Users/wengzhao/Desktop/fondlefish/sql-parser/ast/../include/ast -I/Users/wengzhao/Desktop/fondlefish/sql-parser/ast   -O0 -ggdb -Wall -Wno-deprecated-register -isysroot /Library/Developer/CommandLineTools/SDKs/MacOSX10.14.sdk   -std=gnu++11 -o CMakeFiles/libast.dir/ast_create_table_stmt.cc.o -c /Users/wengzhao/Desktop/fondlefish/sql-parser/ast/ast_create_table_stmt.cc",
+  "file": "/Users/wengzhao/Desktop/fondlefish/sql-parser/ast/ast_create_table_stmt.cc"
+},
+{
+  "directory": "/Users/wengzhao/Desktop/fondlefish/sql-parser/build/ast",
+  "command": "/Library/Developer/CommandLineTools/usr/bin/c++   -I/Users/wengzhao/Desktop/fondlefish/sql-parser/../include/ast -I/Users/wengzhao/Desktop/fondlefish/sql-parser -I/Users/wengzhao/Desktop/fondlefish/sql-parser/ast/../include/ast -I/Users/wengzhao/Desktop/fondlefish/sql-parser/ast   -O0 -ggdb -Wall -Wno-deprecated-register -isysroot /Library/Developer/CommandLineTools/SDKs/MacOSX10.14.sdk   -std=gnu++11 -o CMakeFiles/libast.dir/ast_delete_stmt.cc.o -c /Users/wengzhao/Desktop/fondlefish/sql-parser/ast/ast_delete_stmt.cc",
+  "file": "/Users/wengzhao/Desktop/fondlefish/sql-parser/ast/ast_delete_stmt.cc"
+},
+{
+  "directory": "/Users/wengzhao/Desktop/fondlefish/sql-parser/build/ast",
+  "command": "/Library/Developer/CommandLineTools/usr/bin/c++   -I/Users/wengzhao/Desktop/fondlefish/sql-parser/../include/ast -I/Users/wengzhao/Desktop/fondlefish/sql-parser -I/Users/wengzhao/Desktop/fondlefish/sql-parser/ast/../include/ast -I/Users/wengzhao/Desktop/fondlefish/sql-parser/ast   -O0 -ggdb -Wall -Wno-deprecated-register -isysroot /Library/Developer/CommandLineTools/SDKs/MacOSX10.14.sdk   -std=gnu++11 -o CMakeFiles/libast.dir/ast_expr.cc.o -c /Users/wengzhao/Desktop/fondlefish/sql-parser/ast/ast_expr.cc",
+  "file": "/Users/wengzhao/Desktop/fondlefish/sql-parser/ast/ast_expr.cc"
+},
+{
+  "directory": "/Users/wengzhao/Desktop/fondlefish/sql-parser/build/ast",
+  "command": "/Library/Developer/CommandLineTools/usr/bin/c++   -I/Users/wengzhao/Desktop/fondlefish/sql-parser/../include/ast -I/Users/wengzhao/Desktop/fondlefish/sql-parser -I/Users/wengzhao/Desktop/fondlefish/sql-parser/ast/../include/ast -I/Users/wengzhao/Desktop/fondlefish/sql-parser/ast   -O0 -ggdb -Wall -Wno-deprecated-register -isysroot /Library/Developer/CommandLineTools/SDKs/MacOSX10.14.sdk   -std=gnu++11 -o CMakeFiles/libast.dir/ast_insert_asgn_list.cc.o -c /Users/wengzhao/Desktop/fondlefish/sql-parser/ast/ast_insert_asgn_list.cc",
+  "file": "/Users/wengzhao/Desktop/fondlefish/sql-parser/ast/ast_insert_asgn_list.cc"
+},
+{
+  "directory": "/Users/wengzhao/Desktop/fondlefish/sql-parser/build/ast",
+  "command": "/Library/Developer/CommandLineTools/usr/bin/c++   -I/Users/wengzhao/Desktop/fondlefish/sql-parser/../include/ast -I/Users/wengzhao/Desktop/fondlefish/sql-parser -I/Users/wengzhao/Desktop/fondlefish/sql-parser/ast/../include/ast -I/Users/wengzhao/Desktop/fondlefish/sql-parser/ast   -O0 -ggdb -Wall -Wno-deprecated-register -isysroot /Library/Developer/CommandLineTools/SDKs/MacOSX10.14.sdk   -std=gnu++11 -o CMakeFiles/libast.dir/ast_insert_stmt.cc.o -c /Users/wengzhao/Desktop/fondlefish/sql-parser/ast/ast_insert_stmt.cc",
+  "file": "/Users/wengzhao/Desktop/fondlefish/sql-parser/ast/ast_insert_stmt.cc"
+},
+{
+  "directory": "/Users/wengzhao/Desktop/fondlefish/sql-parser/build/ast",
+  "command": "/Library/Developer/CommandLineTools/usr/bin/c++   -I/Users/wengzhao/Desktop/fondlefish/sql-parser/../include/ast -I/Users/wengzhao/Desktop/fondlefish/sql-parser -I/Users/wengzhao/Desktop/fondlefish/sql-parser/ast/../include/ast -I/Users/wengzhao/Desktop/fondlefish/sql-parser/ast   -O0 -ggdb -Wall -Wno-deprecated-register -isysroot /Library/Developer/CommandLineTools/SDKs/MacOSX10.14.sdk   -std=gnu++11 -o CMakeFiles/libast.dir/ast_insert_val_list.cc.o -c /Users/wengzhao/Desktop/fondlefish/sql-parser/ast/ast_insert_val_list.cc",
+  "file": "/Users/wengzhao/Desktop/fondlefish/sql-parser/ast/ast_insert_val_list.cc"
+},
+{
+  "directory": "/Users/wengzhao/Desktop/fondlefish/sql-parser/build/ast",
+  "command": "/Library/Developer/CommandLineTools/usr/bin/c++   -I/Users/wengzhao/Desktop/fondlefish/sql-parser/../include/ast -I/Users/wengzhao/Desktop/fondlefish/sql-parser -I/Users/wengzhao/Desktop/fondlefish/sql-parser/ast/../include/ast -I/Users/wengzhao/Desktop/fondlefish/sql-parser/ast   -O0 -ggdb -Wall -Wno-deprecated-register -isysroot /Library/Developer/CommandLineTools/SDKs/MacOSX10.14.sdk   -std=gnu++11 -o CMakeFiles/libast.dir/ast_opts.cc.o -c /Users/wengzhao/Desktop/fondlefish/sql-parser/ast/ast_opts.cc",
+  "file": "/Users/wengzhao/Desktop/fondlefish/sql-parser/ast/ast_opts.cc"
+},
+{
+  "directory": "/Users/wengzhao/Desktop/fondlefish/sql-parser/build/ast",
+  "command": "/Library/Developer/CommandLineTools/usr/bin/c++   -I/Users/wengzhao/Desktop/fondlefish/sql-parser/../include/ast -I/Users/wengzhao/Desktop/fondlefish/sql-parser -I/Users/wengzhao/Desktop/fondlefish/sql-parser/ast/../include/ast -I/Users/wengzhao/Desktop/fondlefish/sql-parser/ast   -O0 -ggdb -Wall -Wno-deprecated-register -isysroot /Library/Developer/CommandLineTools/SDKs/MacOSX10.14.sdk   -std=gnu++11 -o CMakeFiles/libast.dir/ast_replace_stmt.cc.o -c /Users/wengzhao/Desktop/fondlefish/sql-parser/ast/ast_replace_stmt.cc",
+  "file": "/Users/wengzhao/Desktop/fondlefish/sql-parser/ast/ast_replace_stmt.cc"
+},
+{
+  "directory": "/Users/wengzhao/Desktop/fondlefish/sql-parser/build/ast",
+  "command": "/Library/Developer/CommandLineTools/usr/bin/c++   -I/Users/wengzhao/Desktop/fondlefish/sql-parser/../include/ast -I/Users/wengzhao/Desktop/fondlefish/sql-parser -I/Users/wengzhao/Desktop/fondlefish/sql-parser/ast/../include/ast -I/Users/wengzhao/Desktop/fondlefish/sql-parser/ast   -O0 -ggdb -Wall -Wno-deprecated-register -isysroot /Library/Developer/CommandLineTools/SDKs/MacOSX10.14.sdk   -std=gnu++11 -o CMakeFiles/libast.dir/ast_select_stmt.cc.o -c /Users/wengzhao/Desktop/fondlefish/sql-parser/ast/ast_select_stmt.cc",
+  "file": "/Users/wengzhao/Desktop/fondlefish/sql-parser/ast/ast_select_stmt.cc"
+},
+{
+  "directory": "/Users/wengzhao/Desktop/fondlefish/sql-parser/build/ast",
+  "command": "/Library/Developer/CommandLineTools/usr/bin/c++   -I/Users/wengzhao/Desktop/fondlefish/sql-parser/../include/ast -I/Users/wengzhao/Desktop/fondlefish/sql-parser -I/Users/wengzhao/Desktop/fondlefish/sql-parser/ast/../include/ast -I/Users/wengzhao/Desktop/fondlefish/sql-parser/ast   -O0 -ggdb -Wall -Wno-deprecated-register -isysroot /Library/Developer/CommandLineTools/SDKs/MacOSX10.14.sdk   -std=gnu++11 -o CMakeFiles/libast.dir/ast_set_stmt.cc.o -c /Users/wengzhao/Desktop/fondlefish/sql-parser/ast/ast_set_stmt.cc",
+  "file": "/Users/wengzhao/Desktop/fondlefish/sql-parser/ast/ast_set_stmt.cc"
+},
+{
+  "directory": "/Users/wengzhao/Desktop/fondlefish/sql-parser/build/ast",
+  "command": "/Library/Developer/CommandLineTools/usr/bin/c++   -I/Users/wengzhao/Desktop/fondlefish/sql-parser/../include/ast -I/Users/wengzhao/Desktop/fondlefish/sql-parser -I/Users/wengzhao/Desktop/fondlefish/sql-parser/ast/../include/ast -I/Users/wengzhao/Desktop/fondlefish/sql-parser/ast   -O0 -ggdb -Wall -Wno-deprecated-register -isysroot /Library/Developer/CommandLineTools/SDKs/MacOSX10.14.sdk   -std=gnu++11 -o CMakeFiles/libast.dir/ast_stmt_list.cc.o -c /Users/wengzhao/Desktop/fondlefish/sql-parser/ast/ast_stmt_list.cc",
+  "file": "/Users/wengzhao/Desktop/fondlefish/sql-parser/ast/ast_stmt_list.cc"
+},
+{
+  "directory": "/Users/wengzhao/Desktop/fondlefish/sql-parser/build/ast",
+  "command": "/Library/Developer/CommandLineTools/usr/bin/c++   -I/Users/wengzhao/Desktop/fondlefish/sql-parser/../include/ast -I/Users/wengzhao/Desktop/fondlefish/sql-parser -I/Users/wengzhao/Desktop/fondlefish/sql-parser/ast/../include/ast -I/Users/wengzhao/Desktop/fondlefish/sql-parser/ast   -O0 -ggdb -Wall -Wno-deprecated-register -isysroot /Library/Developer/CommandLineTools/SDKs/MacOSX10.14.sdk   -std=gnu++11 -o CMakeFiles/libast.dir/ast_table_reference.cc.o -c /Users/wengzhao/Desktop/fondlefish/sql-parser/ast/ast_table_reference.cc",
+  "file": "/Users/wengzhao/Desktop/fondlefish/sql-parser/ast/ast_table_reference.cc"
+},
+{
+  "directory": "/Users/wengzhao/Desktop/fondlefish/sql-parser/build/ast",
+  "command": "/Library/Developer/CommandLineTools/usr/bin/c++   -I/Users/wengzhao/Desktop/fondlefish/sql-parser/../include/ast -I/Users/wengzhao/Desktop/fondlefish/sql-parser -I/Users/wengzhao/Desktop/fondlefish/sql-parser/ast/../include/ast -I/Users/wengzhao/Desktop/fondlefish/sql-parser/ast   -O0 -ggdb -Wall -Wno-deprecated-register -isysroot /Library/Developer/CommandLineTools/SDKs/MacOSX10.14.sdk   -std=gnu++11 -o CMakeFiles/libast.dir/ast_update_stmt.cc.o -c /Users/wengzhao/Desktop/fondlefish/sql-parser/ast/ast_update_stmt.cc",
+  "file": "/Users/wengzhao/Desktop/fondlefish/sql-parser/ast/ast_update_stmt.cc"
+}
+]

@@ -1,7 +1,6 @@
 #include "ast_replace_stmt.h"
-#include "ast_opt_col_names.h"
+#include "ast_opts.h"
 #include "ast_insert_val_list.h"
-#include "ast_opt_on_dup_update.h"
 #include "ast_insert_asgn_list.h"
 #include "ast_select_stmt.h"
 

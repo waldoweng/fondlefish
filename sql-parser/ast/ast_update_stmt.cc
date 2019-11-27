@@ -1,9 +1,7 @@
 #include "ast_update_stmt.h"
 #include "ast_expr.h"
 #include "ast_table_reference.h"
-#include "ast_opt_where.h"
-#include "ast_opt_orderby.h"
-#include "ast_opt_limit.h"
+#include "ast_opts.h"
 
 Ast_UpdateAsgnList::UpdateAsgn::UpdateAsgn(const char *tablename, const char *name, Ast_Expr *expr)
     : tablename(tablename), name(name), expr(expr)
