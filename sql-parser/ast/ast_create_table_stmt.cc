@@ -20,15 +20,17 @@ void Ast_EnumList::addEnum(const char *name) {
     enum_list.push_back(name);
 }
 
-void Ast_EnumList::illustrate() {
-    this->putLine("EnumList: [");
-    for (std::vector<std::string>::iterator it = enum_list.begin();
+std::string Ast_EnumList::format() {
+    std::string str;
+    if (!this->enum_list.empty())
+        str = this->indentf("%s", this->enum_list[0].c_str());
+
+    for (std::vector<std::string>::iterator it = enum_list.begin() + 1;
         it != enum_list.end();
-        it ++)
-    {
-        printf("%s ", it->c_str());
+        it ++) {
+        str = this->rawf(", %s", it->c_str());
     }
-    this->putLine("]");
+    return str;
 }
 
 
@@ -186,12 +188,12 @@ const char * Ast_DataType::typeName(enum Ast_DataType::data_type data_type) {
     return names[data_type-1];
 }
 
-void Ast_DataType::illustrate(enum Ast_DataType::data_type data_type) {
-    this->putLine("DataType %s", typeName(data_type));
+std::string Ast_DataType::format(enum Ast_DataType::data_type data_type) {
+    return this->rawf("%s", typeName(data_type));
 }
 
-void Ast_DataType::illustrate(enum Ast_DataType::data_type data_type, Ast_DataType::NumericType numeric) {
-    this->putLine("DataType %s [LENGTH:%d %s %s]", 
+std::string Ast_DataType::format(enum Ast_DataType::data_type data_type, Ast_DataType::NumericType numeric) {
+    return this->rawf("%s(%d) %s %s", 
         typeName(data_type),
         numeric.length,
         numeric.unsigned_flag ? "UNSIGNED" : "",
@@ -199,8 +201,8 @@ void Ast_DataType::illustrate(enum Ast_DataType::data_type data_type, Ast_DataTy
     );
 }
 
-void Ast_DataType::illustrate(enum Ast_DataType::data_type data_type, Ast_DataType::StringType str) {
-    this->putLine("DataType %s [LENGTH:%d %s %s %s]",
+std::string Ast_DataType::format(enum Ast_DataType::data_type data_type, Ast_DataType::StringType str) {
+    return this->rawf("%s(%d) %s %s %s",
         typeName(data_type),
         str.length,
         str.binary_flag ? "BINARY" : "",
@@ -209,18 +211,19 @@ void Ast_DataType::illustrate(enum Ast_DataType::data_type data_type, Ast_DataTy
     );
 }
 
-void Ast_DataType::illustrate(enum Ast_DataType::data_type data_type, Ast_DataType::CompondType compond) {
-    this->putLine("DataType %s [%s %s]",
+std::string Ast_DataType::format(enum Ast_DataType::data_type data_type, Ast_DataType::CompondType compond) {
+    std::string str = this->rawf("%s %s %s(",
         typeName(data_type),
         compond.charset.empty() ? compond.charset.c_str() : "",
         compond.collate.empty() ? compond.collate.c_str() : ""
     );
-    this->incLevel();
-    compond.enum_list->illustrate();
-    this->decLevel();
+
+    str += compond.enum_list->format();
+    str += ')';
+    return str;
 }
 
-void Ast_DataType::illustrate() {
+std::string Ast_DataType::format() {
     switch (data_type)
     {
     case Ast_DataType::DATA_TYPE_BIT:
@@ -233,8 +236,7 @@ void Ast_DataType::illustrate() {
     case Ast_DataType::DATA_TYPE_DOUBLE:
     case Ast_DataType::DATA_TYPE_FLOAT:
     case Ast_DataType::DATA_TYPE_DECIMAL:
-        this->illustrate(data_type, *(this->type_detail.numeric));
-        break;
+        return this->format(data_type, *(this->type_detail.numeric));
     case Ast_DataType::DATA_TYPE_CHAR:
     case Ast_DataType::DATA_TYPE_VARCHAR:
     case Ast_DataType::DATA_TYPE_BINARY:
@@ -243,15 +245,12 @@ void Ast_DataType::illustrate() {
     case Ast_DataType::DATA_TYPE_TEXT:
     case Ast_DataType::DATA_TYPE_MEDIUMTEXT:
     case Ast_DataType::DATA_TYPE_LONGTEXT:
-        this->illustrate(data_type, *(this->type_detail.str));
-        break;
+        return this->format(data_type, *(this->type_detail.str));
     case Ast_DataType::DATA_TYPE_ENUM:
     case Ast_DataType::DATA_TYPE_SET:
-        this->illustrate(data_type, *(this->type_detail.compond));
-        break;
+        return this->format(data_type, *(this->type_detail.compond));
     default:
-        this->illustrate(data_type);
-        break;
+        return this->format(data_type);
     }
 }
 
@@ -325,8 +324,9 @@ void Ast_ColumnAttrs::addAttr(enum Ast_ColumnAttrs::mask mask, Ast_ColumnList *c
     attrs[mask] = _attr;
 }
 
-void Ast_ColumnAttrs::illustrate() {
-    this->putLine("Attrs: [");
+std::string Ast_ColumnAttrs::format() {
+    std::string str;
+
     for (std::map<enum Ast_ColumnAttrs::mask, union Ast_ColumnAttrs::_attr>::iterator it = attrs.begin();
         it != attrs.end();
         it ++) 
@@ -334,47 +334,44 @@ void Ast_ColumnAttrs::illustrate() {
         switch (it->first)
         {
         case ATTR_NOT_NULL:
-            printf(" NOT NULL ");
+            str += " NOT NULL";
             break;
         case ATTR_DEFAULT_INTNUM:
-            printf(" DEFAULT %d ", it->second.int_attr);
+            str += this->rawf(" DEFAULT %d", it->second.int_attr);
             break;
         case ATTR_DEFAULT_APPROXNUM:
-            printf(" DEFAULT %lf ", it->second.float_attr);
+            str += this->rawf(" DEFAULT %lf", it->second.float_attr);
             break;
         case ATTR_DEFAULT_BOOL:
-            printf(it->second.int_attr ? " DEFAULT TRUE " : " DEFAULT FALSE ");
+            str += this->rawf(it->second.int_attr ? " DEFAULT TRUE" : " DEFAULT FALSE");
             break;
         case ATTR_AUTO_INCREMENT:
-            printf(" AUTO INCREMENT ");
+            str += " AUTO_INCREMENT";
             break;
         case ATTR_UNIQ_KEY:
-            printf(" UNIQUE KEY ");
+            str += " UNIQUE KEY";
             break;
         case ATTR_PRIMARY_KEY:
-            printf(" PRIMARY KEY ");
+            str += " PRIMARY KEY";
             break;
         case ATTR_INDEX_KEY:
-            printf(" INDEX ");
+            str += " INDEX";
             break;
         case ATTR_UNIQ:
-            printf(" UNIQUE KEY(\n");
-            this->incLevel();
-            it->second.column_list->illustrate();
-            this->decLevel();
-            printf(") ");
+            str += this->rawf(" UNIQUE KEY(%s)", it->second.column_list->format().c_str());
             break;
         case ATTR_DEFAULT_STRING:
-            printf(" DEFAULT %s ", it->second.str_attr);
+            str += this->rawf(" DEFAULT %s", it->second.str_attr);
             break;
         case ATTR_COMMENT:
-            printf(" COMMENT %s ", it->second.str_attr);
+            str += this->rawf(" COMMENT %s", it->second.str_attr);
             break;
         default:
             break;
         }
     }
-    this->putLine("]\n");
+
+    return str;
 }
 
 Ast_CreateDefinition::DataDefinition::DataDefinition(
@@ -433,27 +430,29 @@ const char *Ast_CreateDefinition::keyTypeName(enum Ast_CreateDefinition::key_typ
     return names[key_type];
 }
 
-void Ast_CreateDefinition::illustrate() {
+std::string Ast_CreateDefinition::format() {
+    std::string str;
+
     switch (def_type)
     {
     case Ast_CreateDefinition::INDEX_DEFINITION:
-        this->putLine("CreateDefinition INDEX %s [", this->keyTypeName(this->def_detail.index_def->key_type));
-        this->incLevel();
-        this->def_detail.index_def->column_list->illustrate();
-        this->decLevel();
-        this->putLine("]");
+        str = this->rawf("%s %s", 
+            this->keyTypeName(this->def_detail.index_def->key_type),
+            this->def_detail.index_def->column_list->format().c_str()
+        );
         break;
     case Ast_CreateDefinition::DATA_DEFINITION:
-        this->putLine("CreateDefinition DATA %s [", this->def_detail.data_def->name.c_str());
-        this->incLevel();
-        this->def_detail.data_def->data_type->illustrate();
-        this->def_detail.data_def->column_attrs->illustrate();
-        this->decLevel();
-        this->putLine("]");
+        str = this->rawf("%s %s %s", 
+            this->def_detail.data_def->name.c_str(),
+            this->def_detail.data_def->data_type->format().c_str(),
+            this->def_detail.data_def->column_attrs->format().c_str()
+        );
         break;
     default:
         break;
     }
+    
+    return str;
 }
 
 
@@ -474,13 +473,23 @@ void Ast_CreateColList::addCreateDefinition(Ast_CreateDefinition *create_definit
     definitions.push_back(create_definition);
 }
 
-void Ast_CreateColList::illustrate() {
-    for (std::vector<Ast_CreateDefinition *>::iterator it = definitions.begin();
-        it != definitions.end();
-        it ++)
-    {
-        (*it)->illustrate();
+std::string Ast_CreateColList::format() {
+    std::string str;
+
+    if (!definitions.empty()) {
+        str += definitions[0]->format();
+
+        for (std::vector<Ast_CreateDefinition *>::iterator it = definitions.begin() + 1;
+            it != definitions.end();
+            it ++)
+        {
+            str += '\n';
+            str += (*it)->format();
+        }
+
     }
+
+    return str;
 }
 
 
@@ -501,12 +510,10 @@ const char *Ast_CreateSelectStmt::OptName(uint32_t opt_ignore_replace) {
     return names[opt_ignore_replace];
 }
 
-void Ast_CreateSelectStmt::illustrate() {
-    this->putLine("Create Select Stmt: %s [", this->OptName(this->opt_ignore_replace));
-    this->incLevel();
-    this->select_stmt->illustrate();
-    this->decLevel();
-    this->putLine("]");
+std::string Ast_CreateSelectStmt::format() {
+    std::string str = this->rawf("%s", this->OptName(this->opt_ignore_replace));
+    std::string str_sel = this->indentf("%s", this->select_stmt->format().c_str());
+    return str + '\n' + str_sel;
 }
 
 
@@ -561,16 +568,12 @@ Ast_CreateTableStmt::~Ast_CreateTableStmt() {
         delete create_select_stmt;
 }
 
-void Ast_CreateTableStmt::illustrate() {
-    this->putLine("Create Table [%s.%s] %s %s",
-        this->database_name.empty() ? "" : this->database_name.c_str(),
-        this->name.empty() ? "" : this->name.c_str(),
+std::string Ast_CreateTableStmt::format() {
+    return this->rawf("CREATE %s TABLE %s %s %s %s",
         opt_temporary ? "TEMPORARY" : "",
-        opt_if_not_exists ? "IF NOT EXISTS" : "");
-    this->incLevel();
-    if (this->create_col_list)
-        this->create_col_list->illustrate();
-    if (this->create_select_stmt)
-        this->create_select_stmt->illustrate();
-    this->decLevel();
+        opt_if_not_exists ? "IF NOT EXISTS" : "",
+        this->database_name.empty() ? this->name.c_str() : (this->database_name + '.' + this->name).c_str(),
+        this->create_col_list ? ('(' + this->create_col_list->format() + ')').c_str() : "",
+        this->create_select_stmt ? this->create_select_stmt->format().c_str() : ""
+    );
 }

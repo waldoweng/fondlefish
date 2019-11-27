@@ -30,7 +30,7 @@ public:
     virtual ~Ast_EnumList();
 
 public:
-    virtual void illustrate();
+    virtual std::string format();
 
 public:
     void addEnum(const char *name);
@@ -100,14 +100,14 @@ public:
     virtual ~Ast_DataType();
 
 public:
-    virtual void illustrate();
+    virtual std::string format();
 
 private:
     const char * typeName(data_type data_type);
-    void illustrate(data_type data_type);
-    void illustrate(data_type data_type, NumericType numeric);
-    void illustrate(data_type data_type, StringType str);
-    void illustrate(data_type data_type, CompondType compond);
+    std::string format(data_type data_type);
+    std::string format(data_type data_type, NumericType numeric);
+    std::string format(data_type data_type, StringType str);
+    std::string format(data_type data_type, CompondType compond);
 
 private:
     data_type data_type;
@@ -146,7 +146,7 @@ public:
     virtual ~Ast_ColumnAttrs();
 
 public:
-    virtual void illustrate();
+    virtual std::string format();
 
 public:
     void addAttr(mask mask);
@@ -199,7 +199,7 @@ public:
     virtual ~Ast_CreateDefinition();
 
 public:
-    virtual void illustrate();
+    virtual std::string format();
 
 private:
     const char * keyTypeName(key_type key_type);
@@ -218,7 +218,7 @@ public:
     virtual ~Ast_CreateColList();
 
 public:
-    virtual void illustrate();
+    virtual std::string format();
 
 public:
     void addCreateDefinition(Ast_CreateDefinition *create_definition);
@@ -239,7 +239,7 @@ public:
     virtual ~Ast_CreateSelectStmt();
 
 public:
-    virtual void illustrate();
+    virtual std::string format();
 
 private:
     const char * OptName(uint32_t opt_ignore_replace);
@@ -266,7 +266,7 @@ public:
     virtual ~Ast_CreateTableStmt();
 
 public:
-    virtual void illustrate();
+    virtual std::string format();
 
 private:
     bool opt_temporary;

@@ -6,9 +6,9 @@ Ast_CreateDatabaseStmt::Ast_CreateDatabaseStmt(bool opt_if_not_exists, const cha
 
 Ast_CreateDatabaseStmt::~Ast_CreateDatabaseStmt() {}
 
-void Ast_CreateDatabaseStmt::illustrate() {
+std::string Ast_CreateDatabaseStmt::format() {
     if (opt_if_not_exists)
-        printf("Create If Not Exists Database %s;\n", name.c_str());
+        return this->indentf("CREATE IF NOT EXIST DATABASE %s", name.c_str());
     else
-        printf("Create Database %s;\n", name.c_str());
+        return this->indentf("CREATE DATABASE %s", name.c_str());
 }

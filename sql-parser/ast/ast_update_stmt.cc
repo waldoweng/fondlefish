@@ -49,16 +49,30 @@ void Ast_UpdateAsgnList::addUpdateAsgn(const char *tablename, const char *name, 
     );
 }
 
-void Ast_UpdateAsgnList::illustrate() {
-    for (std::vector<Ast_UpdateAsgnList::UpdateAsgn *>::iterator it = this->update_asgn_list.begin();
-        it != this->update_asgn_list.end();
-        it ++)
-    {
-        this->putLine("ASSIGN %s.%s TO", 
-            (*it)->tablename.c_str(),
-            (*it)->name.c_str());
-        (*it)->expr->illustrate();
+std::string Ast_UpdateAsgnList::format() {
+    std::string str;
+
+    if (!this->update_asgn_list.empty()) {
+        str = this->rawf("%s = %s", 
+            this->update_asgn_list[0]->tablename.empty() 
+                ? this->update_asgn_list[0]->name.c_str() 
+                : (this->update_asgn_list[0]->name + this->update_asgn_list[0]->tablename).c_str(),
+            this->update_asgn_list[0]->expr->format().c_str()
+        );
+
+        for (std::vector<Ast_UpdateAsgnList::UpdateAsgn *>::iterator it = this->update_asgn_list.begin();
+            it != this->update_asgn_list.end();
+            it ++)
+        {
+            str += ", ";
+            str += this->rawf("%s = %s", 
+                (*it)->tablename.empty() ? (*it)->name.c_str() : ((*it)->name + (*it)->tablename).c_str(),
+                (*it)->expr->format().c_str()
+            );
+        }
     }
+
+    return str;
 }
 
 Ast_UpdateStmt::Ast_UpdateStmt(enum Ast_UpdateStmt::update_opts update_opts, 
@@ -78,20 +92,21 @@ Ast_UpdateStmt::~Ast_UpdateStmt() {
 }
 
 const char * Ast_UpdateStmt::updateOptsName(enum Ast_UpdateStmt::update_opts update_opts) {
-    static const char names[2][32] = {
-        "LOW PRIORITY",
+    static const char names[3][32] = {
+        "",
+        "LOW_PRIORITY",
         "IGNORE"
     };
-    return names[update_opts-1];
+    return names[update_opts];
 }
 
-void Ast_UpdateStmt::illustrate() {
-    this->putLine("UPDATE STMT %s", this->updateOptsName(this->update_opts));
-    this->incLevel();
-    if (this->references) this->references->illustrate();
-    if (this->update_asgn_list) this->update_asgn_list->illustrate();
-    if (this->opt_where) this->opt_where->illustrate();
-    if (this->opt_orderby) this->opt_orderby->illustrate();
-    if (this->opt_limit) this->opt_limit->illustrate();
-    this->decLevel();
+std::string Ast_UpdateStmt::format() {
+    return this->rawf("UPDATE %s %s SET %s %s %s %s", 
+        this->updateOptsName(this->update_opts),
+        this->references ? this->references->format().c_str() : "",
+        this->update_asgn_list ? this->update_asgn_list->format().c_str() : "",
+        this->opt_where ? this->opt_where->format().c_str() : "",
+        this->opt_orderby ? this->opt_orderby->format().c_str() : "",
+        this->opt_limit ? this->opt_limit->format().c_str() : ""
+    );
 }

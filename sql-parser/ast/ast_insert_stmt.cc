@@ -1,3 +1,4 @@
+#include <map>
 #include "ast_insert_stmt.h"
 #include "ast_opts.h"
 #include "ast_insert_val_list.h"
@@ -101,50 +102,55 @@ Ast_InsertStmt::~Ast_InsertStmt() {
     }
 }
 
-const char * Ast_InsertStmt::insertOptName(enum Ast_InsertStmt::insert_opts insert_opts) {
-    static const char names[4][32] = {
-        "LOW PRIORITY",
-        "DELAYED",
-        "HIGH PRIORITY",
-        "IGNORE"
+std::string Ast_InsertStmt::insertOptName(enum Ast_InsertStmt::insert_opts insert_opts) {
+    const static std::map<int, std::string> names = {
+        {1 << 0, "LOW PRIORITY"},
+        {1 << 1, "DELAYED"},
+        {1 << 2, "HIGH PRIORITY"},
+        {1 << 3, "IGNORE"}
     };
-    return names[insert_opts-1];
+
+    std::string str;
+    for (std::map<int, std::string>::const_iterator it = names.begin();
+        it != names.end();
+        ++it) {
+            if (insert_opts & it->first) {
+                str += it->second;
+            }
+        }
+
+    return str;
 }
 
-void Ast_InsertStmt::illustrate() {
+std::string Ast_InsertStmt::format() {
     switch (this->insert_type)
     {
     case Ast_InsertStmt::INSERT_TYPE_VALLIST:
-        this->putLine("INSERT STMT %s %s", 
-            this->insertOptName(this->stmt._val_list->insert_opts), 
-            this->stmt._val_list->name.c_str());
-        this->incLevel();
-        this->stmt._val_list->opt_col_names->illustrate();
-        this->stmt._val_list->insert_val_list->illustrate();
-        this->stmt._val_list->opt_dupupdate->illustrate();
-        this->decLevel();
-        break;
+        return this->rawf("INSERT %s INTO %s %s VALUES %s %s", 
+            this->insertOptName(this->stmt._val_list->insert_opts).c_str(),
+            this->stmt._val_list->name.c_str(),
+            this->stmt._val_list->opt_col_names->format().c_str(),
+            this->stmt._val_list->opt_col_names->format().c_str(),
+            this->stmt._val_list->opt_dupupdate->format().c_str()
+        );
     case Ast_InsertStmt::INSERT_TYPE_ASGNLIST:
-        this->putLine("INSERT STMT %s %s", 
-            this->insertOptName(this->stmt._asgn_list->insert_opts),
-            this->stmt._asgn_list->name.c_str());
-        this->incLevel();
-        this->stmt._asgn_list->insert_asgn_list->illustrate();
-        this->stmt._asgn_list->opt_ondupupdate->illustrate();
-        this->decLevel();
-        break;
+        return this->rawf("INSERT %s INTO %s SET %s %s", 
+            this->insertOptName(this->stmt._asgn_list->insert_opts).c_str(),
+            this->stmt._asgn_list->name.c_str(),
+            this->stmt._asgn_list->insert_asgn_list->format().c_str(),
+            this->stmt._asgn_list->opt_ondupupdate->format().c_str()
+        );
     case Ast_InsertStmt::INSERT_TYPE_SELECT:
-        this->putLine("INSERT STMT %s %s", 
-            this->insertOptName(this->stmt._select->insert_opts),
-            this->stmt._select->name.c_str());
-        this->incLevel();
-        this->stmt._select->opt_col_names->illustrate();
-        this->stmt._select->select_stmt->illustrate();
-        this->stmt._select->opt_ondupupdate->illustrate();
-        this->decLevel();
-        break;
+        return this->rawf("INSERT %s INTO %s %s %s %s", 
+            this->insertOptName(this->stmt._select->insert_opts).c_str(),
+            this->stmt._select->name.c_str(),
+            this->stmt._select->opt_col_names->format().c_str(),
+            this->stmt._select->select_stmt->format().c_str(),
+            this->stmt._select->opt_ondupupdate->format().c_str()
+        );
     default:
-        this->putLine("unrecognized insert type!");
         break;
     }
+
+    return "";
 }

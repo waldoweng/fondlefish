@@ -1,6 +1,8 @@
 #ifndef FONDLE_FISH_MYSQL_AST_BASE_H_INCLUDED
 #define FONDLE_FISH_MYSQL_AST_BASE_H_INCLUDED
 
+#include <string>
+
 class Ast_Base {
 public:
     explicit Ast_Base();
@@ -13,10 +15,11 @@ public:
     void incLevel();
     void decLevel();
 
-    virtual void illustrate() = 0;
+    virtual std::string format() = 0;
 
 protected:
-    void putLine(const char *fmt, ...);
+    std::string indentf(const char *fmt, ...);
+    std::string rawf(const char *fmt, ...);
 
 private:
     int node_id;

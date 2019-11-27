@@ -13,15 +13,11 @@ Ast_SelectExpr::~Ast_SelectExpr() {
     if (expr) delete expr;
 }
 
-void Ast_SelectExpr::illustrate() {
-    if(alias.empty())
-        this->putLine("SELECT");
+std::string Ast_SelectExpr::format() {
+    if(!alias.empty())
+        return this->rawf("%s AS %s", this->expr->format().c_str(), alias.c_str());
     else
-        this->putLine("SELECT AS %s", alias.c_str());
-
-    this->incLevel();
-    this->expr->illustrate();
-    this->decLevel();
+        return this->expr->format();
 }
 
 Ast_SelectExprList::Ast_SelectExprList()
@@ -46,16 +42,24 @@ void Ast_SelectExprList::addSelectExpr(Ast_SelectExpr *expr) {
     exprs.push_back(expr);
 }
 
-void Ast_SelectExprList::illustrate() {
-    for (std::vector<Ast_SelectExpr *>::iterator it = exprs.begin();
-        it != exprs.end();
-        it ++)
-    {
-        if (*it)
-            (*it)->illustrate();
-        else
-            this->putLine("SELECT ALL");
+std::string Ast_SelectExprList::format() {
+    std::string str;
+
+    if (!exprs.empty()) {
+        str = (exprs[0] ? exprs[0]->format() : "*");
+
+        for (std::vector<Ast_SelectExpr *>::iterator it = exprs.begin() + 1;
+            it != exprs.end();
+            it ++)
+        {
+            if (*it)
+                str += (", " + (*it)->format());
+            else
+                str += ", *";
+        }
     }
+
+    return str;
 }
 Ast_SelectStmt::TablelessSelectStmt::TablelessSelectStmt(
     enum Ast_SelectStmt::select_opts select_opts, Ast_SelectExprList *select_expr_list)
@@ -134,14 +138,14 @@ Ast_SelectStmt::~Ast_SelectStmt() {
 
 const char * Ast_SelectStmt::selectOptsName(Ast_SelectStmt::select_opts select_opts) {
     static const std::map<int, std::string> names = {
-        {Ast_SelectStmt::SELECT_OPTS_ALL, "ALL "},
-        {Ast_SelectStmt::SELECT_OPTS_DISTINCT, "DISTINCT "},
-        {Ast_SelectStmt::SELECT_OPTS_DISTINCTROW, "DISTINCT ROW "},
-        {Ast_SelectStmt::SELECT_OPTS_HIGH_PRIORITY, "HIGH PRIORITY "},
-        {Ast_SelectStmt::SELECT_OPTS_STRAIGHT_JOIN, "STRAIGHT JOIN "},
-        {Ast_SelectStmt::SELECT_OPTS_SQL_SMALL_RESULT, "SQL SMALL RESULT "},
-        {Ast_SelectStmt::SELECT_OPTS_SQL_BIG_RESULT, "SQL BIG RESULT "},
-        {Ast_SelectStmt::SELECT_OPTS_SQL_CALC_FOUND_ROWS, "SQL CALC FOUND ROWS "}
+        {Ast_SelectStmt::SELECT_OPTS_ALL, "ALL"},
+        {Ast_SelectStmt::SELECT_OPTS_DISTINCT, "DISTINCT"},
+        {Ast_SelectStmt::SELECT_OPTS_DISTINCTROW, "DISTINCT_ROW"},
+        {Ast_SelectStmt::SELECT_OPTS_HIGH_PRIORITY, "HIGH_PRIORITY"},
+        {Ast_SelectStmt::SELECT_OPTS_STRAIGHT_JOIN, "STRAIGHT_JOIN"},
+        {Ast_SelectStmt::SELECT_OPTS_SQL_SMALL_RESULT, "SQL_SMALL_RESULT"},
+        {Ast_SelectStmt::SELECT_OPTS_SQL_BIG_RESULT, "SQL_BIG_RESULT"},
+        {Ast_SelectStmt::SELECT_OPTS_SQL_CALC_FOUND_ROWS, "SQL_CALC_FOUND_ROWS"}
     };
     
     static std::string s;
@@ -151,36 +155,37 @@ const char * Ast_SelectStmt::selectOptsName(Ast_SelectStmt::select_opts select_o
         it != names.end();
         ++ it)
     {
-        if (select_opts & it->first)
+        if (select_opts & it->first) {
+            if (!s.empty())
+                s += ' ';
             s += (it->second);
+        }
     }
     
     return s.c_str();
 }
 
-void Ast_SelectStmt::illustrate() {
+std::string Ast_SelectStmt::format() {
     switch (this->select_type)
     {
     case Ast_SelectStmt::SELECT_TYPE_TABLELESS:
-        this->putLine("SELECT STMT %s", this->selectOptsName(this->stmt.tableless->select_opts));
-        this->incLevel();
-        this->stmt.tableless->select_expr_list->illustrate();
-        this->decLevel();
-        break;
+        return this->rawf("SELECT %s %s", 
+            this->selectOptsName(this->stmt.tableless->select_opts),
+            this->stmt.tableless->select_expr_list->format().c_str()
+        );
     case Ast_SelectStmt::SELECT_TYPE_TABLE:
-        this->putLine("SELECT STMT %s", this->selectOptsName(this->stmt.table->select_opts));
-        this->incLevel();
-        this->stmt.table->select_expr_list->illustrate();
-        this->stmt.table->table_references->illustrate();
-        if (this->stmt.table->opt_where) this->stmt.table->opt_where->illustrate();
-        if (this->stmt.table->opt_groupby) this->stmt.table->opt_groupby->illustrate();
-        if (this->stmt.table->opt_having) this->stmt.table->opt_having->illustrate();
-        if (this->stmt.table->opt_orderby) this->stmt.table->opt_orderby->illustrate();
-        if (this->stmt.table->opt_limit) this->stmt.table->opt_limit->illustrate();
-        if (this->stmt.table->opt_into_list) this->stmt.table->opt_into_list->illustrate();
-        this->decLevel();
-        break;
+        return this->rawf("SELECT %s %s FROM %s %s %s %s %s %s %s", 
+            this->selectOptsName(this->stmt.table->select_opts),
+            this->stmt.table->select_expr_list->format().c_str(),
+            this->stmt.table->table_references->format().c_str(),
+            this->stmt.table->opt_where ? this->stmt.table->opt_where->format().c_str() : "",
+            this->stmt.table->opt_groupby ? this->stmt.table->opt_groupby->format().c_str() : "",
+            this->stmt.table->opt_having ? this->stmt.table->opt_having->format().c_str() : "",
+            this->stmt.table->opt_orderby ? this->stmt.table->opt_orderby->format().c_str() : "",
+            this->stmt.table->opt_limit ? this->stmt.table->opt_limit->format().c_str() : "",
+            this->stmt.table->opt_into_list ? this->stmt.table->opt_into_list->format().c_str() : ""
+        );
     default:
-        break;
+        return "";
     }
 }

@@ -29,7 +29,7 @@ public:
     virtual ~Ast_UpdateAsgnList();
 
 public:
-    virtual void illustrate();
+    virtual std::string format();
 
 public:
     void addUpdateAsgn(const char *name, Ast_Expr *expr);
@@ -52,7 +52,7 @@ public:
     virtual ~Ast_UpdateStmt();
 
 public:
-    virtual void illustrate();
+    virtual std::string format();
 
 private:
     const char * updateOptsName(update_opts update_opts);

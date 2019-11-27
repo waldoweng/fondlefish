@@ -23,7 +23,7 @@ public:
     };
 
 public:
-    virtual void illustrate();
+    virtual std::string format();
 
 public:
     void addInsertAsgn(const char *name, Ast_Expr *expr);

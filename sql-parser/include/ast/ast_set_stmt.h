@@ -14,7 +14,7 @@ public:
     virtual ~Ast_SetExpr();
 
 public:
-    virtual void illustrate();
+    virtual std::string format();
 
 private:
     std::string uservar;
@@ -27,7 +27,7 @@ public:
     virtual ~Ast_SetList();
 
 public:
-    virtual void illustrate();
+    virtual std::string format();
 
 public:
     void addSetExpr(Ast_SetExpr *expr);
@@ -42,7 +42,7 @@ public:
     virtual ~Ast_SetStmt();
 
 public:
-    virtual void illustrate();
+    virtual std::string format();
 
 private:
     Ast_SetList *set_list;

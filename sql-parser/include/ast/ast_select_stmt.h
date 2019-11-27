@@ -14,7 +14,7 @@ public:
     virtual ~Ast_SelectExpr();
 
 public:
-    virtual void illustrate();
+    virtual std::string format();
 
 private:
     Ast_Expr *expr;
@@ -31,7 +31,7 @@ public:
     virtual ~Ast_SelectExprList();
 
 public:
-    virtual void illustrate();
+    virtual std::string format();
 
 public:
     void addSelectExpr(Ast_SelectExpr *expr);
@@ -113,7 +113,7 @@ public:
     virtual ~Ast_SelectStmt();
 
 public:
-    virtual void illustrate();
+    virtual std::string format();
 
 private:
     const char * selectOptsName(select_opts select_opts);

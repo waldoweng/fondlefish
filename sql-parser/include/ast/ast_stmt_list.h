@@ -36,7 +36,7 @@ public:
     virtual ~Ast_Stmt();
 
 public:
-    virtual void illustrate();
+    virtual std::string format();
 
 private:
     int m_stmt_type;
@@ -59,7 +59,7 @@ public:
     virtual ~Ast_StmtList();
 
 public:
-    virtual void illustrate();
+    virtual std::string format();
 
 public:
     void addStmt(Ast_Stmt *stmt);

@@ -24,7 +24,7 @@ public:
     void addCase(Ast_Expr *when, Ast_Expr *then);
 
 public:
-    virtual void illustrate();
+    virtual std::string format();
 
 private:
     std::vector<case_item> cases;
@@ -51,7 +51,7 @@ public:
     virtual ~Ast_IntervalExp();
 
 public:
-    virtual void illustrate();
+    virtual std::string format();
 
 private:
     const char * intervalTypeName(interval_type interval_type);
@@ -68,7 +68,7 @@ public:
     virtual ~Ast_ValList();
 
 public:
-    virtual void illustrate();
+    virtual std::string format();
 
 public:
     void addExpr(Ast_Expr *expr);
@@ -84,7 +84,7 @@ public:
     
 public:
     virtual Ast_Expr eval() const;
-    virtual void illustrate();
+    virtual std::string format();
 };
 
 
@@ -113,7 +113,7 @@ public:
 
 public:
     virtual Ast_Expr eval() const;
-    virtual void illustrate();
+    virtual std::string format();
 
 private:
     literal_type literal_type;
@@ -166,10 +166,11 @@ public:
     
 public:
     virtual Ast_Expr eval() const;
-    virtual void illustrate();
+    virtual std::string format();
 
 private:
     const char * arithmeticTypeName(arithmetic_type arithmetic_type);
+    const char * arithmeticTypeStr(arithmetic_type arithmetic_type);
 
 private:
     arithmetic_type arithmetic_type;
@@ -207,10 +208,11 @@ public:
     
 public:
     virtual Ast_Expr eval() const;
-    virtual void illustrate();
+    virtual std::string format();
 
 private:
     const char * compareTypeName(compare_type compare_type);
+    const char * compareTypeStr(compare_type compare_type);
     const char * compareSubTypeName(compare_subtype compare_subtype);
 
 private:
@@ -236,7 +238,7 @@ public:
 
 public:
     virtual Ast_Expr eval() const;
-    virtual void illustrate();
+    virtual std::string format();
 
 private:
     is_type is_type;
@@ -256,7 +258,7 @@ public:
 
 public:
     virtual Ast_Expr eval() const;
-    virtual void illustrate();
+    virtual std::string format();
 
 private:
     std::string name;
@@ -270,7 +272,7 @@ public:
 
 public:
     virtual Ast_Expr eval() const;
-    virtual void illustrate();
+    virtual std::string format();
 
 private:
     Ast_Expr *expr;
@@ -297,7 +299,7 @@ public:
 
 public:
     virtual Ast_Expr eval() const;
-    virtual void illustrate();
+    virtual std::string format();
 
 private:
     in_type in_type;
@@ -322,7 +324,7 @@ public:
 
 public:
     virtual Ast_Expr eval() const;
-    virtual void illustrate();
+    virtual std::string format();
 
 private:
     exist_type exist_type;
@@ -337,7 +339,7 @@ public:
 
 public:
     virtual Ast_Expr eval() const;
-    virtual void illustrate();
+    virtual std::string format();
 
 private:
     std::string func_name;
@@ -351,7 +353,7 @@ public:
 
 public:
     virtual Ast_Expr eval() const;
-    virtual void illustrate();
+    virtual std::string format();
 
 private:
     Ast_Expr *expr;
@@ -370,7 +372,7 @@ public:
 
 public:
     virtual Ast_Expr eval() const;
-    virtual void illustrate();
+    virtual std::string format();
 
 private:
     inner_type inner_type;
@@ -400,7 +402,7 @@ public:
 
 public:
     virtual Ast_Expr eval() const;
-    virtual void illustrate();
+    virtual std::string format();
 
 private:
     const char * trimLtbName(trim_ltb trim_ltb);
@@ -426,7 +428,7 @@ public:
 
 public:
     virtual Ast_Expr eval() const;
-    virtual void illustrate();
+    virtual std::string format();
 
 private:
     date_func_type date_func_type;
@@ -441,7 +443,7 @@ public:
 
 public:
     virtual Ast_Expr eval() const;
-    virtual void illustrate();
+    virtual std::string format();
 
 private:
     Ast_Expr *expr;
@@ -462,7 +464,7 @@ public:
 
 public:
     virtual Ast_Expr eval() const;
-    virtual void illustrate();
+    virtual std::string format();
 
 private:
     like_type like_type;
@@ -483,7 +485,7 @@ public:
 
 public:
     virtual Ast_Expr eval() const;
-    virtual void illustrate();
+    virtual std::string format();
 
 private:    
     regexp_type regexp_type;
@@ -498,7 +500,7 @@ public:
 
 public:
     virtual Ast_Expr eval() const;
-    virtual void illustrate();
+    virtual std::string format();
 
 private:
     Ast_Expr *expr;

@@ -28,22 +28,20 @@ void Ast_CaseList::addCase(Ast_Expr *when, Ast_Expr *then) {
     cases.push_back(item);
 }
 
-void Ast_CaseList::illustrate() {
-    for (int i = 0; i < this->getLevel(); i++)
-        printf("\t");
-    printf("CaseList:\n");
-    
-    this->incLevel();
+std::string Ast_CaseList::format() {
+    std::string str;
+
     for (std::vector<Ast_CaseList::case_item>::iterator it = cases.begin();
         it != cases.end();
         it ++) 
     {
-        if (it->when_expr)
-            it->when_expr->illustrate();
-        if (it->then_expr)
-            it->then_expr->illustrate();
+        str += this->rawf("WHEN %s THEN %s\n",
+            it->when_expr->format().c_str(),
+            it->then_expr->format().c_str()
+        );
     }
-    this->decLevel();
+    
+    return str;
 }
 
 
@@ -72,11 +70,11 @@ const char * Ast_IntervalExp::intervalTypeName(enum Ast_IntervalExp::interval_ty
     return names[interval_type-1];
 }
 
-void Ast_IntervalExp::illustrate() {
-    this->putLine("INTERVAL %s", this->intervalTypeName(this->interval_type));
-    this->incLevel();
-    this->expr->illustrate();
-    this->decLevel();
+std::string Ast_IntervalExp::format() {
+    return this->rawf("INTERVAL %s %s",
+        this->expr->format().c_str(),
+        this->intervalTypeName(this->interval_type)
+    );
 }
 
 
@@ -97,13 +95,22 @@ void Ast_ValList::addExpr(Ast_Expr *expr) {
     this->exprs.push_back(expr);
 }
 
-void Ast_ValList::illustrate() {
-    for (std::vector<Ast_Expr *>::iterator it = this->exprs.begin();
-        it != this->exprs.end();
-        ++ it)
-    {
-        if (*it) (*it)->illustrate();
+std::string Ast_ValList::format() {
+    std::string str;
+
+    if (!this->exprs.empty()) {
+        str = this->exprs.back()->format();
+
+        for (std::vector<Ast_Expr *>::reverse_iterator it = this->exprs.rbegin() + 1;
+            it != this->exprs.rend();
+            ++ it)
+        {
+            if (*it) 
+                str += (", " + (*it)->format());
+        }
     }
+
+    return str;
 }
 
 
@@ -111,7 +118,7 @@ Ast_Expr::Ast_Expr() {}
 
 Ast_Expr::~Ast_Expr() {}
 
-void Ast_Expr::illustrate() {}
+std::string Ast_Expr::format() { return ""; }
 
 Ast_Expr Ast_Expr::eval() const {
     return Ast_LiteralExpr(0);
@@ -148,42 +155,33 @@ Ast_LiteralExpr::Ast_LiteralExpr(bool bool_var)
 
 Ast_LiteralExpr::~Ast_LiteralExpr() {}
 
-void Ast_LiteralExpr::illustrate() {
+std::string Ast_LiteralExpr::format() {
     switch (this->literal_type)
     {
     case Ast_LiteralExpr::LiteralTypeName:
     case Ast_LiteralExpr::LiteralTypeDetailName:
         if (this->first.empty())
-            this->putLine("%s.%s", this->first.c_str(), this->second.c_str());
+            return this->rawf("%s.%s", this->first.c_str(), this->second.c_str());
         else
-            this->putLine("%s", this->second.c_str());
-        break;
+            return this->second;
     case Ast_LiteralExpr::LiteralTypeString:
-        this->putLine("%s", this->second.c_str());
-        break;
+        return this->rawf("%s", this->second.c_str());
     case Ast_LiteralExpr::LiteralTypeUserVar:
-        this->putLine("@%s", this->second.c_str());
-        break;
+        return this->rawf("@%s", this->second.c_str());
     case Ast_LiteralExpr::LiteralTypeIntNum:
-        this->putLine("%d", this->int_var);
-        break;
+        return this->rawf("%d", this->int_var);
     case Ast_LiteralExpr::LiteralTypeApproxNum:
-        this->putLine("%lf", this->float_var);
-        break;
+        return this->rawf("%lf", this->float_var);
     case Ast_LiteralExpr::LiteralTypeBool:
-        this->putLine(this->bool_var ? "true" : "false");
-        break;
+        return this->bool_var ? "true" : "false";
     case Ast_LiteralExpr::LiteralTypeCurTs:
-        this->putLine("CURRENT TIMESTAMP(%d)", time(NULL));
-        break;
+        return "CURRENT_TIMESTAMP";
     case Ast_LiteralExpr::LiteralTypeCurDate:
-        this->putLine("CURRENT DATE");
-        break;
+        return "CURRENT_DATE";
     case Ast_LiteralExpr::LiteralTypeCurTime:
-        this->putLine("CURRENT TIME");
-        break;
+        return "CURRENT_TIME";
     default:
-        break;
+        return "";
     }
 }
 
@@ -240,17 +238,47 @@ const char * Ast_ArithmeticExpr::arithmeticTypeName(enum Ast_ArithmeticExpr::ari
     return names[arithmetic_type];
 }
 
-void Ast_ArithmeticExpr::illustrate() {
-    this->putLine("%s Expr", this->arithmeticTypeName(this->arithmetic_type));
+const char * Ast_ArithmeticExpr::arithmeticTypeStr(enum Ast_ArithmeticExpr::arithmetic_type arithmetic_type) {
+    static const char names[22][32] = {
+        "+",
+        "-",
+        "*",
+        "/",
+        "%",
+        "-",
+        "and",
+        "or",
+        "xor",
+        "|",
+        "&",
+        "^",
+        "<<",
+        ">>",
+        "NOT",
+        "=",
+        "<=>",
+        ">=",
+        ">",
+        "<=",
+        "<",
+        "!="
+    };
+    return names[arithmetic_type];
+}
 
-    this->incLevel();
-    if (this->inner_type == Ast_ArithmeticExpr::InnerTypeUnaryOp)
-        this->unary_op->illustrate();
-    else {
-        this->lhs->illustrate();
-        this->rhs->illustrate();
+std::string Ast_ArithmeticExpr::format() {
+    if (this->inner_type == Ast_ArithmeticExpr::InnerTypeUnaryOp) {
+        return this->rawf("%s %s",
+            this->arithmeticTypeStr(this->arithmetic_type),
+            this->unary_op->format().c_str()
+        );
+    } else {
+        return this->rawf("%s %s %s",
+            this->lhs->format().c_str(),
+            this->arithmeticTypeStr(this->arithmetic_type),
+            this->rhs->format().c_str()
+        );
     }
-    this->decLevel();
 }
 
 Ast_Expr Ast_ArithmeticExpr::eval() const {
@@ -289,6 +317,19 @@ const char * Ast_CompareExpr::compareTypeName(enum Ast_CompareExpr::compare_type
     return names[compare_type];
 }
 
+const char * Ast_CompareExpr::compareTypeStr(enum Ast_CompareExpr::compare_type compare_type) {
+    static const char names[7][32] = {
+        "=",
+        "<=>",
+        ">=",
+        ">",
+        "<=",
+        "<",
+        "!="
+    };
+    return names[compare_type];
+}
+
 const char * Ast_CompareExpr::compareSubTypeName(enum Ast_CompareExpr::compare_subtype compare_subtype) {
     static const char names[4][32] = {
         "",
@@ -299,13 +340,13 @@ const char * Ast_CompareExpr::compareSubTypeName(enum Ast_CompareExpr::compare_s
     return names[compare_subtype];
 }
 
-void Ast_CompareExpr::illustrate() {
-    this->putLine("%s %s",
-        this->compareTypeName(this->compare_type),
-        this->compareSubTypeName(this->compare_subtype)
+std::string Ast_CompareExpr::format() {
+    return this->rawf("%s %s %s %s",
+        this->lhs->format().c_str(),
+        this->compareTypeStr(this->compare_type),
+        this->compareSubTypeName(this->compare_subtype),
+        this->rhs->format().c_str()
     );
-    this->lhs->illustrate();
-    this->rhs->illustrate();
 }
 
 Ast_Expr Ast_CompareExpr::eval() const {
@@ -339,32 +380,23 @@ Ast_IsExpr::~Ast_IsExpr() {
     }
 }
 
-void Ast_IsExpr::illustrate() {
+std::string Ast_IsExpr::format() {
     switch (this->is_type)
     {
     case Ast_IsExpr::CompoundTypeIsNull:
-        this->putLine("IS NULL");
-        this->incLevel();
-        this->is_null->illustrate();
-        this->decLevel();
+        return this->rawf("%s IS NULL", this->is_null->format().c_str());
     case Ast_IsExpr::CompoundTypeIsNotNull:
-        this->putLine("IS NOT NULL");
-        this->incLevel();
-        this->is_null->illustrate();
-        this->decLevel();
-        break;
+        return this->rawf("%s IS NOT NULL", this->is_null->format().c_str());
     case Ast_IsExpr::CompoundTypeIsBool:
-        this->putLine("IS %s", this->bool_var ? "TRUE" : "FALSE");
-        this->incLevel();
-        this->lhs->illustrate();
-        this->decLevel();
-        break;
+        return this->rawf("%s IS %s",
+            this->lhs->format().c_str(), 
+            this->bool_var ? "TRUE" : "FALSE"
+        );
     case Ast_IsExpr::CompoundTypeIsNotBool:
-        this->putLine("IS NOT %s", this->bool_var ? "TRUE" : "FALSE");
-        this->incLevel();
-        this->lhs->illustrate();
-        this->decLevel();
-        break;
+        return this->rawf("%s IS NOT %s",
+            this->lhs->format().c_str(), 
+            this->bool_var ? "TRUE" : "FALSE"
+        );
     default:
         break;
     }
@@ -384,11 +416,11 @@ Ast_AsgnExpr::~Ast_AsgnExpr() {
     if (expr) delete expr;
 }
 
-void Ast_AsgnExpr::illustrate() {
-    this->putLine("%s = ", this->name.c_str());
-    this->incLevel();
-    this->expr->illustrate();
-    this->decLevel();
+std::string Ast_AsgnExpr::format() {
+    return this->rawf("%s = %s", 
+        this->name.c_str(),
+        this->expr->format().c_str()
+    );
 }
 
 Ast_Expr Ast_AsgnExpr::eval() const {
@@ -406,14 +438,12 @@ Ast_BetweenExpr::~Ast_BetweenExpr() {
     if (high) delete high;
 }
 
-void Ast_BetweenExpr::illustrate() {
-    if (expr)
-        this->expr->illustrate();
-    this->putLine("BETWEEN");
-    this->incLevel();
-    this->low->illustrate();
-    this->high->illustrate();
-    this->decLevel();
+std::string Ast_BetweenExpr::format() {
+    return this->rawf("%s BETWEEN %s AND %s",
+        this->expr->format().c_str(),
+        this->low->format().c_str(),
+        this->high->format().c_str()
+    );
 }
 
 Ast_Expr Ast_BetweenExpr::eval() const {
@@ -448,35 +478,35 @@ Ast_InExpr::~Ast_InExpr() {
     }
 }
 
-void Ast_InExpr::illustrate() {
-    if (expr)
-        this->expr->illustrate();
+std::string Ast_InExpr::format() {
+
+    std::string pattern = "";
     
     switch (this->in_type)
     {
     case Ast_InExpr::CompoundTypeIn:
-        this->putLine("IN");
+        pattern = "%s IN %s";
         break;
     case Ast_InExpr::CompoundTypeNotIn:
-        this->putLine("NOT IN");
+        pattern = "%s NOT IN %s";
         break;
     default:
-        break;
+        return "";
     }
     
-    this->incLevel();
     switch (this->inner_type)
     {
     case Ast_InExpr::InnerTypeOptWithValList:
-        this->val_list->illustrate();
-        break;
+        return this->rawf(pattern.c_str(), 
+            this->expr->format().c_str(),
+            this->val_list->format().c_str());
     case Ast_InExpr::InnerTypeOptWithSelect:
-        this->select->illustrate();
-        break;
-    default:
-        break;
+        return this->rawf(pattern.c_str(), 
+            this->expr->format().c_str(),
+            this->select->format().c_str());
     }
-    this->decLevel();
+
+    return "";
 }
 
 Ast_Expr Ast_InExpr::eval() const {
@@ -493,11 +523,11 @@ Ast_ExistExpr::~Ast_ExistExpr() {
     if (stmt) delete stmt;
 }
 
-void Ast_ExistExpr::illustrate() {
-    this->putLine(this->exist_type ? "EXISTS" : "NOT EXISTS");
-    this->incLevel();
-    this->stmt->illustrate();
-    this->decLevel();
+std::string Ast_ExistExpr::format() {
+    return this->rawf("%s (%s)",
+        this->exist_type ? "EXISTS" : "NOT EXISTS",
+        this->stmt->format().c_str()
+    );
 }
 
 Ast_Expr Ast_ExistExpr::eval() const {
@@ -514,11 +544,11 @@ Ast_RegularFunctionExpr::~Ast_RegularFunctionExpr() {
     if (params) delete params;
 }
 
-void Ast_RegularFunctionExpr::illustrate() {
-    this->putLine("%s()", this->func_name.c_str());
-    this->incLevel();
-    this->params->illustrate();
-    this->decLevel();
+std::string Ast_RegularFunctionExpr::format() {
+    return this->rawf("%s(%s)", 
+        this->func_name.c_str(),
+        this->params->format().c_str()
+    );
 }
 
 Ast_Expr Ast_RegularFunctionExpr::eval() const {
@@ -535,14 +565,11 @@ Ast_CountFuncExpr::~Ast_CountFuncExpr() {
     if (expr) delete expr;
 }
 
-void Ast_CountFuncExpr::illustrate() {
+std::string Ast_CountFuncExpr::format() {
     if (expr) {
-        this->putLine("COUNT()");
-        this->incLevel();
-        this->expr->illustrate();
-        this->decLevel();
+        return this->rawf("COUNT(%s)", this->expr->format().c_str());
     } else {
-        this->putLine("COUNT(*)");
+        return "COUNT(*)";
     }
 }
 
@@ -578,21 +605,24 @@ Ast_SubtringFuncExpr::~Ast_SubtringFuncExpr() {
     }
 }
 
-void Ast_SubtringFuncExpr::illustrate() {
-    this->putLine("SUBSTR()");
+std::string Ast_SubtringFuncExpr::format() {
     switch (this->inner_type)
     {
     case Ast_SubtringFuncExpr::InnerTypeOptWithExpr:
-        if (this->str) this->str->illustrate();
-        if (this->begin) this->begin->illustrate();
-        if (this->length) this->length->illustrate();
-        break;
+        return this->rawf("SUBSTRING(%s FROM %s %s)",
+            this->str ? this->str->format().c_str() : "",
+            this->begin ? this->begin->format().c_str() : "",
+            this->length ? (" FOR " + this->length->format()).c_str() : "" 
+        );
     case Ast_SubtringFuncExpr::InnerTypeOptWithValList:
-        if (this->val_list) this->val_list->illustrate();
-        break;
+        return this->rawf("SUBSTRING(%s)",
+            this->val_list ? this->val_list->format().c_str() : ""
+        );
     default:
         break;
     }
+
+    return "";
 }
 
 Ast_Expr Ast_SubtringFuncExpr::eval() const {
@@ -625,15 +655,16 @@ const char * Ast_TrimFuncExpr::trimLtbName(enum Ast_TrimFuncExpr::trim_ltb trim_
     return names[trim_ltb-1];
 }
 
-void Ast_TrimFuncExpr::illustrate() {
-    this->putLine("TRIM()");
-    this->incLevel();
+std::string Ast_TrimFuncExpr::format() {
     if (this->pattern) {
-        this->putLine("%s", this->trimLtbName(this->_trim_ltb));
-        this->pattern->illustrate();
+        return this->rawf("TRIM(%s %s FROM %s)", 
+            this->trimLtbName(this->_trim_ltb),
+            this->pattern->format().c_str(),
+            this->val_list->format().c_str()
+        );
+    } else {
+        return this->rawf("TRIM(%s)", this->val_list->format().c_str());
     }
-    this->val_list->illustrate();
-    this->decLevel();
 }
 
 Ast_Expr Ast_TrimFuncExpr::eval() const {
@@ -652,23 +683,22 @@ Ast_DateFuncExpr::~Ast_DateFuncExpr() {
     if (interval_exp) delete interval_exp;
 }
 
-void Ast_DateFuncExpr::illustrate() {
+std::string Ast_DateFuncExpr::format() {
     switch (this->date_func_type)
     {
     case Ast_DateFuncExpr::CompoundTypeFuncDateAdd:
-        this->putLine("DATE_ADD()");
-        break;
+        this->rawf("DATE_ADD(%s, %s)", 
+            this->expr->format().c_str(), 
+            this->interval_exp->format().c_str()
+        );
     case Ast_DateFuncExpr::CompoundTypeFuncDateSub:
-        this->putLine("DATE_SUB()");
-        break;
+        this->rawf("DATE_SUB(%s, %s)", 
+            this->expr->format().c_str(), 
+            this->interval_exp->format().c_str()
+        );
     default:
-        break;
+        return "";
     }
-
-    this->incLevel();
-    this->expr->illustrate();
-    this->interval_exp->illustrate();
-    this->decLevel();
 }
 
 Ast_Expr Ast_DateFuncExpr::eval() const {
@@ -687,13 +717,12 @@ Ast_CaseExpr::~Ast_CaseExpr() {
     if (this->_else) delete this->_else;
 }
 
-void Ast_CaseExpr::illustrate() {
-    this->putLine("CASE");
-    this->incLevel();
-    if (this->expr) this->expr->illustrate();
-    if (this->case_list) this->case_list->illustrate();
-    if (this->_else) this->_else->illustrate();
-    this->decLevel();
+std::string Ast_CaseExpr::format() {
+    return this->rawf("CASE %s %s %s END",
+        this->expr ? this->expr->format().c_str() : "",
+        this->case_list ? this->case_list->format().c_str() : "",
+        this->_else ? ("ELSE " + this->_else->format()).c_str() : ""
+    );
 }
 
 Ast_Expr Ast_CaseExpr::eval() const {
@@ -711,23 +740,16 @@ Ast_LikeExpr::~Ast_LikeExpr() {
     if (this->rhs) delete this->rhs; 
 }
 
-void Ast_LikeExpr::illustrate() {
+std::string Ast_LikeExpr::format() {
     switch (this->like_type)
     {
     case Ast_LikeExpr::CompoundTypeLike:
-        this->putLine("LIKE");
-        break;
+        return this->rawf("%s LIKE %s", this->lhs->format().c_str(), this->rhs->format().c_str());
     case Ast_LikeExpr::CompoundTypeNotLike:
-        this->putLine("NOT LIKE");
-        break;
+        return this->rawf("%s NOT LIKE %s", this->lhs->format().c_str(), this->rhs->format().c_str());
     default:
-        break;
+        return "";
     }
-
-    this->incLevel();
-    if (this->lhs) this->lhs->illustrate();
-    if (this->rhs) this->rhs->illustrate();
-    this->decLevel();
 }
 
 Ast_Expr Ast_LikeExpr::eval() const {
@@ -745,23 +767,16 @@ Ast_RegexpExpr::~Ast_RegexpExpr() {
     if (this->rhs) delete this->rhs; 
 }
 
-void Ast_RegexpExpr::illustrate() {
+std::string Ast_RegexpExpr::format() {
     switch (this->regexp_type)
     {
     case Ast_RegexpExpr::CompoundTypeRegexp:
-        this->putLine("REGEXP");
-        break;
+        return this->rawf("%s REGEXP %s", this->lhs->format().c_str(), this->rhs->format().c_str());
     case Ast_RegexpExpr::CompoundTypeNotRegexp:
-        this->putLine("NOT REGEXP");
-        break;
+        return this->rawf("%s NOT REGEXP %s", this->lhs->format().c_str(), this->rhs->format().c_str());
     default:
-        break;
+        return "";
     }
-
-    this->incLevel();
-    if (this->lhs) this->lhs->illustrate();
-    if (this->rhs) this->rhs->illustrate();
-    this->decLevel();
 }
 
 Ast_Expr Ast_RegexpExpr::eval() const {
@@ -778,11 +793,8 @@ Ast_BinaryExpr::~Ast_BinaryExpr() {
     if (this->expr) delete this->expr;
 }
 
-void Ast_BinaryExpr::illustrate() {
-    this->putLine("BINARY");
-    this->incLevel();
-    if (this->expr) this->expr->illustrate();
-    this->decLevel();
+std::string Ast_BinaryExpr::format() {
+    return this->rawf("BINARY %s", this->expr->format().c_str());
 }
 
 Ast_Expr Ast_BinaryExpr::eval() const {

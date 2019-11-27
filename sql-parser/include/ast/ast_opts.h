@@ -27,7 +27,7 @@ public:
     void addGroupBy(Ast_Expr *expr, bool asc);
 
 public:
-    virtual void illustrate();
+    virtual std::string format();
 
 private:
     std::vector<GroupByItem> groupby_list;
@@ -40,7 +40,7 @@ public:
     virtual ~Ast_OptOnDupUpdate();
 
 public:
-    virtual void illustrate();
+    virtual std::string format();
 
 private:
     Ast_InsertAsgnList *insert_asgn_list;
@@ -54,7 +54,7 @@ public:
     virtual ~Ast_OptLimit();
 
 public:
-    virtual void illustrate();
+    virtual std::string format();
 
 private:
     Ast_Expr *offset;
@@ -62,13 +62,13 @@ private:
 };
 
 
-class Ast_OptIntoList {
+class Ast_OptIntoList : public Ast_Base {
 public:
     explicit Ast_OptIntoList(Ast_ColumnList *column_list);
     virtual ~Ast_OptIntoList();
 
 public:
-    virtual void illustrate();
+    virtual std::string format();
 
 private:
     Ast_ColumnList *column_list;
@@ -81,7 +81,7 @@ public:
     virtual ~Ast_OptHaving();
 
 public:
-    virtual void illustrate();
+    virtual std::string format();
 
 private:
     Ast_Expr *expr;
@@ -94,7 +94,7 @@ public:
     virtual ~Ast_OptGroupBy();
 
 public:
-    virtual void illustrate();
+    virtual std::string format();
 
 private:
     Ast_GroupByList *groupby_list;
@@ -108,7 +108,7 @@ public:
     virtual ~Ast_OptColNames();
 
 public:
-    virtual void illustrate();
+    virtual std::string format();
 
 private:
     Ast_ColumnList *column_list;
@@ -121,7 +121,7 @@ public:
     ~Ast_OptOrderBy();
     
 public:
-    virtual void illustrate();
+    virtual std::string format();
 
 private:
     Ast_GroupByList *orderby_list;
@@ -134,7 +134,7 @@ public:
     virtual ~Ast_OptWhere();
 
 public:
-    virtual void illustrate();
+    virtual std::string format();
 
 private:
     Ast_Expr *expr;

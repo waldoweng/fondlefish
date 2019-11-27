@@ -11,7 +11,7 @@ public:
     virtual ~Ast_DeleteList();
 
 public:
-    virtual void illustrate();
+    virtual std::string format();
 
 public:
     void addName(const char *name);

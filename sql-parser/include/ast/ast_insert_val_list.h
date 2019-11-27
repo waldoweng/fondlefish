@@ -12,7 +12,7 @@ public:
     virtual ~Ast_InsertVals();
 
 public:
-    virtual void illustrate();
+    virtual std::string format();
 
 public:
     void addInsertVal(Ast_Expr *expr);
@@ -27,7 +27,7 @@ public:
     virtual ~Ast_InsertValList();
 
 public:
-    virtual void illustrate();
+    virtual std::string format();
 
 public:
     void addInsertVals(Ast_InsertVals *insert_vals);

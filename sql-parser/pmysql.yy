@@ -418,11 +418,12 @@ expr: expr '+' expr { $$ = new Ast_ArithmeticExpr(Ast_ArithmeticExpr::CompoundTy
     | expr XOR expr { $$ = new Ast_ArithmeticExpr(Ast_ArithmeticExpr::CompoundTypeXor, $1, $3); }
     | expr '|' expr { $$ = new Ast_ArithmeticExpr(Ast_ArithmeticExpr::CompoundTypeBitOr, $1, $3); }
     | expr '&' expr { $$ = new Ast_ArithmeticExpr(Ast_ArithmeticExpr::CompoundTypeBitAnd, $1, $3); }
-    | expr '^' expr { $$ = new Ast_ArithmeticExpr(Ast_ArithmeticExpr::CompoundTypeMod, $1, $3); }
+    | expr '^' expr { $$ = new Ast_ArithmeticExpr(Ast_ArithmeticExpr::CompoundTypeBitXor, $1, $3); }
     | expr SHIFT expr   { $$ = new Ast_ArithmeticExpr($2==1 ? Ast_ArithmeticExpr::CompoundTypeLeftShift : Ast_ArithmeticExpr::CompoundTypeRightShift, $1, $3); }
     | NOT expr      { $$ = new Ast_ArithmeticExpr(Ast_ArithmeticExpr::CompoundTypeNot, $2); }
     | '!' expr      { $$ = new Ast_ArithmeticExpr(Ast_ArithmeticExpr::CompoundTypeNot, $2); }
     | expr COMPARISON expr { $$ = new Ast_ArithmeticExpr(static_cast<enum Ast_ArithmeticExpr::arithmetic_type>(Ast_ArithmeticExpr::CompoundTypeCompareEQ + $2), $1, $3); }
+    | '(' expr ')'  { $$ = $2; }
 
         /* recursive selects and comparisons thereto */
     | expr COMPARISON '(' select_stmt ')'  { $$ = new Ast_CompareExpr(static_cast<enum Ast_CompareExpr::compare_type>(Ast_CompareExpr::CompoundTypeCompareEQ + $2), $1, $4); }
@@ -520,7 +521,7 @@ expr: BINARY expr %prec UMINUS { $$ = new Ast_BinaryExpr($2); }
     ;
 
     /* statements: select statement */
-stmt: select_stmt { $$ = new Ast_Stmt($1); $1->illustrate(); }
+stmt: select_stmt { $$ = new Ast_Stmt($1); printf("%s", $1->format().c_str()); }
     ;
 
 select_stmt: SELECT select_opts select_expr_list    { $$ = new Ast_SelectStmt(static_cast<Ast_SelectStmt::select_opts>($2), $3); }
@@ -693,7 +694,7 @@ delete_stmt: DELETE delete_opts FROM delete_list USING table_references opt_wher
                 { $$ = new Ast_DeleteStmt(static_cast<enum Ast_DeleteStmt::delete_opts>($2), $4, $6, $7); }
     ;
 
-stmt: insert_stmt { $$ = new Ast_Stmt($1); $1->illustrate(); }
+stmt: insert_stmt { $$ = new Ast_Stmt($1); printf("%s", $1->format().c_str()); }
     ;
 
 insert_stmt: INSERT insert_opts opt_into NAME opt_col_names VALUES insert_vals_list opt_ondupupdate 
@@ -972,7 +973,7 @@ int main(int argc, char *argv[]) {
     }
 
     if (!yyparse())
-        printf("SQL parse worked\n");
+        printf("\n");
     else
-        printf("SQL parse failed\n");
+        printf("\nSQL parse failed\n");
 }

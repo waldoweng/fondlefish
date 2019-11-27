@@ -14,10 +14,10 @@ class Ast_SelectStmt;
 class Ast_InsertStmt : public Ast_Base {
 public:
     enum insert_opts {
-        INSERT_OPTS_LOW_PRIORITY    = 1,
-        INSERT_OPTS_DELAYED         = 2,
-        INSERT_OPTS_HIGH_PRIORITY   = 3,
-        INSERT_OPTS_IGNORE          = 4
+        INSERT_OPTS_LOW_PRIORITY    = 1 << 1,
+        INSERT_OPTS_DELAYED         = 1 << 2,
+        INSERT_OPTS_HIGH_PRIORITY   = 1 << 3,
+        INSERT_OPTS_IGNORE          = 1 << 4
     };
     enum insert_type {
         INSERT_TYPE_VALLIST     = 0,
@@ -85,10 +85,10 @@ public:
     virtual ~Ast_InsertStmt();
 
 public:
-    virtual void illustrate();
+    virtual std::string format();
 
 private:
-    const char * insertOptName(insert_opts insert_opts);
+    std::string insertOptName(insert_opts insert_opts);
 
 private:
     insert_type insert_type;

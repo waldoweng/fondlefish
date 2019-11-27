@@ -17,7 +17,7 @@ public:
     virtual ~Ast_DeleteList();
 
 public:
-    virtual void illustrate();
+    virtual std::string format();
 
 public:
     void addName(const char *name);
@@ -83,7 +83,7 @@ public:
     };
 
 public:
-    virtual void illustrate();
+    virtual std::string format();
 
 private:
     const char *deleteOptName(delete_opts delete_opts);

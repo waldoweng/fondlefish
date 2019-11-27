@@ -1,3 +1,4 @@
+#include <map>
 #include "ast_replace_stmt.h"
 #include "ast_opts.h"
 #include "ast_insert_val_list.h"
@@ -101,49 +102,55 @@ Ast_ReplaceStmt::~Ast_ReplaceStmt() {
     }
 }
 
-const char * Ast_ReplaceStmt::replaceOptName(enum Ast_ReplaceStmt::replace_opts replace_opts) {
-    static const char names[4][32] = {
-        "LOW PRIORITY",
-        "DELAYED",
-        "HIGH PRIORITY",
-        "IGNORE"
+std::string Ast_ReplaceStmt::replaceOptName(enum Ast_ReplaceStmt::replace_opts replace_opts) {
+    const static std::map<int, std::string> names = {
+        {1 << 0, "LOW PRIORITY"},
+        {1 << 1, "DELAYED"},
+        {1 << 2, "HIGH PRIORITY"},
+        {1 << 3, "IGNORE"}
     };
-    return names[replace_opts-1];
+
+    std::string str;
+    for (std::map<int, std::string>::const_iterator it = names.begin();
+        it != names.end();
+        ++it) {
+            if (replace_opts & it->first) {
+                str += it->second;
+            }
+        }
+
+    return str;
 }
 
-void Ast_ReplaceStmt::illustrate() {
+
+
+std::string Ast_ReplaceStmt::format() {
     switch (this->replace_type)
     {
     case Ast_ReplaceStmt::REPLACE_TYPE_VALLIST:
-        this->putLine("REPLACE STMT %s %s", 
-            this->replaceOptName(this->stmt._val_list->replace_opts), 
-            this->stmt._val_list->name.c_str());
-        this->incLevel();
-        this->stmt._val_list->opt_col_names->illustrate();
-        this->stmt._val_list->insert_val_list->illustrate();
-        this->stmt._val_list->opt_dupupdate->illustrate();
-        this->decLevel();
-        break;
+        return this->rawf("REPLACE %s INTO %s %s VALUES %s %s", 
+            this->replaceOptName(this->stmt._val_list->replace_opts).c_str(), 
+            this->stmt._val_list->name.c_str(),
+            this->stmt._val_list->opt_col_names->format().c_str(),
+            this->stmt._val_list->insert_val_list->format().c_str(),
+            this->stmt._val_list->opt_dupupdate->format().c_str()
+        );
     case Ast_ReplaceStmt::REPLACE_TYPE_ASGNLIST:
-        this->putLine("REPLACE STMT %s %s", 
-            this->replaceOptName(this->stmt._asgn_list->replace_opts),
-            this->stmt._asgn_list->name.c_str());
-        this->incLevel();
-        this->stmt._asgn_list->insert_asgn_list->illustrate();
-        this->stmt._asgn_list->opt_ondupupdate->illustrate();
-        this->decLevel();
-        break;
+        return this->rawf("REPLACE %s INTO %s SET %s %s", 
+            this->replaceOptName(this->stmt._asgn_list->replace_opts).c_str(),
+            this->stmt._asgn_list->name.c_str(),
+            this->stmt._asgn_list->insert_asgn_list->format().c_str(),
+            this->stmt._asgn_list->opt_ondupupdate->format().c_str()
+        );
     case Ast_ReplaceStmt::REPLACE_TYPE_SELECT:
-        this->putLine("REPLACE STMT %s %s", 
-            this->replaceOptName(this->stmt._select->replace_opts),
-            this->stmt._select->name.c_str());
-        this->incLevel();
-        this->stmt._select->opt_col_names->illustrate();
-        this->stmt._select->select_stmt->illustrate();
-        this->stmt._select->opt_ondupupdate->illustrate();
-        this->decLevel();
-        break;
+        return this->rawf("REPLACE %s INTO %s %s %s", 
+            this->replaceOptName(this->stmt._select->replace_opts).c_str(),
+            this->stmt._select->name.c_str(),
+            this->stmt._select->opt_col_names->format().c_str(),
+            this->stmt._select->select_stmt->format().c_str(),
+            this->stmt._select->opt_ondupupdate->format().c_str()
+        );
     default:
-        break;
+        return "";
     }
 }

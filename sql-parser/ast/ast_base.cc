@@ -15,15 +15,28 @@ int Ast_Base::getLevel() const { return level; }
 void Ast_Base::incLevel() { level ++; }
 void Ast_Base::decLevel() { level --; }
 
-void Ast_Base::putLine(const char *fmt, ...) 
-{
+std::string Ast_Base::rawf(const char *fmt, ...) {
+    char buffer[1024];
+
+    va_list args;
+    va_start(args, fmt);
+    vsnprintf(buffer, sizeof(buffer), fmt, args);
+    va_end(args);
+
+    return buffer;
+}
+
+std::string Ast_Base::indentf(const char *fmt, ...) {
+    char buffer[1024];
+
+    std::string indent;
     for (int i = 0; i < this->getLevel(); i++)
-        putchar('\t');
+        indent += "    ";
     
     va_list args;
     va_start(args, fmt);
-    vprintf(fmt, args);
+    vsnprintf(buffer, sizeof(buffer), fmt, args);
     va_end(args);
-    
-    putchar('\n');
+
+    return indent + buffer;
 }

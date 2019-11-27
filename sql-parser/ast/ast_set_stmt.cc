@@ -10,11 +10,8 @@ Ast_SetExpr::~Ast_SetExpr() {
     if (expr) delete expr;
 }
 
-void Ast_SetExpr::illustrate() {
-    this->putLine("SET");
-    this->incLevel();
-    this->expr->illustrate();
-    this->decLevel();
+std::string Ast_SetExpr::format() {
+    return this->rawf("%s = %s", this->uservar.c_str(), this->expr->format().c_str());
 }
 
 Ast_SetList::Ast_SetList(Ast_SetExpr *expr) {
@@ -35,14 +32,22 @@ void Ast_SetList::addSetExpr(Ast_SetExpr *expr) {
     exprs.push_back(expr);
 }
 
-void Ast_SetList::illustrate() {
-    for (std::vector<Ast_SetExpr *>::iterator it = exprs.begin();
-        it != exprs.end();
-        it ++)
-    {
-        if (*it)
-            (*it)->illustrate();
+std::string Ast_SetList::format() {
+    std::string str;
+
+    if (!this->exprs.empty()) {
+        str = exprs[0]->format();
+        
+        for (std::vector<Ast_SetExpr *>::iterator it = exprs.begin() + 1;
+            it != exprs.end();
+            it ++)
+        {
+            if (*it)
+                str += (",\n " + (*it)->format());
+        }
     }
+
+    return str;
 }
 
 Ast_SetStmt::Ast_SetStmt(Ast_SetList *set_list) 
@@ -55,11 +60,6 @@ Ast_SetStmt::~Ast_SetStmt() {
         delete set_list;
 }
 
-void Ast_SetStmt::illustrate() {
-    this->putLine("SET STMT");
-    this->incLevel();
-    this->set_list->illustrate();
-    this->decLevel();
+std::string Ast_SetStmt::format() {
+    return this->rawf("SET %s", this->set_list->format().c_str());
 }
-
-

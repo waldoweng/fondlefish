@@ -11,16 +11,17 @@ void Ast_ColumnList::addName(const char *name) {
     names.push_back(name);
 }
 
-void Ast_ColumnList::illustrate() {
-    for (int i = 0; i < this->getLevel(); i++)
-        printf("\t");
-    
-    printf("ColumnList: [");
-    for (std::vector<std::string>::iterator it = names.begin();
+std::string Ast_ColumnList::format() {
+    std::string str;
+
+    if (!names.empty())
+        str = this->indentf("%s", names[0].c_str());
+
+    for (std::vector<std::string>::iterator it = names.begin() + 1;
         it != names.end();
-        it ++)
-    {
-        printf("%s ", it->c_str());
+        it ++) {
+        str += this->rawf(", %s", it->c_str());
     }
-    printf("]\n");
+
+    return str;
 }

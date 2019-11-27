@@ -9,8 +9,9 @@ Ast_IndexList::Ast_IndexList(const char *name) {
 
 Ast_IndexList::~Ast_IndexList() {}
 
-void Ast_IndexList::illustrate() {
+std::string Ast_IndexList::format() {
     std::string tmp;
+
     for (std::vector<std::string>::iterator it = names.begin();
         it != names.end();
         it ++)
@@ -18,7 +19,7 @@ void Ast_IndexList::illustrate() {
         tmp += (*it + ", ");
     }
 
-    this->putLine(tmp.c_str());
+    return tmp;
 }
 
 void Ast_IndexList::addName(const char *name) {
@@ -34,14 +35,12 @@ Ast_IndexHint::~Ast_IndexHint() {
     if (index_list) delete index_list;
 }
 
-void Ast_IndexHint::illustrate() {
-    this->putLine("INDEX HINT %s %s", 
-        this->use ? " USE " : "",
-        this->for_join ? " FOR JOIN " : ""
+std::string Ast_IndexHint::format() {
+    return this->rawf("%s KEY %s (%s)", 
+        this->use ? " USE " : "IGNORE",
+        this->for_join ? " FOR JOIN " : "",
+        this->index_list->format().c_str()
     );
-    this->incLevel();
-    this->index_list->illustrate();
-    this->decLevel();
 }
 
 Ast_JoinCondition::Ast_JoinCondition(Ast_Expr *expr) 
@@ -59,12 +58,12 @@ Ast_JoinCondition::~Ast_JoinCondition() {
     if (column_list) delete column_list;
 }
 
-void Ast_JoinCondition::illustrate() {
-    this->putLine("JOIN ON");
-    this->incLevel();
-    if (expr) this->expr->illustrate();
-    if (column_list) this->column_list->illustrate();
-    this->decLevel();
+std::string Ast_JoinCondition::format() {
+    if (expr) 
+        return this->rawf("ON %s", this->expr->format().c_str());
+    if (column_list) 
+        return this->rawf("USING (%s)", this->column_list->format().c_str());
+    return "";
 }
 
 
@@ -78,11 +77,8 @@ Ast_TableSubquery::~Ast_TableSubquery()
     if (select_stmt) delete select_stmt;
 }
 
-void Ast_TableSubquery::illustrate() {
-    this->putLine("SUBQUERY");
-    this->incLevel();
-    this->select_stmt->illustrate();
-    this->decLevel();
+std::string Ast_TableSubquery::format() {
+    return this->rawf("(%s)", this->select_stmt->format().c_str());
 }
 
 Ast_TableFactor::TableFactorNormal::TableFactorNormal(const char *database_name, 
@@ -175,31 +171,28 @@ Ast_TableFactor::~Ast_TableFactor() {
     }
 }
 
-void Ast_TableFactor::illustrate() {
+std::string Ast_TableFactor::format() {
     switch (this->factor_type)
     {
     case Ast_TableFactor::FACTOR_TYPE_NORMAL:
-        this->putLine("TABLE %s.%s as %s", 
-            this->factor.normal->database_name.c_str(), 
-            this->factor.normal->name.c_str(),
-            this->factor.normal->alias.c_str());
-        this->incLevel();
-        if (this->factor.normal->index_hint) this->factor.normal->index_hint->illustrate();
-        this->decLevel();
-        break;
+        return this->rawf("%s %s %s", 
+            factor.normal->database_name.empty() 
+                ? factor.normal->name.c_str() 
+                : (factor.normal->database_name + '.' + factor.normal->name).c_str(), 
+            factor.normal->alias.empty() 
+                ? ""
+                : ("AS " + factor.normal->alias).c_str(),
+            factor.normal->index_hint->format().c_str()
+        );
     case Ast_TableFactor::FACTOR_TYPE_SUBQUERY:
-        this->putLine("SUBQUERY %s", this->factor.subquery->name.c_str());
-        this->incLevel();
-        this->factor.subquery->subquery->illustrate();
-        this->decLevel();
-        break;
+        return this->rawf("%s %s",
+            this->factor.subquery->subquery->format().c_str(),
+            this->factor.subquery->name.empty() ? "" : ("AS " + this->factor.subquery->name).c_str()
+        );
     case Ast_TableFactor::FACTOR_TYPE_REFERENCES:
-        this->putLine("TABLE REFERENCES");
-        this->incLevel();
-        this->factor.references->references->illustrate();
-        this->decLevel();
+        return this->rawf("(%s)", this->factor.references->references->format().c_str());
     default:
-        break;
+        return "";
     }
 }
 
@@ -235,24 +228,25 @@ Ast_JoinTable::~Ast_JoinTable() {
     if (join_condition) delete join_condition;
 }
 
+/* TODO */
 const char * Ast_JoinTable::joinTypeName(enum Ast_JoinTable::join_type join_type) {
     static const char names[5][32] = {
-        "INNER",
-        "CROSS",
-        "LEFT OUTER",
-        "RIGHT OUTER",
-        "STRAIGHT"
+        "INNER JOIN",
+        "CROSS JOIN",
+        "LEFT OUTER JOIN",
+        "RIGHT OUTER JOIN",
+        "STRAIGHT_JOIN"
     };
     return names[join_type];
 }
 
-void Ast_JoinTable::illustrate() {
-    this->putLine("%s JOIN", this->joinTypeName(this->join_type));
-    this->incLevel();
-    this->reference->illustrate();
-    this->table_factor->illustrate();
-    this->join_condition->illustrate();
-    this->decLevel();
+std::string Ast_JoinTable::format() {
+    return this->rawf("%s %s %s %s", 
+        this->reference->format().c_str(),
+        this->joinTypeName(this->join_type),
+        this->table_factor->format().c_str(),
+        this->join_condition ? this->join_condition->format().c_str() : ""
+    );
 }
 
 Ast_TableReference::Ast_TableReference(Ast_TableFactor *table_factor)
@@ -271,12 +265,12 @@ Ast_TableReference::~Ast_TableReference()
     if (this->join_table) delete this->join_table;
 }
 
-void Ast_TableReference::illustrate() {
-    this->putLine("TABLE REFERENCE");
-    this->incLevel();
-    if (this->table_factor) this->table_factor->illustrate();
-    if (this->join_table) this->join_table->illustrate();
-    this->decLevel();
+std::string Ast_TableReference::format() {
+    if (this->table_factor) 
+        return this->table_factor->format();
+    if (this->join_table)
+        return this->join_table->format();
+    return "";
 }
 
 Ast_TableReferences::Ast_TableReferences(Ast_TableReference *reference) {
@@ -296,11 +290,20 @@ void Ast_TableReferences::addTableReference(Ast_TableReference *reference) {
     this->references.push_back(reference);
 }
 
-void Ast_TableReferences::illustrate() {
-    for (std::vector<Ast_TableReference *>::iterator it = this->references.begin();
-        it != this->references.end();
-        it ++)
-    {
-        if (*it) (*it)->illustrate();
+std::string Ast_TableReferences::format() {
+    std::string str;
+
+    if (!this->references.empty()) {
+        str = this->references[0]->format();
+
+        for (std::vector<Ast_TableReference *>::iterator it = this->references.begin() + 1;
+            it != this->references.end();
+            it ++)
+        {
+            if (*it) 
+                str += (",\n" + (*it)->format());
+        }
     }
+
+    return str;
 }

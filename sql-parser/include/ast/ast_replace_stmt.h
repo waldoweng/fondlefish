@@ -14,10 +14,10 @@ class Ast_SelectStmt;
 class Ast_ReplaceStmt : public Ast_Base {
 public:
     enum replace_opts {
-        REPLACE_OPTS_LOW_PRIORITY    = 1,
-        REPLACE_OPTS_DELAYED         = 2,
-        REPLACE_OPTS_HIGH_PRIORITY   = 3,
-        REPLACE_OPTS_IGNORE          = 4
+        REPLACE_OPTS_LOW_PRIORITY    = 1 << 0,
+        REPLACE_OPTS_DELAYED         = 1 << 2,
+        REPLACE_OPTS_HIGH_PRIORITY   = 1 << 3,
+        REPLACE_OPTS_IGNORE          = 1 << 4
     };
     enum replace_type {
         REPLACE_TYPE_VALLIST     = 0,
@@ -86,10 +86,10 @@ public:
     virtual ~Ast_ReplaceStmt();
 
 public:
-    virtual void illustrate();
+    virtual std::string format();
 
 private:
-    const char * replaceOptName(replace_opts insert_opts);
+    std::string replaceOptName(replace_opts insert_opts);
 
 private:
     replace_type replace_type;

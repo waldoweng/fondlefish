@@ -18,7 +18,7 @@ public:
     virtual ~Ast_IndexList();
 
 public:
-    virtual void illustrate();
+    virtual std::string format();
 
 public:
     void addName(const char *name);
@@ -33,7 +33,7 @@ public:
     virtual ~Ast_IndexHint();
 
 public:
-    virtual void illustrate();
+    virtual std::string format();
 
 private:
     bool use;
@@ -50,7 +50,7 @@ public:
     virtual ~Ast_JoinCondition();
 
 public:
-    virtual void illustrate();
+    virtual std::string format();
 
 private:
     Ast_Expr *expr;
@@ -64,7 +64,7 @@ public:
     virtual ~Ast_TableSubquery();
 
 public:
-    virtual void illustrate();
+    virtual std::string format();
 
 private:
     Ast_SelectStmt *select_stmt;
@@ -129,7 +129,7 @@ public:
     };
 
 public:
-    virtual void illustrate();
+    virtual std::string format();
 
 private:
     factor_type factor_type;
@@ -157,7 +157,7 @@ public:
     virtual ~Ast_JoinTable();
 
 public:
-    virtual void illustrate();
+    virtual std::string format();
 
 private:
     const char * joinTypeName(enum Ast_JoinTable::join_type join_type);
@@ -176,7 +176,7 @@ public:
     virtual ~Ast_TableReference();
 
 public:
-    virtual void illustrate();
+    virtual std::string format();
 
 private:
     Ast_TableFactor *table_factor;
@@ -189,7 +189,7 @@ public:
     virtual ~Ast_TableReferences();
 
 public:
-    virtual void illustrate();
+    virtual std::string format();
 
 public:
     void addTableReference(Ast_TableReference *reference);

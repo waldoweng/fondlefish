@@ -30,18 +30,25 @@ void Ast_InsertAsgnList::addInsertAsgn(const char *name, Ast_Expr *expr) {
     );
 }
 
-void Ast_InsertAsgnList::illustrate() {
-    this->putLine("INSERT ASGN LIST [");
-    this->incLevel();
+std::string Ast_InsertAsgnList::format() {
+    std::string str;
 
-    for (std::vector<InsertAsgn *>::iterator it = asgn_list.begin();
-        it != asgn_list.end();
-        it ++)
-    {
-        this->putLine("NAME %s", (*it)->name.c_str());
-        (*it)->expr->illustrate();
+    if (!asgn_list.empty()) {
+        str = this->rawf("%s = %s", 
+            asgn_list[0]->name.c_str(), 
+            asgn_list[0]->expr->format().c_str()
+        );
+
+        for (std::vector<InsertAsgn *>::iterator it = asgn_list.begin();
+            it != asgn_list.end();
+            it ++)
+        {
+            str += this->rawf("\n%s = %s", 
+                (*it)->name.c_str(),
+                (*it)->expr->format().c_str()
+            );
+        }
     }
 
-    this->decLevel();
-    this->putLine("]");
+    return str;
 }

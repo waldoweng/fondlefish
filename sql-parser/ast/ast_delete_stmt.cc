@@ -8,18 +8,20 @@ Ast_DeleteList::Ast_DeleteList(const char *name) {
 
 Ast_DeleteList::~Ast_DeleteList() {}
 
-void Ast_DeleteList::illustrate() {
-    this->putLine("DeleteList [");
-    
+std::string Ast_DeleteList::format() {
     std::string tmp;
-    for (std::vector<std::string>::iterator it = names.begin();
-        it != names.end();
-        it ++)
-        tmp += (*it + ' ');
-    
-    this->putLine(tmp.c_str());
 
-    this->putLine("]");
+    if (!names.empty()) {
+
+        tmp = names[0];
+
+        for (std::vector<std::string>::iterator it = names.begin() + 1;
+            it != names.end();
+            it ++)
+            tmp += (' ' + *it);
+    }
+
+    return tmp;
 }
 
 void Ast_DeleteList::addName(const char *name) {
@@ -107,28 +109,31 @@ const char * Ast_DeleteStmt::deleteOptName(enum Ast_DeleteStmt::delete_opts dele
     return names[delete_opts-1];
 }
 
-void Ast_DeleteStmt::illustrate() {
+std::string Ast_DeleteStmt::format() {
+    std::string str;
+
     switch (delete_type)
     {
     case Ast_DeleteStmt::SINGLE_TABLE:
-        this->putLine("DELETE STMT %s %s", 
+        str = this->rawf("DELETE %s FROM %s\n%s\n%s\n%s",
             this->deleteOptName(this->stmt.single_stmt->delete_opts),
-            this->stmt.single_stmt->name.c_str());
-        this->incLevel();
-        this->stmt.single_stmt->opt_where->illustrate();
-        this->stmt.single_stmt->opt_orderby->illustrate();
-        this->stmt.single_stmt->opt_limit->illustrate();
-        this->decLevel();
+            this->stmt.single_stmt->name.c_str(),
+            this->stmt.single_stmt->opt_where->format().c_str(),
+            this->stmt.single_stmt->opt_orderby->format().c_str(),
+            this->stmt.single_stmt->opt_limit->format().c_str()
+        );
         break;
     case Ast_DeleteStmt::MULTIPLE_TABLE:
-        this->putLine("DELETE STMT %s", this->deleteOptName(this->stmt.multi_stmt->delete_opts));
-        this->incLevel();
-        this->stmt.multi_stmt->delete_list->illustrate();
-        this->stmt.multi_stmt->table_references->illustrate();
-        this->stmt.multi_stmt->opt_where->illustrate();
-        this->decLevel();
+        str = this->rawf("DELETE %s %s FROM %s\n%s", 
+            this->deleteOptName(this->stmt.multi_stmt->delete_opts),
+            this->stmt.multi_stmt->delete_list->format().c_str(),
+            this->stmt.multi_stmt->table_references->format().c_str(),
+            this->stmt.multi_stmt->opt_where->format().c_str()
+        );
         break;
     default:
         break;
     }
+
+    return str;
 }

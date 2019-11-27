@@ -22,16 +22,20 @@ void Ast_GroupByList::addGroupBy(Ast_Expr *expr, bool asc) {
     groupby_list.push_back(Ast_GroupByList::GroupByItem(expr, asc));
 }
 
-void Ast_GroupByList::illustrate() {
+std::string Ast_GroupByList::format() {
+    std::string str;
+
     for (std::vector<Ast_GroupByList::GroupByItem>::iterator it = groupby_list.begin();
         it != groupby_list.end();
         ++it
     ) {
-        this->putLine("GROUP BY ORDER:%s", it->asc ? "ASC" : "DESC");
-        this->incLevel();
-        it->expr->illustrate();
-        this->decLevel();
+        str += this->rawf("GROUP BY %s %s",
+            it->expr->format().c_str(),
+            it->asc ? "ASC" : "DESC"
+        );
     }
+
+    return str;
 }
 
 
@@ -44,13 +48,11 @@ Ast_OptOnDupUpdate::~Ast_OptOnDupUpdate() {
     if (insert_asgn_list) delete insert_asgn_list;
 }
 
-void Ast_OptOnDupUpdate::illustrate() {
+std::string Ast_OptOnDupUpdate::format() {
     if (this->insert_asgn_list) {
-        this->putLine("ON DUPLICATE UPDATE");
-        this->incLevel();
-        this->insert_asgn_list->illustrate();
-        this->decLevel();
+        return this->rawf("ON DUPLICATE KEY UPDATE %s", this->insert_asgn_list->format().c_str());
     }
+    return "";
 }
 
 
@@ -71,19 +73,18 @@ Ast_OptLimit::~Ast_OptLimit()
 }
 
 
-void Ast_OptLimit::illustrate() {
+std::string Ast_OptLimit::format() {
     if (offset) {
-        this->putLine("OFFSET");
-        this->incLevel();
-        this->offset->illustrate();
-        this->decLevel();
+        return this->rawf("LIMIT %s, %s", 
+            this->offset->format().c_str(),
+            this->limit->format().c_str()
+        );
+    } else if (limit) {
+        return this->rawf("LIMIT %s", 
+            this->limit->format().c_str()
+        );
     }
-    if (limit) {
-        this->putLine("LIMIT");
-        this->incLevel();
-        this->limit->illustrate();
-        this->decLevel();
-    }
+    return "";
 }
 
 
@@ -96,8 +97,10 @@ Ast_OptIntoList::~Ast_OptIntoList() {
     if (column_list) delete column_list;
 }
 
-void Ast_OptIntoList::illustrate() {
-    this->column_list->illustrate();
+std::string Ast_OptIntoList::format() {
+    return this->rawf("INTO %s",
+        this->column_list->format().c_str()
+    );
 }
 
 
@@ -110,13 +113,11 @@ Ast_OptHaving::~Ast_OptHaving() {
     if (expr) delete expr;
 }
 
-void Ast_OptHaving::illustrate() {
+std::string Ast_OptHaving::format() {
     if (expr) {
-        this->putLine("HAVING");
-        this->incLevel();
-        this->expr->illustrate();
-        this->decLevel();
+        return this->rawf("HAVING %s", this->expr->format().c_str());
     }
+    return "";
 }
 
 
@@ -129,11 +130,14 @@ Ast_OptGroupBy::~Ast_OptGroupBy() {
     if (groupby_list) delete groupby_list;
 }
 
-void Ast_OptGroupBy::illustrate() {
-    this->putLine("OPT GROUP BY %s", this->opt_with_rollup ? "WITH ROLLUP" : "");
-    this->incLevel();
-    if (groupby_list) this->groupby_list->illustrate();
-    this->decLevel();
+std::string Ast_OptGroupBy::format() {
+    if (this->groupby_list)
+        return this->rawf("GROUP BY %s %s",
+            this->groupby_list->format().c_str(), 
+            this->opt_with_rollup ? "WITH ROLLUP" : ""
+        );
+
+    return "";
 }
 
 
@@ -146,9 +150,10 @@ Ast_OptColNames::~Ast_OptColNames() {
     if (column_list) delete column_list;
 }
 
-void Ast_OptColNames::illustrate() {
+std::string Ast_OptColNames::format() {
     if (column_list)
-        column_list->illustrate();
+        return '(' + column_list->format() + ')';
+    return "";
 }
 
 
@@ -161,13 +166,11 @@ Ast_OptOrderBy::~Ast_OptOrderBy() {
     if (orderby_list) delete orderby_list;
 }
 
-void Ast_OptOrderBy::illustrate() {
+std::string Ast_OptOrderBy::format() {
     if (orderby_list) {
-        this->putLine("ORDER BY");
-        this->incLevel();
-        this->orderby_list->illustrate();
-        this->decLevel();
+        return this->rawf("ORDER BY %s", this->orderby_list->format().c_str());
     }
+    return "";
 }
 
 
@@ -181,11 +184,9 @@ Ast_OptWhere::~Ast_OptWhere()
     if (expr) delete expr;
 }
 
-void Ast_OptWhere::illustrate() {
+std::string Ast_OptWhere::format() {
     if (expr) {
-        this->putLine("WHERE");
-        this->incLevel();
-        this->expr->illustrate();
-        this->decLevel();
-    }    
+        return this->rawf("WHERE %s", this->expr->format().c_str());
+    }
+    return "";
 }

@@ -11,7 +11,7 @@ public:
     virtual ~Ast_CreateDatabaseStmt();
 
 public:
-    virtual void illustrate();
+    virtual std::string format();
 
 private:
     bool opt_if_not_exists;
