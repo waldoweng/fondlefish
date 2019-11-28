@@ -6,7 +6,7 @@ cmake_minimum_required (VERSION 3.5.0)
 
 project(sql-parser)
 
-set( CMAKE_EXPORT_COMPILE_COMMANDS ON )
+set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 set(CMAKE_CXX_STANDARD 11)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
@@ -15,7 +15,6 @@ add_library(coverage_config INTERFACE)
 
 option(CODE_COVERAGE "Enable coverage reporting" OFF)
 if(CODE_COVERAGE)
-    # Add required flags (GCC & LLVM/Clang)
     target_compile_options(coverage_config INTERFACE
         -O0        # no optimization
         -g         # generate debug info
@@ -30,4 +29,12 @@ if(CODE_COVERAGE)
 endif()
 
 add_subdirectory(ast)
+add_subdirectory(parser)
 add_subdirectory(src)
+
+option (BUILD_TESTING "Build the testing tree." ON)
+# Allows this to be used by super projects with `add_subdirectory`
+if (BUILD_TESTING)
+    enable_testing()
+    add_subdirectory(test)
+endif()
