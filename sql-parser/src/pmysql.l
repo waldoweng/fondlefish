@@ -1,7 +1,7 @@
 %option noyywrap nodefault yylineno case-insensitive
 
 %{
-#include "include/ast/ast.h"
+#include "ast.h"
 #include "pmysql.tab.hh"
 #include <stdarg.h>
 #include <string.h>

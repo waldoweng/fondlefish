@@ -687,12 +687,12 @@ std::string Ast_DateFuncExpr::format() {
     switch (this->date_func_type)
     {
     case Ast_DateFuncExpr::CompoundTypeFuncDateAdd:
-        this->rawf("DATE_ADD(%s, %s)", 
+        return this->rawf("DATE_ADD(%s, %s)", 
             this->expr->format().c_str(), 
             this->interval_exp->format().c_str()
         );
     case Ast_DateFuncExpr::CompoundTypeFuncDateSub:
-        this->rawf("DATE_SUB(%s, %s)", 
+        return this->rawf("DATE_SUB(%s, %s)", 
             this->expr->format().c_str(), 
             this->interval_exp->format().c_str()
         );

@@ -4,7 +4,7 @@
 #include <stdlib.h>
 #include <stdarg.h>
 #include <string.h>
-#include "include/ast/ast.h"
+#include "ast.h"
 
 extern int yylex (void);
 
@@ -956,24 +956,4 @@ void lyyerror(YYLTYPE t, const char *s, ...) {
         fprintf(stderr, "%d.%d-%d.%d: error: ", t.first_line, t.first_column, t.last_line, t.last_column); 
     vfprintf(stderr, s, ap); 
     fprintf(stderr, "\n");
-}
-
-int main(int argc, char *argv[]) {
-    extern FILE *yyin;
-
-    if( argc > 1 && !strcmp(argv[1], "-d")) {
-        //yydebug = 1;
-        argc --;
-        argv ++;
-    }
-
-    if ( argc > 1 && (yyin = fopen(argv[1], "r")) == NULL) {
-        perror(argv[1]);
-        exit(1);
-    }
-
-    if (!yyparse())
-        printf("\n");
-    else
-        printf("\nSQL parse failed\n");
 }
