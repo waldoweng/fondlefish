@@ -111,11 +111,11 @@ private:
 
 private:
     data_type data_type;
-    union _type {
+    union {
         NumericType *numeric;
         StringType *str;
         CompondType *compond;
-    } type_detail;
+    };
 };
 
 class Ast_ColumnAttrs : public Ast_Base {
@@ -206,10 +206,10 @@ private:
 
 private:
     def_type def_type;
-    union _def {
+    union {
         IndexDefinition *index_def;
         DataDefinition *data_def;
-    } def_detail;
+    };
 };
 
 class Ast_CreateColList : public Ast_Base {

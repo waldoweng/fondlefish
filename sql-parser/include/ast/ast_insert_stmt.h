@@ -63,18 +63,6 @@ public:
         Ast_OptOnDupUpdate *opt_ondupupdate;
     };
 
-    union InsertStmt {
-    public:
-        explicit InsertStmt(InsertStmtValList *_val_list);
-        explicit InsertStmt(InsertStmtAsgnList *_asgn_list);
-        explicit InsertStmt(InsertStmtSelect *_select);
-        ~InsertStmt();
-    public:
-        InsertStmtValList *_val_list;
-        InsertStmtAsgnList *_asgn_list;
-        InsertStmtSelect *_select;
-    };
-
 public:
     explicit Ast_InsertStmt(insert_opts insert_opts, const char *name, Ast_OptColNames *opt_col_names,
         Ast_InsertValList *insert_val_list, Ast_OptOnDupUpdate *opt_dupupdate);
@@ -92,7 +80,11 @@ private:
 
 private:
     insert_type insert_type;
-    InsertStmt stmt;
+    union {
+        InsertStmtValList *_val_list;
+        InsertStmtAsgnList *_asgn_list;
+        InsertStmtSelect *_select;
+    };
 };
 
 #endif

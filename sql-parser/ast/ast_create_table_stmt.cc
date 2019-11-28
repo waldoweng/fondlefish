@@ -57,10 +57,10 @@ Ast_DataType::Ast_DataType(
     case Ast_DataType::DATA_TYPE_DOUBLE:
     case Ast_DataType::DATA_TYPE_FLOAT:
     case Ast_DataType::DATA_TYPE_DECIMAL:
-        type_detail.numeric = new Ast_DataType::NumericType();
-        type_detail.numeric->length = length;
-        type_detail.numeric->unsigned_flag = unsigned_flag;
-        type_detail.numeric->zerofill_flag = zerofill_flag;
+        numeric = new Ast_DataType::NumericType();
+        numeric->length = length;
+        numeric->unsigned_flag = unsigned_flag;
+        numeric->zerofill_flag = zerofill_flag;
         break;
     default:
         break;
@@ -85,11 +85,11 @@ Ast_DataType::Ast_DataType(
     case Ast_DataType::DATA_TYPE_TEXT:
     case Ast_DataType::DATA_TYPE_MEDIUMTEXT:
     case Ast_DataType::DATA_TYPE_LONGTEXT:
-        type_detail.str = new Ast_DataType::StringType();
-        type_detail.str->length = length;
-        type_detail.str->binary_flag = binary_flag;
-        type_detail.str->charset = (opt_csc->csc_type == Ast_OptCSC::CSC_TYPE_CHARSET) ? opt_csc->value : "";
-        type_detail.str->collate = (opt_csc->csc_type == Ast_OptCSC::CSC_TYPE_COLLATE) ? opt_csc->value : "";
+        str = new Ast_DataType::StringType();
+        str->length = length;
+        str->binary_flag = binary_flag;
+        str->charset = (opt_csc->csc_type == Ast_OptCSC::CSC_TYPE_CHARSET) ? opt_csc->value : "";
+        str->collate = (opt_csc->csc_type == Ast_OptCSC::CSC_TYPE_COLLATE) ? opt_csc->value : "";
         break;
     default:
         break;
@@ -107,10 +107,10 @@ Ast_DataType::Ast_DataType(
     {
     case Ast_DataType::DATA_TYPE_ENUM:
     case Ast_DataType::DATA_TYPE_SET:
-        type_detail.compond = new Ast_DataType::CompondType();
-        type_detail.compond->enum_list = enum_list;
-        type_detail.compond->charset = (opt_csc->csc_type == Ast_OptCSC::CSC_TYPE_CHARSET) ? opt_csc->value : "";
-        type_detail.compond->collate = (opt_csc->csc_type == Ast_OptCSC::CSC_TYPE_COLLATE) ? opt_csc->value : "";
+        compond = new Ast_DataType::CompondType();
+        compond->enum_list = enum_list;
+        compond->charset = (opt_csc->csc_type == Ast_OptCSC::CSC_TYPE_CHARSET) ? opt_csc->value : "";
+        compond->collate = (opt_csc->csc_type == Ast_OptCSC::CSC_TYPE_COLLATE) ? opt_csc->value : "";
         break;
     default:
         break;
@@ -130,7 +130,7 @@ Ast_DataType::~Ast_DataType() {
     case Ast_DataType::DATA_TYPE_DOUBLE:
     case Ast_DataType::DATA_TYPE_FLOAT:
     case Ast_DataType::DATA_TYPE_DECIMAL:
-        delete type_detail.numeric;
+        delete numeric;
         break;
     case Ast_DataType::DATA_TYPE_CHAR:
     case Ast_DataType::DATA_TYPE_VARCHAR:
@@ -140,12 +140,12 @@ Ast_DataType::~Ast_DataType() {
     case Ast_DataType::DATA_TYPE_TEXT:
     case Ast_DataType::DATA_TYPE_MEDIUMTEXT:
     case Ast_DataType::DATA_TYPE_LONGTEXT:
-        delete type_detail.str;
+        delete str;
         break;
     case Ast_DataType::DATA_TYPE_ENUM:
     case Ast_DataType::DATA_TYPE_SET:
-        delete type_detail.compond->enum_list;
-        delete type_detail.compond;
+        delete compond->enum_list;
+        delete compond;
         break;
     default:
         break;
@@ -236,7 +236,7 @@ std::string Ast_DataType::format() {
     case Ast_DataType::DATA_TYPE_DOUBLE:
     case Ast_DataType::DATA_TYPE_FLOAT:
     case Ast_DataType::DATA_TYPE_DECIMAL:
-        return this->format(data_type, *(this->type_detail.numeric));
+        return this->format(data_type, *(this->numeric));
     case Ast_DataType::DATA_TYPE_CHAR:
     case Ast_DataType::DATA_TYPE_VARCHAR:
     case Ast_DataType::DATA_TYPE_BINARY:
@@ -245,10 +245,10 @@ std::string Ast_DataType::format() {
     case Ast_DataType::DATA_TYPE_TEXT:
     case Ast_DataType::DATA_TYPE_MEDIUMTEXT:
     case Ast_DataType::DATA_TYPE_LONGTEXT:
-        return this->format(data_type, *(this->type_detail.str));
+        return this->format(data_type, *(this->str));
     case Ast_DataType::DATA_TYPE_ENUM:
     case Ast_DataType::DATA_TYPE_SET:
-        return this->format(data_type, *(this->type_detail.compond));
+        return this->format(data_type, *(this->compond));
     default:
         return this->format(data_type);
     }
@@ -397,23 +397,23 @@ Ast_CreateDefinition::IndexDefinition::~IndexDefinition() {
 Ast_CreateDefinition::Ast_CreateDefinition(Ast_CreateDefinition::key_type type, Ast_ColumnList *column_list)
     : def_type(Ast_CreateDefinition::INDEX_DEFINITION)
 {
-    def_detail.index_def = new Ast_CreateDefinition::IndexDefinition(type, column_list);
+    index_def = new Ast_CreateDefinition::IndexDefinition(type, column_list);
 }
 
 Ast_CreateDefinition::Ast_CreateDefinition(const char *name, Ast_DataType *data_type, Ast_ColumnAttrs *column_attr)
     : def_type(Ast_CreateDefinition::DATA_DEFINITION)
 {
-    def_detail.data_def = new Ast_CreateDefinition::DataDefinition(name, data_type, column_attr);
+    data_def = new Ast_CreateDefinition::DataDefinition(name, data_type, column_attr);
 }
 
 Ast_CreateDefinition::~Ast_CreateDefinition() {
     switch (def_type)
     {
     case Ast_CreateDefinition::INDEX_DEFINITION:
-        delete this->def_detail.index_def;
+        delete this->index_def;
         break;
     case Ast_CreateDefinition::DATA_DEFINITION:
-        delete this->def_detail.data_def;
+        delete this->data_def;
         break;
     default:
         break;
@@ -437,15 +437,15 @@ std::string Ast_CreateDefinition::format() {
     {
     case Ast_CreateDefinition::INDEX_DEFINITION:
         str = this->rawf("%s %s", 
-            this->keyTypeName(this->def_detail.index_def->key_type),
-            this->def_detail.index_def->column_list->format().c_str()
+            this->keyTypeName(this->index_def->key_type),
+            this->index_def->column_list->format().c_str()
         );
         break;
     case Ast_CreateDefinition::DATA_DEFINITION:
         str = this->rawf("%s %s %s", 
-            this->def_detail.data_def->name.c_str(),
-            this->def_detail.data_def->data_type->format().c_str(),
-            this->def_detail.data_def->column_attrs->format().c_str()
+            this->data_def->name.c_str(),
+            this->data_def->data_type->format().c_str(),
+            this->data_def->column_attrs->format().c_str()
         );
         break;
     default:

@@ -93,21 +93,10 @@ Ast_SelectStmt::TableSelectStmt::~TableSelectStmt() {
     if (opt_into_list) delete opt_into_list;
 }
 
-Ast_SelectStmt::SelectStmt::SelectStmt(Ast_SelectStmt::TablelessSelectStmt *tableless)
-    : tableless(tableless)
-{
-}
 
-Ast_SelectStmt::SelectStmt::SelectStmt(Ast_SelectStmt::TableSelectStmt *table) 
-    : table(table)
-{
-}
-
-Ast_SelectStmt::SelectStmt::~SelectStmt() {}
-
-Ast_SelectStmt::Ast_SelectStmt(enum Ast_SelectStmt::select_opts select_opts, Ast_SelectExprList *select_expr_list) 
+Ast_SelectStmt::Ast_SelectStmt(enum Ast_SelectStmt::select_opts select_opts, Ast_SelectExprList *select_expr_list)
     : select_type(Ast_SelectStmt::SELECT_TYPE_TABLELESS),
-        stmt(new Ast_SelectStmt::TablelessSelectStmt(select_opts, select_expr_list))
+        tableless(new Ast_SelectStmt::TablelessSelectStmt(select_opts, select_expr_list))
 {
 }
 
@@ -116,7 +105,7 @@ Ast_SelectStmt::Ast_SelectStmt(enum Ast_SelectStmt::select_opts select_opts,
     Ast_OptGroupBy *opt_groupby, Ast_OptHaving *opt_having, Ast_OptOrderBy *opt_orderby, Ast_OptLimit *opt_limit,
     Ast_OptIntoList *opt_into_list) 
     : select_type(Ast_SelectStmt::SELECT_TYPE_TABLE),
-        stmt(new Ast_SelectStmt::TableSelectStmt(
+        table(new Ast_SelectStmt::TableSelectStmt(
             select_opts, select_expr_list, table_references, opt_where, opt_groupby, opt_having,
             opt_orderby, opt_limit, opt_into_list))
 {
@@ -126,10 +115,10 @@ Ast_SelectStmt::~Ast_SelectStmt() {
     switch (this->select_type)
     {
     case Ast_SelectStmt::SELECT_TYPE_TABLELESS:
-        delete this->stmt.tableless;
+        delete this->tableless;
         break;
     case Ast_SelectStmt::SELECT_TYPE_TABLE:
-        delete this->stmt.table;
+        delete this->table;
         break;
     default:
         break;
@@ -170,20 +159,20 @@ std::string Ast_SelectStmt::format() {
     {
     case Ast_SelectStmt::SELECT_TYPE_TABLELESS:
         return this->rawf("SELECT %s %s", 
-            this->selectOptsName(this->stmt.tableless->select_opts),
-            this->stmt.tableless->select_expr_list->format().c_str()
+            this->selectOptsName(this->tableless->select_opts),
+            this->tableless->select_expr_list->format().c_str()
         );
     case Ast_SelectStmt::SELECT_TYPE_TABLE:
         return this->rawf("SELECT %s %s FROM %s %s %s %s %s %s %s", 
-            this->selectOptsName(this->stmt.table->select_opts),
-            this->stmt.table->select_expr_list->format().c_str(),
-            this->stmt.table->table_references->format().c_str(),
-            this->stmt.table->opt_where ? this->stmt.table->opt_where->format().c_str() : "",
-            this->stmt.table->opt_groupby ? this->stmt.table->opt_groupby->format().c_str() : "",
-            this->stmt.table->opt_having ? this->stmt.table->opt_having->format().c_str() : "",
-            this->stmt.table->opt_orderby ? this->stmt.table->opt_orderby->format().c_str() : "",
-            this->stmt.table->opt_limit ? this->stmt.table->opt_limit->format().c_str() : "",
-            this->stmt.table->opt_into_list ? this->stmt.table->opt_into_list->format().c_str() : ""
+            this->selectOptsName(this->table->select_opts),
+            this->table->select_expr_list->format().c_str(),
+            this->table->table_references->format().c_str(),
+            this->table->opt_where ? this->table->opt_where->format().c_str() : "",
+            this->table->opt_groupby ? this->table->opt_groupby->format().c_str() : "",
+            this->table->opt_having ? this->table->opt_having->format().c_str() : "",
+            this->table->opt_orderby ? this->table->opt_orderby->format().c_str() : "",
+            this->table->opt_limit ? this->table->opt_limit->format().c_str() : "",
+            this->table->opt_into_list ? this->table->opt_into_list->format().c_str() : ""
         );
     default:
         return "";

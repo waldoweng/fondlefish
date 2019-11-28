@@ -94,16 +94,6 @@ public:
         Ast_OptIntoList *opt_into_list;
     };
 
-    union SelectStmt {
-    public:
-        explicit SelectStmt(TablelessSelectStmt *tableless);
-        explicit SelectStmt(TableSelectStmt *table);
-        ~SelectStmt();
-    public:
-        TablelessSelectStmt *tableless;
-        TableSelectStmt *table;
-    };
-
 public:
     explicit Ast_SelectStmt(select_opts select_opts, Ast_SelectExprList *select_expr_list);
     explicit Ast_SelectStmt(select_opts select_opts, Ast_SelectExprList *select_expr_list,
@@ -119,8 +109,11 @@ private:
     const char * selectOptsName(select_opts select_opts);
 
 private:
-    select_type select_type;
-    SelectStmt stmt;
+    enum select_type select_type;
+    union {
+        TablelessSelectStmt *tableless;
+        TableSelectStmt *table;
+    };
 };
 
 #endif

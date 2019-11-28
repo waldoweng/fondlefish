@@ -28,21 +28,6 @@ void Ast_DeleteList::addName(const char *name) {
     names.push_back(name);
 }
 
-Ast_DeleteStmt::DeleteStmt::DeleteStmt(enum Ast_DeleteStmt::delete_opts delete_opts, const char *name, 
-    Ast_OptWhere *opt_where, Ast_OptOrderBy *opt_orderby, Ast_OptLimit *opt_limit) 
-    : single_stmt(new Ast_DeleteStmt::SingleTableDeleteStmt(delete_opts, name, opt_where, opt_orderby, opt_limit))   
-{
-}
-
-Ast_DeleteStmt::DeleteStmt::DeleteStmt(enum Ast_DeleteStmt::delete_opts delete_opts, 
-    Ast_DeleteList *delete_list, Ast_TableReferences *table_references, Ast_OptWhere *opt_where)
-    : multi_stmt(new Ast_DeleteStmt::MultipleTableDeleteStmt(delete_opts, delete_list, table_references, opt_where))
-{
-}
-
-Ast_DeleteStmt::DeleteStmt::~DeleteStmt() 
-{
-}
 
 Ast_DeleteStmt::SingleTableDeleteStmt::SingleTableDeleteStmt(enum Ast_DeleteStmt::delete_opts delete_opts, 
     const char *name, Ast_OptWhere *opt_where, Ast_OptOrderBy *opt_orderby, Ast_OptLimit *opt_limit)
@@ -75,14 +60,14 @@ Ast_DeleteStmt::MultipleTableDeleteStmt::~MultipleTableDeleteStmt()
 Ast_DeleteStmt::Ast_DeleteStmt(enum Ast_DeleteStmt::delete_opts delete_opts, const char *name, 
     Ast_OptWhere *opt_where, Ast_OptOrderBy *opt_orderby, Ast_OptLimit *opt_limit)
     : delete_type(Ast_DeleteStmt::SINGLE_TABLE),
-        stmt(delete_opts, name, opt_where, opt_orderby, opt_limit)
+        single_stmt(new SingleTableDeleteStmt(delete_opts, name, opt_where, opt_orderby, opt_limit))
 {
 }
 
 Ast_DeleteStmt::Ast_DeleteStmt(enum Ast_DeleteStmt::delete_opts delete_opts, Ast_DeleteList *delete_list, 
     Ast_TableReferences *table_references, Ast_OptWhere *opt_where)
     : delete_type(Ast_DeleteStmt::MULTIPLE_TABLE),
-        stmt(delete_opts, delete_list, table_references, opt_where)
+        multi_stmt(new MultipleTableDeleteStmt(delete_opts, delete_list, table_references, opt_where))
 {
 }
 
@@ -90,10 +75,10 @@ Ast_DeleteStmt::~Ast_DeleteStmt() {
     switch (delete_type)
     {
     case Ast_DeleteStmt::SINGLE_TABLE:
-        delete this->stmt.single_stmt;
+        delete this->single_stmt;
         break;
     case Ast_DeleteStmt::MULTIPLE_TABLE:
-        delete this->stmt.multi_stmt;
+        delete this->multi_stmt;
         break;
     default:
         break;
@@ -116,19 +101,19 @@ std::string Ast_DeleteStmt::format() {
     {
     case Ast_DeleteStmt::SINGLE_TABLE:
         str = this->rawf("DELETE %s FROM %s\n%s\n%s\n%s",
-            this->deleteOptName(this->stmt.single_stmt->delete_opts),
-            this->stmt.single_stmt->name.c_str(),
-            this->stmt.single_stmt->opt_where->format().c_str(),
-            this->stmt.single_stmt->opt_orderby->format().c_str(),
-            this->stmt.single_stmt->opt_limit->format().c_str()
+            this->deleteOptName(this->single_stmt->delete_opts),
+            this->single_stmt->name.c_str(),
+            this->single_stmt->opt_where->format().c_str(),
+            this->single_stmt->opt_orderby->format().c_str(),
+            this->single_stmt->opt_limit->format().c_str()
         );
         break;
     case Ast_DeleteStmt::MULTIPLE_TABLE:
         str = this->rawf("DELETE %s %s FROM %s\n%s", 
-            this->deleteOptName(this->stmt.multi_stmt->delete_opts),
-            this->stmt.multi_stmt->delete_list->format().c_str(),
-            this->stmt.multi_stmt->table_references->format().c_str(),
-            this->stmt.multi_stmt->opt_where->format().c_str()
+            this->deleteOptName(this->multi_stmt->delete_opts),
+            this->multi_stmt->delete_list->format().c_str(),
+            this->multi_stmt->table_references->format().c_str(),
+            this->multi_stmt->opt_where->format().c_str()
         );
         break;
     default:

@@ -112,45 +112,28 @@ Ast_TableFactor::TableFactorReferences::~TableFactorReferences()
     if (this->references) delete this->references;
 }
 
-Ast_TableFactor::TableFactor::TableFactor(Ast_TableFactor::TableFactorNormal *normal)
-    : normal(normal)
-{
-}
-
-Ast_TableFactor::TableFactor::TableFactor(Ast_TableFactor::TableFactorSubquery *subquery)
-    : subquery(subquery)
-{
-}
-
-Ast_TableFactor::TableFactor::TableFactor(Ast_TableFactor::TableFactorReferences *references)
-    : references(references)
-{
-}
-
-Ast_TableFactor::TableFactor::~TableFactor() {}
-
 Ast_TableFactor::Ast_TableFactor(const char *name, const char *alias, Ast_IndexHint *index_hint)
     : factor_type(Ast_TableFactor::FACTOR_TYPE_NORMAL),
-        factor(new TableFactorNormal("", name, alias ? alias : "", index_hint))
+        normal(new TableFactorNormal("", name, alias ? alias : "", index_hint))
 {
 }
 
 Ast_TableFactor::Ast_TableFactor(const char *database_name, const char *name, 
     const char *alias, Ast_IndexHint *index_hint)
     : factor_type(Ast_TableFactor::FACTOR_TYPE_NORMAL),
-        factor(new TableFactorNormal(database_name, name, alias ? alias : "", index_hint))
+        normal(new TableFactorNormal(database_name, name, alias ? alias : "", index_hint))
 {
 }
 
 Ast_TableFactor::Ast_TableFactor(Ast_TableSubquery *subquery, const char *name)
     : factor_type(Ast_TableFactor::FACTOR_TYPE_SUBQUERY),
-        factor(new TableFactorSubquery(subquery, name))
+        subquery(new TableFactorSubquery(subquery, name))
 {
 }
 
 Ast_TableFactor::Ast_TableFactor(Ast_TableReferences *references)
     : factor_type(Ast_TableFactor::FACTOR_TYPE_REFERENCES),
-        factor(new TableFactorReferences(references))
+        references(new TableFactorReferences(references))
 {
 }
 
@@ -158,13 +141,13 @@ Ast_TableFactor::~Ast_TableFactor() {
     switch (this->factor_type)
     {
     case Ast_TableFactor::FACTOR_TYPE_NORMAL:
-        delete this->factor.normal;
+        delete this->normal;
         break;
     case Ast_TableFactor::FACTOR_TYPE_SUBQUERY:
-        delete this->factor.subquery;
+        delete this->subquery;
         break;
     case Ast_TableFactor::FACTOR_TYPE_REFERENCES:
-        delete this->factor.references;
+        delete this->references;
         break;
     default:
         break;
@@ -176,21 +159,21 @@ std::string Ast_TableFactor::format() {
     {
     case Ast_TableFactor::FACTOR_TYPE_NORMAL:
         return this->rawf("%s %s %s", 
-            factor.normal->database_name.empty() 
-                ? factor.normal->name.c_str() 
-                : (factor.normal->database_name + '.' + factor.normal->name).c_str(), 
-            factor.normal->alias.empty() 
+            normal->database_name.empty() 
+                ? normal->name.c_str() 
+                : (normal->database_name + '.' + normal->name).c_str(), 
+            normal->alias.empty() 
                 ? ""
-                : ("AS " + factor.normal->alias).c_str(),
-            factor.normal->index_hint->format().c_str()
+                : ("AS " + normal->alias).c_str(),
+            normal->index_hint->format().c_str()
         );
     case Ast_TableFactor::FACTOR_TYPE_SUBQUERY:
         return this->rawf("%s %s",
-            this->factor.subquery->subquery->format().c_str(),
-            this->factor.subquery->name.empty() ? "" : ("AS " + this->factor.subquery->name).c_str()
+            this->subquery->subquery->format().c_str(),
+            this->subquery->name.empty() ? "" : ("AS " + this->subquery->name).c_str()
         );
     case Ast_TableFactor::FACTOR_TYPE_REFERENCES:
-        return this->rawf("(%s)", this->factor.references->references->format().c_str());
+        return this->rawf("(%s)", this->references->references->format().c_str());
     default:
         return "";
     }

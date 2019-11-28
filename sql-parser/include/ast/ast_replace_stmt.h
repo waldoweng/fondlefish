@@ -64,18 +64,6 @@ public:
         Ast_OptOnDupUpdate *opt_ondupupdate;
     };
 
-    union ReplaceStmt {
-    public:
-        explicit ReplaceStmt(ReplaceStmtValList *_val_list);
-        explicit ReplaceStmt(ReplaceStmtAsgnList *_asgn_list);
-        explicit ReplaceStmt(ReplaceStmtSelect *_select);
-        ~ReplaceStmt();
-    public:
-        ReplaceStmtValList *_val_list;
-        ReplaceStmtAsgnList *_asgn_list;
-        ReplaceStmtSelect *_select;
-    };
-
 public:
     explicit Ast_ReplaceStmt(replace_opts insert_opts, const char *name, Ast_OptColNames *opt_col_names,
         Ast_InsertValList *insert_vals_list, Ast_OptOnDupUpdate *opt_ondupupdate);
@@ -92,8 +80,12 @@ private:
     std::string replaceOptName(replace_opts insert_opts);
 
 private:
-    replace_type replace_type;
-    ReplaceStmt stmt;
+    enum replace_type replace_type;
+    union {
+        ReplaceStmtValList *_val_list;
+        ReplaceStmtAsgnList *_asgn_list;
+        ReplaceStmtSelect *_select;
+    };
 
 };
 

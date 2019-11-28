@@ -40,7 +40,7 @@ public:
 
 private:
     int m_stmt_type;
-    union _stmt
+    union
     {
         Ast_SelectStmt *select_stmt;
         Ast_UpdateStmt *update_stmt;
@@ -50,7 +50,7 @@ private:
         Ast_CreateDatabaseStmt *create_database_stmt;
         Ast_CreateTableStmt *create_table_stmt;
         Ast_SetStmt *set_stmt;
-    } m_stmt;
+    };
 };
 
 class Ast_StmtList : public Ast_Base {

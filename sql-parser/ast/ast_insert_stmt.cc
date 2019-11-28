@@ -45,43 +45,24 @@ Ast_InsertStmt::InsertStmtSelect::~InsertStmtSelect() {
     if (opt_ondupupdate) delete opt_ondupupdate;
 }
 
-Ast_InsertStmt::InsertStmt::InsertStmt(Ast_InsertStmt::InsertStmtValList *_val_list)
-    : _val_list(_val_list)
-{
-}
-
-Ast_InsertStmt::InsertStmt::InsertStmt(Ast_InsertStmt::InsertStmtAsgnList *_asgn_list)
-    : _asgn_list(_asgn_list)
-{
-}
-
-Ast_InsertStmt::InsertStmt::InsertStmt(Ast_InsertStmt::InsertStmtSelect *_select)
-    : _select(_select)
-{
-}
-
-Ast_InsertStmt::InsertStmt::~InsertStmt() 
-{
-}
-
 Ast_InsertStmt::Ast_InsertStmt(enum Ast_InsertStmt::insert_opts insert_opts, const char *name, 
     Ast_OptColNames *opt_col_names, Ast_InsertValList *insert_val_list, Ast_OptOnDupUpdate *opt_dupupdate)
     : insert_type(Ast_InsertStmt::INSERT_TYPE_VALLIST),
-        stmt(new Ast_InsertStmt::InsertStmtValList(insert_opts, name, opt_col_names, insert_val_list, opt_dupupdate))
+        _val_list(new Ast_InsertStmt::InsertStmtValList(insert_opts, name, opt_col_names, insert_val_list, opt_dupupdate))
 {
 }
 
 Ast_InsertStmt::Ast_InsertStmt(enum Ast_InsertStmt::insert_opts insert_opts, const char *name,
     Ast_InsertAsgnList *insert_asgn_list, Ast_OptOnDupUpdate *opt_ondupupdate)
     : insert_type(Ast_InsertStmt::INSERT_TYPE_ASGNLIST),
-        stmt(new Ast_InsertStmt::InsertStmtAsgnList(insert_opts, name, insert_asgn_list, opt_ondupupdate))
+        _asgn_list(new Ast_InsertStmt::InsertStmtAsgnList(insert_opts, name, insert_asgn_list, opt_ondupupdate))
 {
 }
 
 Ast_InsertStmt::Ast_InsertStmt(enum Ast_InsertStmt::insert_opts insert_opts, const char *name, 
     Ast_OptColNames *opt_col_names, Ast_SelectStmt *select_stmt, Ast_OptOnDupUpdate *opt_ondupupdate)
     : insert_type(Ast_InsertStmt::INSERT_TYPE_SELECT),
-        stmt(new Ast_InsertStmt::InsertStmtSelect(insert_opts, name, opt_col_names, select_stmt, opt_ondupupdate))
+        _select(new Ast_InsertStmt::InsertStmtSelect(insert_opts, name, opt_col_names, select_stmt, opt_ondupupdate))
 {
 }
 
@@ -89,13 +70,13 @@ Ast_InsertStmt::~Ast_InsertStmt() {
     switch (insert_type)
     {
     case Ast_InsertStmt::INSERT_TYPE_VALLIST:
-        delete this->stmt._val_list;
+        delete this->_val_list;
         break;
     case Ast_InsertStmt::INSERT_TYPE_ASGNLIST:
-        delete this->stmt._asgn_list;
+        delete this->_asgn_list;
         break;
     case Ast_InsertStmt::INSERT_TYPE_SELECT:
-        delete this->stmt._select;
+        delete this->_select;
         break;
     default:
         break;
@@ -127,26 +108,26 @@ std::string Ast_InsertStmt::format() {
     {
     case Ast_InsertStmt::INSERT_TYPE_VALLIST:
         return this->rawf("INSERT %s INTO %s %s VALUES %s %s", 
-            this->insertOptName(this->stmt._val_list->insert_opts).c_str(),
-            this->stmt._val_list->name.c_str(),
-            this->stmt._val_list->opt_col_names->format().c_str(),
-            this->stmt._val_list->opt_col_names->format().c_str(),
-            this->stmt._val_list->opt_dupupdate->format().c_str()
+            this->insertOptName(this->_val_list->insert_opts).c_str(),
+            this->_val_list->name.c_str(),
+            this->_val_list->opt_col_names->format().c_str(),
+            this->_val_list->opt_col_names->format().c_str(),
+            this->_val_list->opt_dupupdate->format().c_str()
         );
     case Ast_InsertStmt::INSERT_TYPE_ASGNLIST:
         return this->rawf("INSERT %s INTO %s SET %s %s", 
-            this->insertOptName(this->stmt._asgn_list->insert_opts).c_str(),
-            this->stmt._asgn_list->name.c_str(),
-            this->stmt._asgn_list->insert_asgn_list->format().c_str(),
-            this->stmt._asgn_list->opt_ondupupdate->format().c_str()
+            this->insertOptName(this->_asgn_list->insert_opts).c_str(),
+            this->_asgn_list->name.c_str(),
+            this->_asgn_list->insert_asgn_list->format().c_str(),
+            this->_asgn_list->opt_ondupupdate->format().c_str()
         );
     case Ast_InsertStmt::INSERT_TYPE_SELECT:
         return this->rawf("INSERT %s INTO %s %s %s %s", 
-            this->insertOptName(this->stmt._select->insert_opts).c_str(),
-            this->stmt._select->name.c_str(),
-            this->stmt._select->opt_col_names->format().c_str(),
-            this->stmt._select->select_stmt->format().c_str(),
-            this->stmt._select->opt_ondupupdate->format().c_str()
+            this->insertOptName(this->_select->insert_opts).c_str(),
+            this->_select->name.c_str(),
+            this->_select->opt_col_names->format().c_str(),
+            this->_select->select_stmt->format().c_str(),
+            this->_select->opt_ondupupdate->format().c_str()
         );
     default:
         break;

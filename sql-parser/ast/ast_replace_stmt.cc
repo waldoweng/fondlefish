@@ -45,43 +45,24 @@ Ast_ReplaceStmt::ReplaceStmtSelect::~ReplaceStmtSelect() {
     if (opt_ondupupdate) delete opt_ondupupdate;
 }
 
-Ast_ReplaceStmt::ReplaceStmt::ReplaceStmt(Ast_ReplaceStmt::ReplaceStmtValList *_val_list)
-    : _val_list(_val_list)
-{
-}
-
-Ast_ReplaceStmt::ReplaceStmt::ReplaceStmt(Ast_ReplaceStmt::ReplaceStmtAsgnList *_asgn_list)
-    : _asgn_list(_asgn_list)
-{
-}
-
-Ast_ReplaceStmt::ReplaceStmt::ReplaceStmt(Ast_ReplaceStmt::ReplaceStmtSelect *_select)
-    : _select(_select)
-{
-}
-
-Ast_ReplaceStmt::ReplaceStmt::~ReplaceStmt() 
-{
-}
-
 Ast_ReplaceStmt::Ast_ReplaceStmt(enum Ast_ReplaceStmt::replace_opts replace_opts, const char *name, 
     Ast_OptColNames *opt_col_names, Ast_InsertValList *replace_val_list, Ast_OptOnDupUpdate *opt_dupupdate)
     : replace_type(Ast_ReplaceStmt::REPLACE_TYPE_VALLIST),
-        stmt(new Ast_ReplaceStmt::ReplaceStmtValList(replace_opts, name, opt_col_names, replace_val_list, opt_dupupdate))
+        _val_list(new Ast_ReplaceStmt::ReplaceStmtValList(replace_opts, name, opt_col_names, replace_val_list, opt_dupupdate))
 {
 }
 
 Ast_ReplaceStmt::Ast_ReplaceStmt(enum Ast_ReplaceStmt::replace_opts replace_opts, const char *name,
     Ast_InsertAsgnList *insert_asgn_list, Ast_OptOnDupUpdate *opt_ondupupdate)
     : replace_type(Ast_ReplaceStmt::REPLACE_TYPE_ASGNLIST),
-        stmt(new Ast_ReplaceStmt::ReplaceStmtAsgnList(replace_opts, name, insert_asgn_list, opt_ondupupdate))
+        _asgn_list(new Ast_ReplaceStmt::ReplaceStmtAsgnList(replace_opts, name, insert_asgn_list, opt_ondupupdate))
 {
 }
 
 Ast_ReplaceStmt::Ast_ReplaceStmt(enum Ast_ReplaceStmt::replace_opts replace_opts, const char *name, 
     Ast_OptColNames *opt_col_names, Ast_SelectStmt *select_stmt, Ast_OptOnDupUpdate *opt_ondupupdate)
     : replace_type(Ast_ReplaceStmt::REPLACE_TYPE_SELECT),
-        stmt(new Ast_ReplaceStmt::ReplaceStmtSelect(replace_opts, name, opt_col_names, select_stmt, opt_ondupupdate))
+        _select(new Ast_ReplaceStmt::ReplaceStmtSelect(replace_opts, name, opt_col_names, select_stmt, opt_ondupupdate))
 {
 }
 
@@ -89,13 +70,13 @@ Ast_ReplaceStmt::~Ast_ReplaceStmt() {
     switch (replace_type)
     {
     case Ast_ReplaceStmt::REPLACE_TYPE_VALLIST:
-        delete this->stmt._val_list;
+        delete this->_val_list;
         break;
     case Ast_ReplaceStmt::REPLACE_TYPE_ASGNLIST:
-        delete this->stmt._asgn_list;
+        delete this->_asgn_list;
         break;
     case Ast_ReplaceStmt::REPLACE_TYPE_SELECT:
-        delete this->stmt._select;
+        delete this->_select;
         break;
     default:
         break;
@@ -129,26 +110,26 @@ std::string Ast_ReplaceStmt::format() {
     {
     case Ast_ReplaceStmt::REPLACE_TYPE_VALLIST:
         return this->rawf("REPLACE %s INTO %s %s VALUES %s %s", 
-            this->replaceOptName(this->stmt._val_list->replace_opts).c_str(), 
-            this->stmt._val_list->name.c_str(),
-            this->stmt._val_list->opt_col_names->format().c_str(),
-            this->stmt._val_list->insert_val_list->format().c_str(),
-            this->stmt._val_list->opt_dupupdate->format().c_str()
+            this->replaceOptName(this->_val_list->replace_opts).c_str(), 
+            this->_val_list->name.c_str(),
+            this->_val_list->opt_col_names->format().c_str(),
+            this->_val_list->insert_val_list->format().c_str(),
+            this->_val_list->opt_dupupdate->format().c_str()
         );
     case Ast_ReplaceStmt::REPLACE_TYPE_ASGNLIST:
         return this->rawf("REPLACE %s INTO %s SET %s %s", 
-            this->replaceOptName(this->stmt._asgn_list->replace_opts).c_str(),
-            this->stmt._asgn_list->name.c_str(),
-            this->stmt._asgn_list->insert_asgn_list->format().c_str(),
-            this->stmt._asgn_list->opt_ondupupdate->format().c_str()
+            this->replaceOptName(this->_asgn_list->replace_opts).c_str(),
+            this->_asgn_list->name.c_str(),
+            this->_asgn_list->insert_asgn_list->format().c_str(),
+            this->_asgn_list->opt_ondupupdate->format().c_str()
         );
     case Ast_ReplaceStmt::REPLACE_TYPE_SELECT:
         return this->rawf("REPLACE %s INTO %s %s %s", 
-            this->replaceOptName(this->stmt._select->replace_opts).c_str(),
-            this->stmt._select->name.c_str(),
-            this->stmt._select->opt_col_names->format().c_str(),
-            this->stmt._select->select_stmt->format().c_str(),
-            this->stmt._select->opt_ondupupdate->format().c_str()
+            this->replaceOptName(this->_select->replace_opts).c_str(),
+            this->_select->name.c_str(),
+            this->_select->opt_col_names->format().c_str(),
+            this->_select->select_stmt->format().c_str(),
+            this->_select->opt_ondupupdate->format().c_str()
         );
     default:
         return "";

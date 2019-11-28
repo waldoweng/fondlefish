@@ -116,24 +116,16 @@ public:
         Ast_TableReferences *references;
     };
 
-    union TableFactor {
-    public:
-        explicit TableFactor(TableFactorNormal *normal);
-        explicit TableFactor(TableFactorSubquery *subquery);
-        explicit TableFactor(TableFactorReferences *references);
-        ~TableFactor();
-    public:
-        TableFactorNormal *normal;
-        TableFactorSubquery *subquery;
-        TableFactorReferences *references;
-    };
-
 public:
     virtual std::string format();
 
 private:
-    factor_type factor_type;
-    TableFactor factor;
+    enum factor_type factor_type;
+    union {
+        TableFactorNormal *normal;
+        TableFactorSubquery *subquery;
+        TableFactorReferences *references;
+    };
 };
 
 class Ast_JoinTable : public Ast_Base {

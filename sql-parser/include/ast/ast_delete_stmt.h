@@ -71,17 +71,6 @@ public:
         Ast_OptWhere *opt_where;
     };
 
-    union DeleteStmt {
-        DeleteStmt(delete_opts delete_opts, const char *name, Ast_OptWhere *opt_where,
-            Ast_OptOrderBy *opt_orderby, Ast_OptLimit *opt_limit);
-        DeleteStmt(delete_opts delete_opts, Ast_DeleteList *delete_list, 
-            Ast_TableReferences *table_references, Ast_OptWhere *opt_where);
-        ~DeleteStmt();
-
-        SingleTableDeleteStmt *single_stmt;
-        MultipleTableDeleteStmt *multi_stmt;
-    };
-
 public:
     virtual std::string format();
 
@@ -90,7 +79,10 @@ private:
 
 private:
     delete_type delete_type;
-    union DeleteStmt stmt;
+    union {
+        SingleTableDeleteStmt *single_stmt;
+        MultipleTableDeleteStmt *multi_stmt;
+    };
 };
 
 #endif
