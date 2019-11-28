@@ -524,10 +524,10 @@ expr: BINARY expr %prec UMINUS { $$ = new Ast_BinaryExpr($2); }
 stmt: select_stmt { $$ = new Ast_Stmt($1); printf("%s", $1->format().c_str()); }
     ;
 
-select_stmt: SELECT select_opts select_expr_list    { $$ = new Ast_SelectStmt(static_cast<Ast_SelectStmt::select_opts>($2), $3); }
+select_stmt: SELECT select_opts select_expr_list    { $$ = new Ast_SelectStmt(static_cast<Ast_SelectStmt::_select_opts>($2), $3); }
     | SELECT select_opts select_expr_list FROM table_references 
         opt_where opt_groupby opt_having opt_orderby opt_limit opt_into_list 
-        {  $$ = new Ast_SelectStmt(static_cast<Ast_SelectStmt::select_opts>($2), $3, $5, $6, $7, $8, $9, $10, $11); }
+        {  $$ = new Ast_SelectStmt(static_cast<Ast_SelectStmt::_select_opts>($2), $3, $5, $6, $7, $8, $9, $10, $11); }
     ;
 
 opt_where: /* nil */ { $$ = NULL; }
@@ -538,7 +538,7 @@ opt_groupby: /* nil */ { $$ = NULL; }
     | GROUP BY groupby_list opt_with_rollup { $$ = new Ast_OptGroupBy($3, $4); }
     ;
 
-groupby_list: expr opt_asc_desc { $$ = new Ast_GroupByList($1, $2) }
+groupby_list: expr opt_asc_desc { $$ = new Ast_GroupByList($1, $2); }
     | groupby_list ',' expr opt_asc_desc { $1->addGroupBy($3, $4); $$ = $1; }
     ;
 
@@ -670,7 +670,7 @@ table_subquery: '(' select_stmt ')' { $$ = new Ast_TableSubquery($2); }
 stmt: delete_stmt { $$ = new Ast_Stmt($1); }
     ;
 
-delete_stmt: DELETE delete_opts FROM NAME opt_where opt_orderby opt_limit { $$ = new Ast_DeleteStmt(static_cast<enum Ast_DeleteStmt::delete_opts>($2), $4, $5, $6, $7); }
+delete_stmt: DELETE delete_opts FROM NAME opt_where opt_orderby opt_limit { $$ = new Ast_DeleteStmt(static_cast<enum Ast_DeleteStmt::_delete_opts>($2), $4, $5, $6, $7); }
     ;
 
 delete_opts: delete_opts LOW_PRIORITY { $$ = $1 + 01; }
@@ -679,7 +679,7 @@ delete_opts: delete_opts LOW_PRIORITY { $$ = $1 + 01; }
     | /* nil */ { $$ = 0; }
     ;
 
-delete_stmt: DELETE delete_opts delete_list FROM table_references opt_where { $$ = new Ast_DeleteStmt(static_cast<enum Ast_DeleteStmt::delete_opts>($2), $3, $5, $6); }
+delete_stmt: DELETE delete_opts delete_list FROM table_references opt_where { $$ = new Ast_DeleteStmt(static_cast<enum Ast_DeleteStmt::_delete_opts>($2), $3, $5, $6); }
     ;
 
 delete_list: NAME opt_dot_star { $$ = new Ast_DeleteList($1); }
@@ -691,14 +691,14 @@ opt_dot_star: /* nil */
     ;
 
 delete_stmt: DELETE delete_opts FROM delete_list USING table_references opt_where 
-                { $$ = new Ast_DeleteStmt(static_cast<enum Ast_DeleteStmt::delete_opts>($2), $4, $6, $7); }
+                { $$ = new Ast_DeleteStmt(static_cast<enum Ast_DeleteStmt::_delete_opts>($2), $4, $6, $7); }
     ;
 
 stmt: insert_stmt { $$ = new Ast_Stmt($1); printf("%s", $1->format().c_str()); }
     ;
 
 insert_stmt: INSERT insert_opts opt_into NAME opt_col_names VALUES insert_vals_list opt_ondupupdate 
-                { $$ = new Ast_InsertStmt(static_cast<enum Ast_InsertStmt::insert_opts>($2), $4, $5, $7, $8); }
+                { $$ = new Ast_InsertStmt(static_cast<enum Ast_InsertStmt::_insert_opts>($2), $4, $5, $7, $8); }
     ;
 
 opt_ondupupdate: /* nil */ { $$ = NULL; }
@@ -731,7 +731,7 @@ insert_vals: expr { $$ = new Ast_InsertVals($1); }
     ;
 
 insert_stmt: INSERT insert_opts opt_into NAME SET insert_asgn_list opt_ondupupdate {
-                $$ = new Ast_InsertStmt(static_cast<enum Ast_InsertStmt::insert_opts>($2), $4, $6, $7); }
+                $$ = new Ast_InsertStmt(static_cast<enum Ast_InsertStmt::_insert_opts>($2), $4, $6, $7); }
     ;
 
 insert_asgn_list: NAME COMPARISON expr { if($2 != 4) { yyerror("bad insert assignment to %s", $1); YYERROR; }
@@ -746,22 +746,22 @@ insert_asgn_list: NAME COMPARISON expr { if($2 != 4) { yyerror("bad insert assig
 
 
 insert_stmt: INSERT insert_opts opt_into NAME opt_col_names select_stmt opt_ondupupdate 
-                { $$ = new Ast_InsertStmt(static_cast<enum Ast_InsertStmt::insert_opts>($2), $4, $5, $6, $7); }
+                { $$ = new Ast_InsertStmt(static_cast<enum Ast_InsertStmt::_insert_opts>($2), $4, $5, $6, $7); }
     ;
 
 stmt: replace_stmt { $$ = new Ast_Stmt($1); }
     ;
 
 replace_stmt: REPLACE insert_opts opt_into NAME opt_col_names VALUES insert_vals_list opt_ondupupdate
-                { $$ = new Ast_ReplaceStmt(static_cast<enum Ast_ReplaceStmt::replace_opts>($2), $4, $5, $7, $8); }
+                { $$ = new Ast_ReplaceStmt(static_cast<enum Ast_ReplaceStmt::_replace_opts>($2), $4, $5, $7, $8); }
     ;
 
 replace_stmt: REPLACE insert_opts opt_into NAME SET insert_asgn_list opt_ondupupdate
-                { $$ = new Ast_ReplaceStmt(static_cast<enum Ast_ReplaceStmt::replace_opts>($2), $4, $6, $7); }
+                { $$ = new Ast_ReplaceStmt(static_cast<enum Ast_ReplaceStmt::_replace_opts>($2), $4, $6, $7); }
     ;
 
 replace_stmt: REPLACE insert_opts opt_into NAME opt_col_names select_stmt opt_ondupupdate
-                { $$ = new Ast_ReplaceStmt(static_cast<enum Ast_ReplaceStmt::replace_opts>($2), $4, $5, $6, $7); }
+                { $$ = new Ast_ReplaceStmt(static_cast<enum Ast_ReplaceStmt::_replace_opts>($2), $4, $5, $6, $7); }
     ;
 
 
@@ -787,7 +787,7 @@ update_asgn_list: NAME COMPARISON expr { if ($2 != 4) { yyerror("bad update assi
         $1->addUpdateAsgn($3, $5, $7); $$ = $1; }
     ;
 
-stmt: create_database_stmt { $$ = new Ast_Stmt($1) }
+stmt: create_database_stmt { $$ = new Ast_Stmt($1); }
     ;
 
 create_database_stmt: CREATE DATABASE opt_if_not_exists NAME { $$ = new Ast_CreateDatabaseStmt($3, $4); }

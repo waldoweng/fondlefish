@@ -167,7 +167,7 @@ public:
         DATA_DEFINITION = 0,
         INDEX_DEFINITION = 1
     };
-    enum key_type {
+    enum _key_type {
         KEY_TYPE_KEY = 0,
         KEY_TYPE_PRIMARY_KEY = 1,
         KEY_TYPE_FULLTEXT_KEY = 2
@@ -186,15 +186,15 @@ public:
 
     class IndexDefinition {
     public:
-        explicit IndexDefinition(key_type type, Ast_ColumnList *column_list);
+        explicit IndexDefinition(enum _key_type type, Ast_ColumnList *column_list);
         ~IndexDefinition();
     public:
-        key_type key_type;
+        enum _key_type key_type;
         Ast_ColumnList *column_list;
     };
 
 public:
-    explicit Ast_CreateDefinition(key_type type, Ast_ColumnList *column_list);
+    explicit Ast_CreateDefinition(enum _key_type type, Ast_ColumnList *column_list);
     explicit Ast_CreateDefinition(const char *name, Ast_DataType *data_type, Ast_ColumnAttrs *column_attr);
     virtual ~Ast_CreateDefinition();
 
@@ -202,7 +202,7 @@ public:
     virtual std::string format();
 
 private:
-    const char * keyTypeName(key_type key_type);
+    const char * keyTypeName(enum _key_type key_type);
 
 private:
     def_type def_type;

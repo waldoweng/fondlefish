@@ -13,7 +13,7 @@ class Ast_SelectStmt;
 
 class Ast_ReplaceStmt : public Ast_Base {
 public:
-    enum replace_opts {
+    enum _replace_opts {
         REPLACE_OPTS_LOW_PRIORITY    = 1 << 0,
         REPLACE_OPTS_DELAYED         = 1 << 2,
         REPLACE_OPTS_HIGH_PRIORITY   = 1 << 3,
@@ -28,11 +28,11 @@ public:
 public:
     class ReplaceStmtValList {
     public:
-        explicit ReplaceStmtValList(replace_opts insert_opts, const char *name, Ast_OptColNames *opt_col_names,
+        explicit ReplaceStmtValList(enum _replace_opts insert_opts, const char *name, Ast_OptColNames *opt_col_names,
             Ast_InsertValList *insert_val_list, Ast_OptOnDupUpdate *opt_dupupdate);
         ~ReplaceStmtValList();
     public:
-        replace_opts replace_opts;
+        enum _replace_opts replace_opts;
         std::string name;
         Ast_OptColNames *opt_col_names;
         Ast_InsertValList *insert_val_list;
@@ -41,11 +41,11 @@ public:
 
     class ReplaceStmtAsgnList {
     public:
-        explicit ReplaceStmtAsgnList(replace_opts insert_opts, const char *name, 
+        explicit ReplaceStmtAsgnList(enum _replace_opts insert_opts, const char *name, 
             Ast_InsertAsgnList *insert_asgn_list, Ast_OptOnDupUpdate *opt_ondupupdate);
         ~ReplaceStmtAsgnList();
     public:
-        replace_opts replace_opts;
+        enum _replace_opts replace_opts;
         std::string name; 
         Ast_InsertAsgnList *insert_asgn_list;
         Ast_OptOnDupUpdate *opt_ondupupdate;
@@ -53,11 +53,11 @@ public:
 
     class ReplaceStmtSelect {
     public:
-        explicit ReplaceStmtSelect(replace_opts insert_opts, const char *name, Ast_OptColNames *opt_col_names,
+        explicit ReplaceStmtSelect(enum _replace_opts insert_opts, const char *name, Ast_OptColNames *opt_col_names,
             Ast_SelectStmt *select_stmt, Ast_OptOnDupUpdate *opt_ondupupdate);
         virtual ~ReplaceStmtSelect();
     public:
-        replace_opts replace_opts;
+        enum _replace_opts replace_opts;
         std::string name;
         Ast_OptColNames *opt_col_names;
         Ast_SelectStmt *select_stmt;
@@ -65,11 +65,11 @@ public:
     };
 
 public:
-    explicit Ast_ReplaceStmt(replace_opts insert_opts, const char *name, Ast_OptColNames *opt_col_names,
+    explicit Ast_ReplaceStmt(enum _replace_opts insert_opts, const char *name, Ast_OptColNames *opt_col_names,
         Ast_InsertValList *insert_vals_list, Ast_OptOnDupUpdate *opt_ondupupdate);
-    explicit Ast_ReplaceStmt(replace_opts insert_opts, const char *name, Ast_InsertAsgnList *insert_asgn_list,
+    explicit Ast_ReplaceStmt(enum _replace_opts insert_opts, const char *name, Ast_InsertAsgnList *insert_asgn_list,
         Ast_OptOnDupUpdate *opt_ondupupdate);
-    explicit Ast_ReplaceStmt(replace_opts insert_opts, const char *name, Ast_OptColNames *opt_col_names,
+    explicit Ast_ReplaceStmt(enum _replace_opts insert_opts, const char *name, Ast_OptColNames *opt_col_names,
         Ast_SelectStmt *select_stmt, Ast_OptOnDupUpdate *opt_ondupupdate);
     virtual ~Ast_ReplaceStmt();
 
@@ -77,7 +77,7 @@ public:
     virtual std::string format();
 
 private:
-    std::string replaceOptName(replace_opts insert_opts);
+    std::string replaceOptName(enum _replace_opts insert_opts);
 
 private:
     enum replace_type replace_type;

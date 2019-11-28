@@ -5,7 +5,7 @@
 #include "ast_insert_asgn_list.h"
 #include "ast_select_stmt.h"
 
-Ast_ReplaceStmt::ReplaceStmtValList::ReplaceStmtValList(enum Ast_ReplaceStmt::replace_opts replace_opts, 
+Ast_ReplaceStmt::ReplaceStmtValList::ReplaceStmtValList(enum Ast_ReplaceStmt::_replace_opts replace_opts, 
     const char *name, Ast_OptColNames *opt_col_names, Ast_InsertValList *replace_val_list, 
     Ast_OptOnDupUpdate *opt_dupupdate)
     : replace_opts(replace_opts), name(name), opt_col_names(opt_col_names),  
@@ -19,7 +19,7 @@ Ast_ReplaceStmt::ReplaceStmtValList::~ReplaceStmtValList() {
     if (opt_dupupdate) delete opt_dupupdate;
 }
 
-Ast_ReplaceStmt::ReplaceStmtAsgnList::ReplaceStmtAsgnList(enum Ast_ReplaceStmt::replace_opts replace_opts, 
+Ast_ReplaceStmt::ReplaceStmtAsgnList::ReplaceStmtAsgnList(enum Ast_ReplaceStmt::_replace_opts replace_opts, 
     const char *name, Ast_InsertAsgnList *insert_asgn_list, Ast_OptOnDupUpdate *opt_ondupupdate)
     : replace_opts(replace_opts), name(name), insert_asgn_list(insert_asgn_list),
         opt_ondupupdate(opt_ondupupdate)
@@ -31,7 +31,7 @@ Ast_ReplaceStmt::ReplaceStmtAsgnList::~ReplaceStmtAsgnList() {
     if (opt_ondupupdate) delete opt_ondupupdate;
 }
 
-Ast_ReplaceStmt::ReplaceStmtSelect::ReplaceStmtSelect(enum Ast_ReplaceStmt::replace_opts replace_opts, 
+Ast_ReplaceStmt::ReplaceStmtSelect::ReplaceStmtSelect(enum Ast_ReplaceStmt::_replace_opts replace_opts, 
     const char *name, Ast_OptColNames *opt_col_names, Ast_SelectStmt *select_stmt, 
     Ast_OptOnDupUpdate *opt_ondupupdate)
     : replace_opts(replace_opts), name(name), opt_col_names(opt_col_names),
@@ -45,21 +45,21 @@ Ast_ReplaceStmt::ReplaceStmtSelect::~ReplaceStmtSelect() {
     if (opt_ondupupdate) delete opt_ondupupdate;
 }
 
-Ast_ReplaceStmt::Ast_ReplaceStmt(enum Ast_ReplaceStmt::replace_opts replace_opts, const char *name, 
+Ast_ReplaceStmt::Ast_ReplaceStmt(enum Ast_ReplaceStmt::_replace_opts replace_opts, const char *name, 
     Ast_OptColNames *opt_col_names, Ast_InsertValList *replace_val_list, Ast_OptOnDupUpdate *opt_dupupdate)
     : replace_type(Ast_ReplaceStmt::REPLACE_TYPE_VALLIST),
         _val_list(new Ast_ReplaceStmt::ReplaceStmtValList(replace_opts, name, opt_col_names, replace_val_list, opt_dupupdate))
 {
 }
 
-Ast_ReplaceStmt::Ast_ReplaceStmt(enum Ast_ReplaceStmt::replace_opts replace_opts, const char *name,
+Ast_ReplaceStmt::Ast_ReplaceStmt(enum Ast_ReplaceStmt::_replace_opts replace_opts, const char *name,
     Ast_InsertAsgnList *insert_asgn_list, Ast_OptOnDupUpdate *opt_ondupupdate)
     : replace_type(Ast_ReplaceStmt::REPLACE_TYPE_ASGNLIST),
         _asgn_list(new Ast_ReplaceStmt::ReplaceStmtAsgnList(replace_opts, name, insert_asgn_list, opt_ondupupdate))
 {
 }
 
-Ast_ReplaceStmt::Ast_ReplaceStmt(enum Ast_ReplaceStmt::replace_opts replace_opts, const char *name, 
+Ast_ReplaceStmt::Ast_ReplaceStmt(enum Ast_ReplaceStmt::_replace_opts replace_opts, const char *name, 
     Ast_OptColNames *opt_col_names, Ast_SelectStmt *select_stmt, Ast_OptOnDupUpdate *opt_ondupupdate)
     : replace_type(Ast_ReplaceStmt::REPLACE_TYPE_SELECT),
         _select(new Ast_ReplaceStmt::ReplaceStmtSelect(replace_opts, name, opt_col_names, select_stmt, opt_ondupupdate))
@@ -83,7 +83,7 @@ Ast_ReplaceStmt::~Ast_ReplaceStmt() {
     }
 }
 
-std::string Ast_ReplaceStmt::replaceOptName(enum Ast_ReplaceStmt::replace_opts replace_opts) {
+std::string Ast_ReplaceStmt::replaceOptName(enum Ast_ReplaceStmt::_replace_opts replace_opts) {
     const static std::map<int, std::string> names = {
         {1 << 0, "LOW PRIORITY"},
         {1 << 1, "DELAYED"},

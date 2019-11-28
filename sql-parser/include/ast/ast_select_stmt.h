@@ -50,7 +50,7 @@ class Ast_OptIntoList;
 
 class Ast_SelectStmt : public Ast_Base {
 public:
-    enum select_opts {
+    enum _select_opts {
         SELECT_OPTS_ALL                 = 1 << 0,
         SELECT_OPTS_DISTINCT            = 1 << 1,
         SELECT_OPTS_DISTINCTROW         = 1 << 2,
@@ -68,22 +68,22 @@ public:
 public:
     class TablelessSelectStmt {
     public:
-        explicit TablelessSelectStmt(select_opts select_opts, Ast_SelectExprList *select_expr_list);
+        explicit TablelessSelectStmt(enum _select_opts select_opts, Ast_SelectExprList *select_expr_list);
         ~TablelessSelectStmt();
     public:
-        select_opts select_opts;
+        enum _select_opts select_opts;
         Ast_SelectExprList *select_expr_list;
     };
 
     class TableSelectStmt {
     public:
-        explicit TableSelectStmt(select_opts select_opts, Ast_SelectExprList *select_expr_list,
+        explicit TableSelectStmt(enum _select_opts select_opts, Ast_SelectExprList *select_expr_list,
             Ast_TableReferences *table_references, Ast_OptWhere *opt_where, Ast_OptGroupBy *opt_groupby,
             Ast_OptHaving *opt_having, Ast_OptOrderBy *opt_orderby, Ast_OptLimit *opt_limit,
             Ast_OptIntoList *opt_into_list);
         ~TableSelectStmt();
     public:
-        select_opts select_opts;
+        enum _select_opts select_opts;
         Ast_SelectExprList *select_expr_list;
         Ast_TableReferences *table_references;
         Ast_OptWhere *opt_where;
@@ -95,8 +95,8 @@ public:
     };
 
 public:
-    explicit Ast_SelectStmt(select_opts select_opts, Ast_SelectExprList *select_expr_list);
-    explicit Ast_SelectStmt(select_opts select_opts, Ast_SelectExprList *select_expr_list,
+    explicit Ast_SelectStmt(enum _select_opts select_opts, Ast_SelectExprList *select_expr_list);
+    explicit Ast_SelectStmt(enum _select_opts select_opts, Ast_SelectExprList *select_expr_list,
         Ast_TableReferences *table_references, Ast_OptWhere *opt_where, Ast_OptGroupBy *opt_groupby,
         Ast_OptHaving *opt_having, Ast_OptOrderBy *opt_orderby, Ast_OptLimit *opt_limit,
         Ast_OptIntoList *opt_into_list);
@@ -106,7 +106,7 @@ public:
     virtual std::string format();
 
 private:
-    const char * selectOptsName(select_opts select_opts);
+    const char * selectOptsName(enum _select_opts select_opts);
 
 private:
     enum select_type select_type;

@@ -5,7 +5,7 @@
 #include "ast_insert_asgn_list.h"
 #include "ast_select_stmt.h"
 
-Ast_InsertStmt::InsertStmtValList::InsertStmtValList(enum Ast_InsertStmt::insert_opts insert_opts, 
+Ast_InsertStmt::InsertStmtValList::InsertStmtValList(enum Ast_InsertStmt::_insert_opts insert_opts, 
     const char *name, Ast_OptColNames *opt_col_names, Ast_InsertValList *insert_val_list, 
     Ast_OptOnDupUpdate *opt_dupupdate)
     : insert_opts(insert_opts), name(name), opt_col_names(opt_col_names),  
@@ -19,7 +19,7 @@ Ast_InsertStmt::InsertStmtValList::~InsertStmtValList() {
     if (opt_dupupdate) delete opt_dupupdate;
 }
 
-Ast_InsertStmt::InsertStmtAsgnList::InsertStmtAsgnList(enum Ast_InsertStmt::insert_opts insert_opts, 
+Ast_InsertStmt::InsertStmtAsgnList::InsertStmtAsgnList(enum Ast_InsertStmt::_insert_opts insert_opts, 
     const char *name, Ast_InsertAsgnList *insert_asgn_list, Ast_OptOnDupUpdate *opt_ondupupdate)
     : insert_opts(insert_opts), name(name), insert_asgn_list(insert_asgn_list),
         opt_ondupupdate(opt_ondupupdate)
@@ -31,7 +31,7 @@ Ast_InsertStmt::InsertStmtAsgnList::~InsertStmtAsgnList() {
     if (opt_ondupupdate) delete opt_ondupupdate;
 }
 
-Ast_InsertStmt::InsertStmtSelect::InsertStmtSelect(enum Ast_InsertStmt::insert_opts insert_opts, 
+Ast_InsertStmt::InsertStmtSelect::InsertStmtSelect(enum Ast_InsertStmt::_insert_opts insert_opts, 
     const char *name, Ast_OptColNames *opt_col_names, Ast_SelectStmt *select_stmt, 
     Ast_OptOnDupUpdate *opt_ondupupdate)
     : insert_opts(insert_opts), name(name), opt_col_names(opt_col_names),
@@ -45,21 +45,21 @@ Ast_InsertStmt::InsertStmtSelect::~InsertStmtSelect() {
     if (opt_ondupupdate) delete opt_ondupupdate;
 }
 
-Ast_InsertStmt::Ast_InsertStmt(enum Ast_InsertStmt::insert_opts insert_opts, const char *name, 
+Ast_InsertStmt::Ast_InsertStmt(enum Ast_InsertStmt::_insert_opts insert_opts, const char *name, 
     Ast_OptColNames *opt_col_names, Ast_InsertValList *insert_val_list, Ast_OptOnDupUpdate *opt_dupupdate)
     : insert_type(Ast_InsertStmt::INSERT_TYPE_VALLIST),
         _val_list(new Ast_InsertStmt::InsertStmtValList(insert_opts, name, opt_col_names, insert_val_list, opt_dupupdate))
 {
 }
 
-Ast_InsertStmt::Ast_InsertStmt(enum Ast_InsertStmt::insert_opts insert_opts, const char *name,
+Ast_InsertStmt::Ast_InsertStmt(enum Ast_InsertStmt::_insert_opts insert_opts, const char *name,
     Ast_InsertAsgnList *insert_asgn_list, Ast_OptOnDupUpdate *opt_ondupupdate)
     : insert_type(Ast_InsertStmt::INSERT_TYPE_ASGNLIST),
         _asgn_list(new Ast_InsertStmt::InsertStmtAsgnList(insert_opts, name, insert_asgn_list, opt_ondupupdate))
 {
 }
 
-Ast_InsertStmt::Ast_InsertStmt(enum Ast_InsertStmt::insert_opts insert_opts, const char *name, 
+Ast_InsertStmt::Ast_InsertStmt(enum Ast_InsertStmt::_insert_opts insert_opts, const char *name, 
     Ast_OptColNames *opt_col_names, Ast_SelectStmt *select_stmt, Ast_OptOnDupUpdate *opt_ondupupdate)
     : insert_type(Ast_InsertStmt::INSERT_TYPE_SELECT),
         _select(new Ast_InsertStmt::InsertStmtSelect(insert_opts, name, opt_col_names, select_stmt, opt_ondupupdate))
@@ -83,7 +83,7 @@ Ast_InsertStmt::~Ast_InsertStmt() {
     }
 }
 
-std::string Ast_InsertStmt::insertOptName(enum Ast_InsertStmt::insert_opts insert_opts) {
+std::string Ast_InsertStmt::insertOptName(enum Ast_InsertStmt::_insert_opts insert_opts) {
     const static std::map<int, std::string> names = {
         {1 << 0, "LOW PRIORITY"},
         {1 << 1, "DELAYED"},

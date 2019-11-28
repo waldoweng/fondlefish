@@ -62,7 +62,7 @@ std::string Ast_SelectExprList::format() {
     return str;
 }
 Ast_SelectStmt::TablelessSelectStmt::TablelessSelectStmt(
-    enum Ast_SelectStmt::select_opts select_opts, Ast_SelectExprList *select_expr_list)
+    enum Ast_SelectStmt::_select_opts select_opts, Ast_SelectExprList *select_expr_list)
     : select_opts(select_opts), select_expr_list(select_expr_list)
 {
 }
@@ -72,7 +72,7 @@ Ast_SelectStmt::TablelessSelectStmt::~TablelessSelectStmt() {
         delete select_expr_list;
 }
 
-Ast_SelectStmt::TableSelectStmt::TableSelectStmt(enum Ast_SelectStmt::select_opts select_opts, 
+Ast_SelectStmt::TableSelectStmt::TableSelectStmt(enum Ast_SelectStmt::_select_opts select_opts, 
     Ast_SelectExprList *select_expr_list, Ast_TableReferences *table_references, Ast_OptWhere *opt_where,
     Ast_OptGroupBy *opt_groupby, Ast_OptHaving *opt_having, Ast_OptOrderBy *opt_orderby, Ast_OptLimit *opt_limit,
     Ast_OptIntoList *opt_into_list)
@@ -94,13 +94,13 @@ Ast_SelectStmt::TableSelectStmt::~TableSelectStmt() {
 }
 
 
-Ast_SelectStmt::Ast_SelectStmt(enum Ast_SelectStmt::select_opts select_opts, Ast_SelectExprList *select_expr_list)
+Ast_SelectStmt::Ast_SelectStmt(enum Ast_SelectStmt::_select_opts select_opts, Ast_SelectExprList *select_expr_list)
     : select_type(Ast_SelectStmt::SELECT_TYPE_TABLELESS),
         tableless(new Ast_SelectStmt::TablelessSelectStmt(select_opts, select_expr_list))
 {
 }
 
-Ast_SelectStmt::Ast_SelectStmt(enum Ast_SelectStmt::select_opts select_opts, 
+Ast_SelectStmt::Ast_SelectStmt(enum Ast_SelectStmt::_select_opts select_opts, 
     Ast_SelectExprList *select_expr_list, Ast_TableReferences *table_references, Ast_OptWhere *opt_where,
     Ast_OptGroupBy *opt_groupby, Ast_OptHaving *opt_having, Ast_OptOrderBy *opt_orderby, Ast_OptLimit *opt_limit,
     Ast_OptIntoList *opt_into_list) 
@@ -125,7 +125,7 @@ Ast_SelectStmt::~Ast_SelectStmt() {
     }
 }
 
-const char * Ast_SelectStmt::selectOptsName(Ast_SelectStmt::select_opts select_opts) {
+const char * Ast_SelectStmt::selectOptsName(Ast_SelectStmt::_select_opts select_opts) {
     static const std::map<int, std::string> names = {
         {Ast_SelectStmt::SELECT_OPTS_ALL, "ALL"},
         {Ast_SelectStmt::SELECT_OPTS_DISTINCT, "DISTINCT"},

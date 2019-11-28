@@ -33,26 +33,26 @@ public:
         SINGLE_TABLE = 1,
         MULTIPLE_TABLE = 2
     };
-    enum delete_opts {
+    enum _delete_opts {
         DELETE_OPTS_LOW_PRIORITY = 1,
         DELETE_OPTS_QUICK = 2,
         DELETE_OPTS_IGNORE = 3
     };
 public:
-    explicit Ast_DeleteStmt(delete_opts delete_opts, const char *name, Ast_OptWhere *opt_where,
+    explicit Ast_DeleteStmt(enum _delete_opts delete_opts, const char *name, Ast_OptWhere *opt_where,
         Ast_OptOrderBy *opt_orderby, Ast_OptLimit *opt_limit);
-    explicit Ast_DeleteStmt(delete_opts delete_opts, Ast_DeleteList *delete_list, 
+    explicit Ast_DeleteStmt(enum _delete_opts delete_opts, Ast_DeleteList *delete_list, 
         Ast_TableReferences *table_references, Ast_OptWhere *opt_where);
     virtual ~Ast_DeleteStmt();
 
 public:
     class SingleTableDeleteStmt {
     public:
-        explicit SingleTableDeleteStmt(delete_opts delete_opts, const char *name, Ast_OptWhere *opt_where,
+        explicit SingleTableDeleteStmt(enum _delete_opts delete_opts, const char *name, Ast_OptWhere *opt_where,
             Ast_OptOrderBy *opt_orderby, Ast_OptLimit *opt_limit);
         ~SingleTableDeleteStmt();
     public:
-        delete_opts delete_opts;
+        enum _delete_opts delete_opts;
         std::string name;
         Ast_OptWhere *opt_where;
         Ast_OptOrderBy *opt_orderby;
@@ -61,11 +61,11 @@ public:
 
     class MultipleTableDeleteStmt {
     public:
-        explicit MultipleTableDeleteStmt(delete_opts delete_opts, Ast_DeleteList *delete_list, 
+        explicit MultipleTableDeleteStmt(enum _delete_opts delete_opts, Ast_DeleteList *delete_list, 
             Ast_TableReferences *table_references, Ast_OptWhere *opt_where);
         ~MultipleTableDeleteStmt();
     public:
-        delete_opts delete_opts;
+        enum _delete_opts delete_opts;
         Ast_DeleteList *delete_list;
         Ast_TableReferences *table_references;
         Ast_OptWhere *opt_where;
@@ -75,7 +75,7 @@ public:
     virtual std::string format();
 
 private:
-    const char *deleteOptName(delete_opts delete_opts);
+    const char *deleteOptName(enum _delete_opts delete_opts);
 
 private:
     delete_type delete_type;

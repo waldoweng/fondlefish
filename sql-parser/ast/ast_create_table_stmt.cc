@@ -386,7 +386,7 @@ Ast_CreateDefinition::DataDefinition::~DataDefinition() {
 }
 
 Ast_CreateDefinition::IndexDefinition::IndexDefinition(
-    Ast_CreateDefinition::key_type key_type, Ast_ColumnList *column_list)
+    enum Ast_CreateDefinition::_key_type key_type, Ast_ColumnList *column_list)
     : key_type(key_type), column_list(column_list) {}
 
 Ast_CreateDefinition::IndexDefinition::~IndexDefinition() {
@@ -394,7 +394,7 @@ Ast_CreateDefinition::IndexDefinition::~IndexDefinition() {
         delete column_list;
 }
 
-Ast_CreateDefinition::Ast_CreateDefinition(Ast_CreateDefinition::key_type type, Ast_ColumnList *column_list)
+Ast_CreateDefinition::Ast_CreateDefinition(enum Ast_CreateDefinition::_key_type type, Ast_ColumnList *column_list)
     : def_type(Ast_CreateDefinition::INDEX_DEFINITION)
 {
     index_def = new Ast_CreateDefinition::IndexDefinition(type, column_list);
@@ -420,7 +420,7 @@ Ast_CreateDefinition::~Ast_CreateDefinition() {
     }
 }
 
-const char *Ast_CreateDefinition::keyTypeName(enum Ast_CreateDefinition::key_type key_type) {
+const char *Ast_CreateDefinition::keyTypeName(enum Ast_CreateDefinition::_key_type key_type) {
     static const char names[3][32] = {
         "KEY",
         "PRIMARY KEY",

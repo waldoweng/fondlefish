@@ -134,8 +134,8 @@ Ast_LiteralExpr::Ast_LiteralExpr(enum Ast_LiteralExpr::literal_type literal_type
     const char *first, const char *second)
     : literal_type(literal_type)
 {
-    this->first = first ? first : "";
-    this->second = second;
+    this->name.first = first ? first : "";
+    this->name.second = second;
 }
 
 Ast_LiteralExpr::Ast_LiteralExpr(int int_var)
@@ -160,14 +160,14 @@ std::string Ast_LiteralExpr::format() {
     {
     case Ast_LiteralExpr::LiteralTypeName:
     case Ast_LiteralExpr::LiteralTypeDetailName:
-        if (this->first.empty())
-            return this->rawf("%s.%s", this->first.c_str(), this->second.c_str());
+        if (this->name.first.empty())
+            return this->rawf("%s.%s", this->name.first.c_str(), this->name.second.c_str());
         else
-            return this->second;
+            return this->name.second;
     case Ast_LiteralExpr::LiteralTypeString:
-        return this->rawf("%s", this->second.c_str());
+        return this->rawf("%s", this->name.second.c_str());
     case Ast_LiteralExpr::LiteralTypeUserVar:
-        return this->rawf("@%s", this->second.c_str());
+        return this->rawf("@%s", this->name.second.c_str());
     case Ast_LiteralExpr::LiteralTypeIntNum:
         return this->rawf("%d", this->int_var);
     case Ast_LiteralExpr::LiteralTypeApproxNum:
@@ -398,7 +398,7 @@ std::string Ast_IsExpr::format() {
             this->bool_var ? "TRUE" : "FALSE"
         );
     default:
-        break;
+        return "";
     }
 }
 
